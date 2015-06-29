@@ -3,12 +3,11 @@
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx"
-	xmlns:supportClasses="supportClasses.*">
+	xmlns:supportClasses="supportClasses.*">	
 	
 	<fx:Declarations>
 		<supportClasses:Dao id="dao" dbfilename="mydatabase"/>
-	</fx:Declarations>
-	
+	</fx:Declarations>	
 	
 	<fx:Script>
 		<![CDATA[
@@ -17,22 +16,21 @@
 			import mx.events.FlexNativeMenuEvent;
 			import mx.managers.PopUpManager;
 			import mx.utils.UIDUtil;			
-			import org.osmf.events.TimeEvent;			
-			import supportClasses.ProjectItem;
-			import supportClasses.TitleItem;
-			import supportClasses.UserItem;
 			import spark.events.GridItemEditorEvent;
 			import spark.events.GridSelectionEvent;			
+			import org.osmf.events.TimeEvent;			
+			import supportClasses.ProjectItem;
 			import supportClasses.TimeLineItem;
+			import supportClasses.TitleItem;
+			import supportClasses.UserItem;
 			
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
 			private var userself:UserItem = new UserItem();
+			private var newuser:UserItem = new UserItem();
 			
+			//登录判断用户名密码是否正确
 			protected function login(event:MouseEvent):void
-			{							
-				//Alert.show("检索完毕");	
-				var i:int = 0;
-				//获取所有的用户名和密码
+			{												
 				dao.query("select * from SYS_USER where username = '"+inputUserName.text+"' and userpassword = '"+inputPassWord.text+"' ", function (data:*):void 
 				{	
 					if( data != null && data.length > 0)
@@ -40,80 +38,25 @@
 						Alert.show("成功");
 						loginpage.visible = false;
 						listpage.visible = true;
-					}else{
+						loginuser.text = "当前登陆者："+inputUserName.text+"";
+					}
+					else
+					{
 						Alert.show("用户名或密码错误");
-					}
-					/*useritems = new Vector.<UserItem>();
-					for (i = 0; i < data.length; ++i) 
-					{
-					var useritem:UserItem = new UserItem();
-					useritem.sid = data[i].sid;
-					useritem.username = data[i].username;
-					useritem.userpassword = data[i].userpassword;
-					useritems.push(useritem);
-					}*/
-					
-					for (i = 0; i < dao.daoitems.length; ++i)
-					{
-						dao.daoitems[i].conn.close();
-					}
-				});
-				
-				//判断用户名密码是否正确
-				/*for(i=0 ; i <= useritems.length ; ++i)
-				{
-				if(inputUserName.text != useritems[i].username)
-				{
-				if(i == useritems.length)
-				{
-				Alert.show("本系统无此用户\n请重新输入");
-				loginpage.visible = true;
-				}					
-				else
-				{
-				continue;
-				}
-				}
-				else if(inputPassWord.text != useritems[i].userpassword)
-				{
-				if(i == useritems.length)
-				{
-				Alert.show("用户名或密码错误\n\t 请重新输入");
-				loginpage.visible = true;
-				}
-				else
-				{
-				continue;
-				}
-				}
-				else
-				{
-				
-				}
-				}*/
+					}			
+				});	
 			}
 			
+			//点击进入创建页面
 			protected function makeUser(event:MouseEvent):void
-			{
-				// TODO Auto-generated method stub
-				//点击进入创建页面
-				var usid:String = UIDUtil.createUID();
-				
+			{				
 				loginpage.visible = false;
 				makepage.visible = true;
 			}
 			
-			
-			private function ftitle(event:TextEvent):String
-			{
-				var title:String = new String();
-				title = "当前登陆者";
-				return title;
-			}
-			
+			// TODO Auto-generated method stub
 			protected function updateWork(event:MouseEvent):void
-			{
-				// TODO Auto-generated method stub
+			{				
 				listpage.visible=false;
 				updatepage.visible=true;
 			}
@@ -137,77 +80,61 @@
 			{
 				// TODO Auto-generated method stub
 				//发送数据到数据库
-				//弹出页面
-				makepage.visible=false;
-				Alert.show("\t\t提示\n网络用户不存在");
-				loginpage.visible = true;
+				if(inputFirstPassWord.text.length>16 || inputFirstPassWord.text.length<6)
+				{
+					Alert.show("请输入6~16位字符");
+					makepage.visible=true;
+				}
+				else if(inputFirstPassWord.text != inputSecondPassWord.text)
+				{
+					Alert.show("密码不一致，请重新输入");
+					makepage.visible=true;
+				}
+				else if(dao.query("select * from SYS_USER where username = '"+inputLoginName.text+"' and userpassword = '"+inputFirstPassWord.text+"' ",function (data:*):void{})) 
+				{	
+					Alert.show("用户已存在");
+				}
+				else
+				{					
+					newuser.sid = UIDUtil.createUID();
+					newuser.username = inputLoginName.text;
+					newuser.userpassword = inputFirstPassWord.text;
+					newuser.server_username = inputNetName.text;
+					dao.insertOrUpdate(newuser);
+					//判断网络用户是否存在，如果不存在
+					//Alert.show("\t\t提示\n网络用户不存在");
+					makepage.visible=false;
+					loginpage.visible = true;
+				}				
 			}
-			
-			
-			
-			
-			
-			/*	private function finalSave():void 
-			{
-			dao.updateBySQL("delete from DES_THREE_SCREEN_PROJ");
-			dao.updateBySQL("delete from DES_THREE_SCREEN_TITLES");
-			dao.updateBySQL("delete from DES_THREE_SCREEN_TIMELINES");
-			
-			var prosid:String = UIDUtil.createUID();
-			currproj.name = saveParamDialog.returnValue.jiaocainame;
-			currproj.videoname = videoname;
-			currproj.videopath = videopath;
-			currproj.sid = prosid;
-			dao.insertOrUpdate(currproj);
-			
-			var i:int;
-			for (i = 0; i < titlesgrid.dataProvider.length; ++i) 
-			{
-			var titleItem:TitleItem = new TitleItem();
-			titleItem.sid = UIDUtil.createUID();
-			titleItem.title = titlesgrid.dataProvider.getItemAt(i).title;
-			titleItem.projsid = prosid;
-			titleItem.ordercol = i;
-			dao.insertOrUpdate(titleItem);
-			}
-			
-			for (i = 0; i < timelines.length; ++i ) 
-			{
-			timelines[i].sid = UIDUtil.createUID();
-			timelines[i].projsid = prosid;
-			dao.insertOrUpdate(timelines[i]);
-			}
-			
-			// 保存项目数据 
-			file.removeEventListener(Event.SELECT, fileSaveHandler);
-			var nativeProcessStartupInfo:NativeProcessStartupInfo = new NativeProcessStartupInfo(); 
-			var file2:File = File.applicationDirectory.resolvePath("toswf\\java\\jdk1.6.0_18\\bin\\java.exe"); 
-			nativeProcessStartupInfo.executable = file2; 
-			nativeProcessStartupInfo.arguments = new <String>['-classpath',
-			'toswf;toswf/jacob.jar;toswf/ant.jar','main/ZipThreeSplitScreen', 
-			videopath, saveParamDialog.returnValue.savepath.replace(/\.[^\.]*$/,".tss")];
-			
-			var process:NativeProcess = new NativeProcess(); 
-			process.addEventListener(NativeProcessExitEvent.EXIT, function(e:NativeProcessExitEvent):void 
-			{
-			Alert.show("Save Success！");
-			tiploading.visible = false;
-			tiploading.includeInLayout = false;
-			});
-			process.start(nativeProcessStartupInfo);
-			}
-			
-			
-			
-			*/
-			
-			
-			
+						
 			protected function submittask(event:MouseEvent):void
 			{
 				// TODO Auto-generated method stub
 				Alert.show("\t提示\n提交成功");
 				submitpage.visible=false;
+				listpage.visible=true;
+			}
+			
+			protected function backtologin(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				listpage.visible=false;
+				backpage.visible=true;
+			}
+			
+			protected function backlogin(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				makepage.visible=false;
+				backpage.visible=false;
+				loginpage.visible=true;
+			}
+			
+			protected function stophere(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				backpage.visible=false;
 				listpage.visible=true;
 			}
 			
@@ -227,17 +154,17 @@
 			<s:Label/>
 			<s:HGroup>
 				<s:Label text="用户名 : "/>
-				<s:TextInput id="inputLoginName"/>
+				<s:TextInput id="inputLoginName" prompt="请输入真实姓名" restrict="0-9\a-z\^{'[\一-\龥]'}"/>
 			</s:HGroup>
 			<s:Label/>
 			<s:HGroup>
 				<s:Label text="密码 : "/>
-				<s:TextInput id="inputFirstPassWord"/>
+				<s:TextInput id="inputFirstPassWord" prompt="请输入6~16位字符" displayAsPassword="true" restrict="a-zA-Z0-9"/>
 			</s:HGroup>
 			<s:Label/>
 			<s:HGroup>
 				<s:Label text="重复密码 : "/>
-				<s:TextInput id="inputSecondPassWord"/>
+				<s:TextInput id="inputSecondPassWord" prompt="只许使用字母与数字" displayAsPassword="true"/>
 			</s:HGroup>
 			<s:Label/>
 			<s:HGroup>
@@ -246,9 +173,9 @@
 			</s:HGroup>
 			<s:Label/>
 			<s:HGroup>
-				<s:Button label="确定创建" click="makeSure(event)"/>
+				<s:Button label="返回登陆" click="backlogin(event)"/>
 				<s:Label/><s:Label/><s:Label/><s:Label/>
-				<s:Label/><s:Label/><s:Label/><s:Label/>
+				<s:Button label="确定创建" click="makeSure(event)"/>				
 			</s:HGroup>	
 		</s:VGroup>
 		
@@ -268,7 +195,7 @@
 			<s:Label/>
 			<s:HGroup>
 				<s:Label text="密码 : "/>
-				<s:TextInput id="updetNetPassword"/>
+				<s:TextInput id="updetNetPassword" displayAsPassword="true"/>
 			</s:HGroup>
 			<s:Label/>
 			<s:Button label="确定更新" click="updatetask(event)"/>			
@@ -285,19 +212,44 @@
 			<s:Label/>
 			<s:HGroup>
 				<s:Label text="密码 : "/>
-				<s:TextInput id="submitNetPassword"/>
+				<s:TextInput id="submitNetPassword" displayAsPassword="true"/>
 			</s:HGroup>
 			<s:Label/>
 			<s:Button label="确定提交" click="submittask(event)"/>			
 		</s:VGroup>		
 	</s:Group>
 	
+	<!--判断是否返回登录页-->
+	<s:Group id="backpage" fontSize="15" visible="false" width="100%" height="100%">
+		<s:VGroup horizontalAlign="center" width="100%" height="100%">
+			<s:Label/>
+			<s:Label/>
+			<s:Label top="50" text="返回登录页面" fontSize="30" fontWeight="bold" lineHeight="50"/>
+			<s:Label/>
+			<s:Label/>
+			<s:HGroup>
+				<s:Button label="是" click="backlogin(event)"/>
+				<s:Button label="否" click="stophere(event)"/>
+			</s:HGroup>
+		</s:VGroup>
+		
+		
+	</s:Group>
+	
 	<!--登录成功后的页面-->	
 	<s:Group id="listpage" fontSize="15" visible="false" width="100%" height="100%">		
 		<s:VGroup >
 			<s:HGroup >
-				<s:Label text="当前登陆者 : " fontSize="25"/>				
+				<s:Label text="当前登陆者 : " id="loginuser" fontSize="25"/>				
 			</s:HGroup>
+		</s:VGroup>
+		<s:VGroup fontSize="20" horizontalAlign="right"  height="100%" width="100%" >				
+			<s:Label/>	
+			<s:Label/>
+			<s:HGroup></s:HGroup>
+			<s:HGroup>
+				<s:Button label="退出当前用户" click="backtologin(event)"/>
+			</s:HGroup>			
 		</s:VGroup>
 		<s:VGroup fontSize="20" horizontalAlign="center"  height="100%" width="100%" >				
 			<s:Label/>	
@@ -359,7 +311,7 @@
 		<s:Label/>
 		<s:HGroup>
 			<s:Label text=" 密  码 "/>
-			<s:TextInput id="inputPassWord"/>
+			<s:TextInput id="inputPassWord" displayAsPassword="true"/>
 		</s:HGroup>
 		<s:Label/>
 		<s:HGroup>
