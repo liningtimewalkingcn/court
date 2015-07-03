@@ -3,19 +3,24 @@
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx"
-	xmlns:supportClasses="supportClasses.*">	
+	xmlns:supportClasses="supportClasses.*"
+	>
 	
 	<fx:Declarations>
 		<supportClasses:Dao id="dao" dbfilename="mydatabase"/>
+		<supportClasses:HTTPServicePool id="HttpRequest" />
 	</fx:Declarations>	
 	
 	<fx:Script>
 		<![CDATA[
+			import com.adobe.serialization.json.JSON;			
 			import mx.controls.Alert;
 			import mx.events.FlexEvent;
 			import mx.events.FlexNativeMenuEvent;
+			import mx.events.IndexChangedEvent;
 			import mx.managers.PopUpManager;
-			import mx.utils.UIDUtil;			
+			import mx.utils.UIDUtil;
+			import mx.utils.object_proxy;			
 			import spark.events.GridItemEditorEvent;
 			import spark.events.GridSelectionEvent;			
 			import org.osmf.events.TimeEvent;			
@@ -23,11 +28,18 @@
 			import supportClasses.TimeLineItem;
 			import supportClasses.TitleItem;
 			import supportClasses.UserItem;
+			import supportClasses.ListAuditItem;
+			import supportClasses.ListTodoItem;
+
+
 			
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
 			private var userself:UserItem = new UserItem();
 			private var newuser:UserItem = new UserItem();
-			
+			private var list_audit_item:ListAuditItem = new ListAuditItem();
+			private var list_todo_item:ListTodoItem = new ListTodoItem();
+			private var httpurl:String = "http://192.168.1.107:8081/court";
+				
 			//登录判断用户名密码是否正确
 			protected function login(event:MouseEvent):void
 			{												
@@ -39,6 +51,7 @@
 						loginpage.visible = false;
 						listpage.visible = true;
 						loginuser.text = "当前登陆者："+inputUserName.text+"";
+						loginusernetusername.text = data[0].server_username;
 					}
 					else
 					{
@@ -54,86 +67,176 @@
 				makepage.visible = true;
 			}
 			
-			// TODO Auto-generated method stub
+			//更新待办填写网络用户密码页面
 			protected function updateWork(event:MouseEvent):void
 			{				
 				listpage.visible=false;
 				updatepage.visible=true;
 			}
 			
+			//提交待办填写网络用户密码页面
 			protected function submitWork(event:MouseEvent):void
 			{
-				// TODO Auto-generated method stub
 				listpage.visible=false;
 				submitpage.visible=true;
 			}
 			
-			protected function updatetask(event:MouseEvent):void
-			{
-				// TODO Auto-generated method stub
-				Alert.show("\t提示\n更新成功");
-				updatepage.visible=false;
-				listpage.visible=true;
-			}
-			
-			protected function makeSure(event:MouseEvent):void
-			{
-				// TODO Auto-generated method stub
-				//发送数据到数据库
-				if(inputFirstPassWord.text.length>16 || inputFirstPassWord.text.length<6)
-				{
-					Alert.show("请输入6~16位字符");
-					makepage.visible=true;
-				}
-				else if(inputFirstPassWord.text != inputSecondPassWord.text)
-				{
-					Alert.show("密码不一致，请重新输入");
-					makepage.visible=true;
-				}
-				else if(dao.query("select * from SYS_USER where username = '"+inputLoginName.text+"' and userpassword = '"+inputFirstPassWord.text+"' ",function (data:*):void{})) 
-				{	
-					Alert.show("用户已存在");
-				}
-				else
-				{					
-					newuser.sid = UIDUtil.createUID();
-					newuser.username = inputLoginName.text;
-					newuser.userpassword = inputFirstPassWord.text;
-					newuser.server_username = inputNetName.text;
-					dao.insertOrUpdate(newuser);
-					//判断网络用户是否存在，如果不存在
-					//Alert.show("\t\t提示\n网络用户不存在");
-					makepage.visible=false;
-					loginpage.visible = true;
-				}				
-			}
-						
+			// 判断提交待办页面网络用户密码是否正确			
 			protected function submittask(event:MouseEvent):void
 			{
-				// TODO Auto-generated method stub
-				Alert.show("\t提示\n提交成功");
-				submitpage.visible=false;
-				listpage.visible=true;
+				HttpRequest.post(httpurl+"/OffLineClientController/checkPasswordthird.vot",{"username":loginusernetusername.text,"netPassword":submitNetPassword.text},function(str)
+				{
+					if(str == "yes")
+					{	
+						Alert.show("\t提示\n提交成功");
+						//提交列表
+						//HttpRequest.post(httpurl+"/OffLineClientController/checkPasswordthird.vot",{"username":loginusernetusername.text,"netPassword":submitNetPassword.text},function(str)
+						submitpage.visible=false;
+						listpage.visible=true;
+					}
+					else
+					{
+						Alert.show("\t提示\n密码错误");
+						submitpage.visible=true;
+					}
+				})
+			}			
+			
+			private function indexChangeFunc(e:Event):void
+			{
+				if(tabnavigator1.selectedIndex==0)
+				{
+					titlesgrid2.visible=true;
+					titlesgrid2.percentHeight = 100;
+					titlesgrid3.visible=false;
+					titlesgrid3.height = -6;
+				}
+				else
+				{
+					titlesgrid3.visible=true;
+					titlesgrid3.percentHeight = 100;
+					titlesgrid2.visible=false;
+					titlesgrid2.height = -6;
+				}				
 			}
 			
+			// 判断更新待办页面网络用户密码是否正确
+			protected function updatetask(event:MouseEvent):void
+			{				
+				HttpRequest.post(httpurl+"/OffLineClientController/updateTask.vot",{"username":loginusernetusername.text,"netPassword":updetNetPassword.text},function(data)
+				{
+					if(data == "no")
+					{	
+						Alert.show("\t提示\n密码错误");
+						updatepage.visible=true;
+					}
+					else
+					{
+						var msg:String;  
+						var code:int;  
+						var json:Object;  
+						Alert.show("\t提示\n更新成功");
+						//列表更新
+						var JsonObj:Object = com.adobe.serialization.json.JSON.decode(data);
+						if (JsonObj.list_audit.length >0){
+							//Alert.show(JsonObj.list_audit.length)							
+							titlesgrid3.dataProvider = new ArrayList(JsonObj.list_audit);
+							Alert.show();
+							/*
+							list_audit_item.sid = JsonObj.list_audit.sid;
+							list_audit_item.nairename = JsonObj.list_audit.nairename;
+							list_audit_item.evalobjname = JsonObj.list_audit.evalobjname;
+							list_audit_item.levelonezb = JsonObj.list_audit.levelonezb;
+							list_audit_item.audit_status = JsonObj.list_audit.audit_status;
+							list_audit_item.input_status = JsonObj.list_audit.input_status;
+							dao.insertOrUpdate(list_audit_item);
+							*/
+						}
+						if (JsonObj.list_todo.length >0){
+							//Alert.show(JsonObj.list_todo[0].inputorsid)
+							titlesgrid2.dataProvider = new ArrayList(JsonObj.list_todo);
+							/*
+							list_todo_item.sid = JsonObj.list_todo.sid;
+							list_todo_item.nairename = JsonObj.list_todo.nairename;
+							list_todo_item.evalobjname = JsonObj.list_todo.evalobjname;
+							list_todo_item.levelonezb = JsonObj.list_todo.levelonezb;
+							list_todo_item.audit_status = JsonObj.list_todo.audit_status;
+							list_todo_item.input_status = JsonObj.list_todo.input_status;
+							dao.insertOrUpdate(list_todo_item);
+							*/
+						}
+						
+						updatepage.visible=false;
+						listpage.visible=true;
+					}
+				})
+			}
+			
+			//创建本地客户页面
+			protected function makeSure(event:MouseEvent):void
+			{	
+				dao.query("select * from SYS_USER where username = '"+inputLoginName.text+"' ", function (data:*):void 
+				{	
+					if( data != null && data.length > 0)
+					{
+						Alert.show("用户已存在\n请重新输入");
+						makepage.visible=true;
+					}
+					else if(inputFirstPassWord.text.length>16 || inputFirstPassWord.text.length<6)
+					{
+						Alert.show("请输入6~16位字符");
+						makepage.visible=true;
+					}
+					else if(inputFirstPassWord.text != inputSecondPassWord.text)
+					{
+						Alert.show("密码不一致，请重新输入");
+						makepage.visible=true;
+					}						
+					else
+					{							
+						//判断网络用户是否存在
+						HttpRequest.post(httpurl+"/OffLineClientController/createUser.vot",{"username":inputNetName.text},function(data:String)
+						{
+							if(data == "yes")
+							{
+								Alert.show("创建成功");	
+								makepage.visible=false;
+								loginpage.visible = true;
+								//发送数据到数据库
+								newuser.sid = UIDUtil.createUID();
+								newuser.username = inputLoginName.text;
+								newuser.userpassword = inputFirstPassWord.text;
+								newuser.server_username = inputNetName.text;
+								dao.insertOrUpdate(newuser);
+							}
+							else
+							{
+								Alert.show("\t\t提示\n网络用户不存在");
+								makepage.visible=true;
+							}
+						})	
+					}			
+				});
+			}			
+			
+			//退出当前用户页面（已登录）
 			protected function backtologin(event:MouseEvent):void
 			{
-				// TODO Auto-generated method stub
 				listpage.visible=false;
 				backpage.visible=true;
 			}
 			
+			//返回登录页面（未登录）
 			protected function backlogin(event:MouseEvent):void
 			{
-				// TODO Auto-generated method stub
 				makepage.visible=false;
 				backpage.visible=false;
 				loginpage.visible=true;
 			}
 			
+			//留在当前页面
 			protected function stophere(event:MouseEvent):void
 			{
-				// TODO Auto-generated method stub
 				backpage.visible=false;
 				listpage.visible=true;
 			}
@@ -141,7 +244,98 @@
 		]]>
 	</fx:Script>
 	
-	<!--创建用户页面-->
+	<!--进入系统后显示的页面-->
+	<s:VGroup id="loginpage" fontSize="15" visible="true" height="100%" width="100%" horizontalAlign="center">
+		<s:Label/>
+		<s:Label/>
+		<s:Label text="欢迎登陆法制指数系统平台" fontWeight="bold" fontSize="30"  lineHeight="50"/>
+		<s:Label/>
+		<s:Label/>
+		<s:HGroup>
+			<s:Label text="用户名"/>
+			<s:TextInput id="inputUserName"/>
+		</s:HGroup>
+		<s:Label/>
+		<s:HGroup>
+			<s:Label text=" 密  码 "/>
+			<s:TextInput id="inputPassWord" displayAsPassword="true"/>
+		</s:HGroup>
+		<s:Label/>
+		<s:HGroup>
+			<s:Button label="创建本地用户" click="makeUser(event)"/>
+			<s:Button label="登录" click="login(event)"/>
+		</s:HGroup>
+	</s:VGroup>
+	
+	<!--成功登录后的页面-->	
+	<s:Group id="listpage" fontSize="15" visible="false" width="100%" height="100%">	
+		
+		<s:VGroup >
+			<s:HGroup >
+				<s:Label text="当前登陆者 : " id="loginuser" fontSize="25"/>	
+				<s:Label visible="false" id="loginusernetusername" fontSize="25"/>	
+			</s:HGroup>
+		</s:VGroup>
+		<s:VGroup fontSize="20" horizontalAlign="right"  height="100%" width="100%" >				
+			<s:Label/>	
+			<s:Label/>
+			<s:HGroup></s:HGroup>
+			<s:HGroup>
+				<s:Button label="退出当前用户" click="backtologin(event)"/>
+			</s:HGroup>			
+		</s:VGroup>
+		<s:VGroup fontSize="20" horizontalAlign="center"  height="100%" width="100%" >				
+			<s:Label/>	
+			<s:Label/>
+			<s:HGroup></s:HGroup>
+			<s:HGroup>
+				<s:Button label="更新待办任务" click="updateWork(event)"/>
+				<s:Button label="提交待办任务" click="submitWork(event)"/>
+			</s:HGroup>			
+		</s:VGroup>
+		<s:VGroup  height="100%" width="100%" top="80" horizontalAlign="left">
+			<s:HGroup></s:HGroup>
+			<s:Label/>
+			<mx:TabNavigator id="tabnavigator1" change="indexChangeFunc(event)" width="100%" height="30" fontSize="20">
+				<mx:Panel width="100%" height="0" layout="horizontal"  id="writein" label="录入任务" headerHeight="0">
+				</mx:Panel>
+				<mx:Panel width="100%" height="0" layout="horizontal"  id="check" label="审核任务" headerHeight="0">
+				</mx:Panel>
+			</mx:TabNavigator>	
+		</s:VGroup>
+		<s:VGroup  height="100%" width="100%" top="150" horizontalAlign="left">
+				<s:DataGrid horizontalCenter="0" id="titlesgrid2"  selectionChange="" editable="true" width="100%" height="100%" contentBackgroundColor="white" color="gray" borderColor="black">
+					<s:columns>
+						<s:ArrayList>
+							<s:GridColumn editable="false" dataField="order" headerText="序号"/>
+							<s:GridColumn editable="false" dataField="nairename" headerText="问卷"/>
+							<s:GridColumn editable="false" dataField="evalobjname" headerText="测评对象"/>
+							<s:GridColumn editable="false" dataField="levelonezb" headerText="任务" id="Task"/>
+							<s:GridColumn editable="false" dataField="input_status" headerText="录入任务状态"/>
+							<s:GridColumn editable="false" dataField="audit_status" headerText="审核任务状态"/>
+							<s:GridColumn editable="false" dataField="operation" headerText="操作"/>
+						</s:ArrayList>
+					</s:columns>
+				</s:DataGrid>
+				<s:DataGrid  id="titlesgrid3" selectionChange="" editable="true" width="100%" height="-6" contentBackgroundColor="white" color="gray" borderColor="black">
+					<s:columns>
+						<s:ArrayList>
+							<s:GridColumn editable="true" dataField="order" headerText="序号"/>
+							<s:GridColumn editable="true" dataField="nairename" headerText="问卷"/>
+							<s:GridColumn editable="true" dataField="evalobjname" headerText="测评对象"/>
+							<s:GridColumn editable="true" dataField="levelonezb" headerText="任务"/>
+							<s:GridColumn editable="true" dataField="input_status" headerText="录入任务状态"/>
+							<s:GridColumn editable="true" dataField="audit_status" headerText="审核任务状态"/>
+							<s:GridColumn editable="true" dataField="operation" headerText="操作"/>
+						</s:ArrayList>
+					</s:columns>
+				</s:DataGrid>
+		</s:VGroup>
+	</s:Group>
+
+
+	
+	<!--创建本地用户页面-->
 	<s:Group id="makepage" visible="false" horizontalCenter="0">
 		<s:VGroup horizontalAlign="center">		
 			<s:Label/>
@@ -231,92 +425,6 @@
 				<s:Button label="是" click="backlogin(event)"/>
 				<s:Button label="否" click="stophere(event)"/>
 			</s:HGroup>
-		</s:VGroup>
-		
-		
-	</s:Group>
-	
-	<!--登录成功后的页面-->	
-	<s:Group id="listpage" fontSize="15" visible="false" width="100%" height="100%">		
-		<s:VGroup >
-			<s:HGroup >
-				<s:Label text="当前登陆者 : " id="loginuser" fontSize="25"/>				
-			</s:HGroup>
-		</s:VGroup>
-		<s:VGroup fontSize="20" horizontalAlign="right"  height="100%" width="100%" >				
-			<s:Label/>	
-			<s:Label/>
-			<s:HGroup></s:HGroup>
-			<s:HGroup>
-				<s:Button label="退出当前用户" click="backtologin(event)"/>
-			</s:HGroup>			
-		</s:VGroup>
-		<s:VGroup fontSize="20" horizontalAlign="center"  height="100%" width="100%" >				
-			<s:Label/>	
-			<s:Label/>
-			<s:HGroup></s:HGroup>
-			<s:HGroup>
-				<s:Button label="更新待办任务" click="updateWork(event)"/>
-				<s:Button label="提交待办任务" click="submitWork(event)"/>
-			</s:HGroup>			
-		</s:VGroup>
-		<s:VGroup  height="100%" width="100%" top="80">
-			<s:HGroup></s:HGroup>
-			<s:Label/>
-			<mx:TabNavigator width="100%" height="100%" fontSize="20">
-				<mx:Panel width="100%" height="100%" layout="horizontal" id="writein" label="录入任务" headerHeight="0">
-					<s:DataGrid id="titlesgrid2"  selectionChange="" editable="true" width="100%" height="100%" contentBackgroundColor="white" color="gray" borderColor="black">
-						<s:columns>
-							<s:ArrayList>
-								<s:GridColumn editable="true" dataField="number" headerText="序号"/>
-								<s:GridColumn editable="true" dataField="questionnaire" headerText="问卷"/>
-								<s:GridColumn editable="true" dataField="testingObject" headerText="测评对象"/>
-								<s:GridColumn editable="true" dataField="task" headerText="任务"/>
-								<s:GridColumn editable="true" dataField="inputTaskStatus" headerText="录入任务状态"/>
-								<s:GridColumn editable="true" dataField="reviewTaskStatus" headerText="审核任务状态"/>
-							</s:ArrayList>
-						</s:columns>
-					</s:DataGrid>
-				</mx:Panel>
-				
-				<mx:Panel width="70%" height="100%" layout="horizontal" id="check" label="审核任务" headerHeight="0">
-					<s:DataGrid id="titlesgrid"  selectionChange="" editable="true" width="100%" height="100%" contentBackgroundColor="white" color="gray" borderColor="black">
-						<s:columns>
-							<s:ArrayList>
-								<s:GridColumn editable="true" dataField="number" headerText="序号"/>
-								<s:GridColumn editable="true" dataField="questionnaire" headerText="问卷"/>
-								<s:GridColumn editable="true" dataField="testingObject" headerText="测评对象"/>
-								<s:GridColumn editable="true" dataField="task" headerText="任务"/>
-								<s:GridColumn editable="true" dataField="inputTaskStatus" headerText="录入任务状态"/>
-								<s:GridColumn editable="true" dataField="reviewTaskStatus" headerText="审核任务状态"/>
-							</s:ArrayList>
-						</s:columns>
-					</s:DataGrid>
-				</mx:Panel>
-			</mx:TabNavigator>	
-		</s:VGroup>
-	</s:Group>
-	
-	<!--进入系统后显示的页面-->
-	<s:VGroup id="loginpage" fontSize="15" visible="true" height="100%" width="100%" horizontalAlign="center">
-		<s:Label/>
-		<s:Label/>
-		<s:Label text="欢迎登陆法制指数系统平台" fontWeight="bold" fontSize="30"  lineHeight="50"/>
-		<s:Label/>
-		<s:Label/>
-		<s:HGroup>
-			<s:Label text="用户名"/>
-			<s:TextInput id="inputUserName"/>
-		</s:HGroup>
-		<s:Label/>
-		<s:HGroup>
-			<s:Label text=" 密  码 "/>
-			<s:TextInput id="inputPassWord" displayAsPassword="true"/>
-		</s:HGroup>
-		<s:Label/>
-		<s:HGroup>
-			<s:Button label="创建本地用户" click="makeUser(event)"/>
-			<s:Button label="登录" click="login(event)"/>
-		</s:HGroup>
-	</s:VGroup>
+		</s:VGroup>		
+	</s:Group>	
 </s:WindowedApplication>
