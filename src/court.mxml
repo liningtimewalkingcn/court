@@ -13,36 +13,37 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import com.adobe.serialization.json.JSON;			
 			import mx.controls.Alert;
+			import mx.controls.List;
+			import mx.controls.listClasses.ListBaseContentHolder;
 			import mx.events.FlexEvent;
 			import mx.events.FlexNativeMenuEvent;
 			import mx.events.IndexChangedEvent;
 			import mx.managers.PopUpManager;
+			import mx.rpc.events.ResultEvent;
+			import mx.rpc.http.mxml.HTTPService;
 			import mx.utils.UIDUtil;
 			import mx.utils.object_proxy;			
 			import spark.events.GridItemEditorEvent;
 			import spark.events.GridSelectionEvent;			
 			import org.osmf.events.TimeEvent;			
+			import supportClasses.ListAuditItem;
+			import supportClasses.ListTodoItem;
 			import supportClasses.ProjectItem;
 			import supportClasses.TimeLineItem;
 			import supportClasses.TitleItem;
-			import supportClasses.UserItem;
-			import supportClasses.ListAuditItem;
-			import supportClasses.ListTodoItem;
-
+			import supportClasses.UserItem; 
 
 			
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
 			private var userself:UserItem = new UserItem();
 			private var newuser:UserItem = new UserItem();
-			private var list_audit_item:ListAuditItem = new ListAuditItem();
-			private var list_todo_item:ListTodoItem = new ListTodoItem();
 			private var httpurl:String = "http://192.168.1.107:8081/court";
 				
 			//登录判断用户名密码是否正确
 			protected function login(event:MouseEvent):void
-			{												
+			{								
+				var namelist :ArrayList = new ArrayList();
 				dao.query("select * from SYS_USER where username = '"+inputUserName.text+"' and userpassword = '"+inputPassWord.text+"' ", function (data:*):void 
 				{	
 					if( data != null && data.length > 0)
@@ -50,6 +51,7 @@
 						Alert.show("成功");
 						loginpage.visible = false;
 						listpage.visible = true;
+						locallist.visible = true;
 						loginuser.text = "当前登陆者："+inputUserName.text+"";
 						loginusernetusername.text = data[0].server_username;
 					}
@@ -57,7 +59,16 @@
 					{
 						Alert.show("用户名或密码错误");
 					}			
-				});	
+				});
+				
+				dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
+				{					
+					local1.dataProvider = new ArrayList(data);
+				});			
+				/*dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
+				{
+					local2.dataProvider = new ArrayList(date);
+				});*/
 			}
 			
 			//点击进入创建页面
@@ -69,8 +80,9 @@
 			
 			//更新待办填写网络用户密码页面
 			protected function updateWork(event:MouseEvent):void
-			{				
+			{			
 				listpage.visible=false;
+				locallist.visible=false;
 				updatepage.visible=true;
 			}
 			
@@ -78,6 +90,8 @@
 			protected function submitWork(event:MouseEvent):void
 			{
 				listpage.visible=false;
+				locallist.visible=false;
+				serverlist.visible = false;
 				submitpage.visible=true;
 			}
 			
@@ -93,6 +107,7 @@
 						//HttpRequest.post(httpurl+"/OffLineClientController/checkPasswordthird.vot",{"username":loginusernetusername.text,"netPassword":submitNetPassword.text},function(str)
 						submitpage.visible=false;
 						listpage.visible=true;
+						serverlist.visible = true;
 					}
 					else
 					{
@@ -102,6 +117,7 @@
 				})
 			}			
 			
+			//服务器更新列表的审核与提交的切换
 			private function indexChangeFunc(e:Event):void
 			{
 				if(tabnavigator1.selectedIndex==0)
@@ -120,6 +136,25 @@
 				}				
 			}
 			
+			//本地列表的审核与提交的切换
+			private function indexChangelocal(e:Event):void
+			{
+				if(local3.selectedIndex==0)
+				{
+					local1.visible=true;
+					local1.percentHeight = 100;
+					local2.visible=false;
+					local2.height = -6;
+				}
+				else
+				{
+					local2.visible=true;
+					local2.percentHeight = 100;
+					local1.visible=false;
+					local1.height = -6;
+				}				
+			}
+			
 			// 判断更新待办页面网络用户密码是否正确
 			protected function updatetask(event:MouseEvent):void
 			{				
@@ -132,29 +167,37 @@
 					}
 					else
 					{
-						var msg:String;  
-						var code:int;  
-						var json:Object;  
 						Alert.show("\t提示\n更新成功");
 						//列表更新
-						var JsonObj:Object = com.adobe.serialization.json.JSON.decode(data);
-						if (JsonObj.list_audit.length >0){
-							//Alert.show(JsonObj.list_audit.length)							
+						var JsonObj:Object = JSON.parse(data);
+						if (JsonObj.list_audit.length >0)
+						{
+													
 							titlesgrid3.dataProvider = new ArrayList(JsonObj.list_audit);
-							Alert.show();
-							/*
-							list_audit_item.sid = JsonObj.list_audit.sid;
-							list_audit_item.nairename = JsonObj.list_audit.nairename;
-							list_audit_item.evalobjname = JsonObj.list_audit.evalobjname;
-							list_audit_item.levelonezb = JsonObj.list_audit.levelonezb;
-							list_audit_item.audit_status = JsonObj.list_audit.audit_status;
-							list_audit_item.input_status = JsonObj.list_audit.input_status;
-							dao.insertOrUpdate(list_audit_item);
-							*/
+							
+							//想把列表中的数据存入数据库
+							for(var i:int = 0; i<titlesgrid3.dataProvider.length ; i++)
+							{
+								var list_audit_item:ListAuditItem = new ListAuditItem();
+								list_audit_item.sid = JSON.stringify(JsonObj.list_audit[i].sid);
+								list_audit_item.nairename = JSON.stringify(JsonObj.list_audit[i].nairename);
+								list_audit_item.evalobjname = JSON.stringify(JsonObj.list_audit[i].evalobjname);
+								list_audit_item.levelonezb = JSON.stringify(JsonObj.list_audit[i].levelonezb);
+								list_audit_item.audit_status = JSON.stringify(JsonObj.list_audit[i].audit_status);
+								list_audit_item.input_status = JSON.stringify(JsonObj.list_audit[i].input_status);
+								//dao.insertOrUpdate(list_audit_item);
+							}
+							
+							//Alert.show(list_audit_item.evalobjname);
+							//Alert.show(JsonObj.list_audit[50].evalobjname);
+							//dao.insertOrUpdate(JsonObj.list_audit[50]);
 						}
-						if (JsonObj.list_todo.length >0){
+						if (JsonObj.list_todo.length >0)
+						{
 							//Alert.show(JsonObj.list_todo[0].inputorsid)
 							titlesgrid2.dataProvider = new ArrayList(JsonObj.list_todo);
+							
+							var list_todo_item:ListTodoItem = new ListTodoItem();
 							/*
 							list_todo_item.sid = JsonObj.list_todo.sid;
 							list_todo_item.nairename = JsonObj.list_todo.nairename;
@@ -164,10 +207,11 @@
 							list_todo_item.input_status = JsonObj.list_todo.input_status;
 							dao.insertOrUpdate(list_todo_item);
 							*/
-						}
-						
+						}						
 						updatepage.visible=false;
 						listpage.visible=true;
+						locallist.visible=false;
+						serverlist.visible = true;
 					}
 				})
 			}
@@ -223,6 +267,8 @@
 			protected function backtologin(event:MouseEvent):void
 			{
 				listpage.visible=false;
+				locallist.visible=false;
+				serverlist.visible=false;
 				backpage.visible=true;
 			}
 			
@@ -231,6 +277,8 @@
 			{
 				makepage.visible=false;
 				backpage.visible=false;
+				locallist.visible=false;
+				serverlist.visible=false;
 				loginpage.visible=true;
 			}
 			
@@ -239,6 +287,7 @@
 			{
 				backpage.visible=false;
 				listpage.visible=true;
+				locallist.visible=true;
 			}
 			
 		]]>
@@ -268,8 +317,7 @@
 	</s:VGroup>
 	
 	<!--成功登录后的页面-->	
-	<s:Group id="listpage" fontSize="15" visible="false" width="100%" height="100%">	
-		
+	<s:Group id="listpage" fontSize="15" visible="false" width="100%" height="100%">			
 		<s:VGroup >
 			<s:HGroup >
 				<s:Label text="当前登陆者 : " id="loginuser" fontSize="25"/>	
@@ -293,18 +341,22 @@
 				<s:Button label="提交待办任务" click="submitWork(event)"/>
 			</s:HGroup>			
 		</s:VGroup>
+	</s:Group>
+		
+	<!--从服务器端更新的列表-->
+	<s:Group id="serverlist" visible="false" width="100%" height="100%">
 		<s:VGroup  height="100%" width="100%" top="80" horizontalAlign="left">
 			<s:HGroup></s:HGroup>
 			<s:Label/>
 			<mx:TabNavigator id="tabnavigator1" change="indexChangeFunc(event)" width="100%" height="30" fontSize="20">
-				<mx:Panel width="100%" height="0" layout="horizontal"  id="writein" label="录入任务" headerHeight="0">
+				<mx:Panel horizontalAlign="center" id="writein" label="录入任务" headerHeight="0">
 				</mx:Panel>
-				<mx:Panel width="100%" height="0" layout="horizontal"  id="check" label="审核任务" headerHeight="0">
+				<mx:Panel horizontalAlign="center"  id="check" label="审核任务" headerHeight="0">
 				</mx:Panel>
 			</mx:TabNavigator>	
 		</s:VGroup>
-		<s:VGroup  height="100%" width="100%" top="150" horizontalAlign="left">
-				<s:DataGrid horizontalCenter="0" id="titlesgrid2"  selectionChange="" editable="true" width="100%" height="100%" contentBackgroundColor="white" color="gray" borderColor="black">
+		<s:VGroup  height="100%" width="100%" top="150" horizontalAlign="center">
+				<s:DataGrid textAlign="left" id="titlesgrid2"  selectionChange="" editable="true" width="100%" height="100%" contentBackgroundColor="white" color="gray" borderColor="black">
 					<s:columns>
 						<s:ArrayList>
 							<s:GridColumn editable="false" dataField="order" headerText="序号"/>
@@ -313,27 +365,117 @@
 							<s:GridColumn editable="false" dataField="levelonezb" headerText="任务" id="Task"/>
 							<s:GridColumn editable="false" dataField="input_status" headerText="录入任务状态"/>
 							<s:GridColumn editable="false" dataField="audit_status" headerText="审核任务状态"/>
-							<s:GridColumn editable="false" dataField="operation" headerText="操作"/>
+							<s:GridColumn headerText="操作" editable="false" dataField="operation">
+								<s:itemRenderer>
+									<fx:Component>
+										<s:GridItemRenderer horizontalCenter="">
+											<mx:LinkButton label="编辑" visible="true" width="50%"/>
+											<mx:LinkButton label="查看" visible="true"/>
+										</s:GridItemRenderer>							
+									</fx:Component>
+								</s:itemRenderer>
+							</s:GridColumn>
 						</s:ArrayList>
 					</s:columns>
 				</s:DataGrid>
-				<s:DataGrid  id="titlesgrid3" selectionChange="" editable="true" width="100%" height="-6" contentBackgroundColor="white" color="gray" borderColor="black">
+				<s:DataGrid textAlign="left" id="titlesgrid3" selectionChange="" editable="true" width="100%" height="-6" contentBackgroundColor="white" color="gray" borderColor="black">
 					<s:columns>
 						<s:ArrayList>
-							<s:GridColumn editable="true" dataField="order" headerText="序号"/>
-							<s:GridColumn editable="true" dataField="nairename" headerText="问卷"/>
-							<s:GridColumn editable="true" dataField="evalobjname" headerText="测评对象"/>
-							<s:GridColumn editable="true" dataField="levelonezb" headerText="任务"/>
-							<s:GridColumn editable="true" dataField="input_status" headerText="录入任务状态"/>
-							<s:GridColumn editable="true" dataField="audit_status" headerText="审核任务状态"/>
-							<s:GridColumn editable="true" dataField="operation" headerText="操作"/>
+							<s:GridColumn editable="false" dataField="order" headerText="序号"/>
+							<s:GridColumn editable="false" dataField="nairename" headerText="问卷"/>
+							<s:GridColumn editable="false" dataField="evalobjname" headerText="测评对象"/>
+							<s:GridColumn editable="false" dataField="levelonezb" headerText="任务"/>
+							<s:GridColumn editable="false" dataField="input_status" headerText="录入任务状态"/>
+							<s:GridColumn editable="false" dataField="audit_status" headerText="审核任务状态"/>
+							<s:GridColumn headerText="操作" editable="false" dataField="id">
+								<s:itemRenderer>
+									<fx:Component>
+										<s:GridItemRenderer horizontalCenter="">
+											<mx:LinkButton label="编辑" visible="true" width="50%"/>
+											<mx:LinkButton label="查看" visible="true"/>
+										</s:GridItemRenderer>							
+									</fx:Component>
+								</s:itemRenderer>
+							</s:GridColumn>
 						</s:ArrayList>
 					</s:columns>
 				</s:DataGrid>
 		</s:VGroup>
 	</s:Group>
-
-
+		
+	<!--从本地更新的列表-->
+	<s:Group id="locallist" visible="false" width="100%" height="100%">
+		<s:VGroup  height="100%" width="100%" top="80" horizontalAlign="left">
+			<s:HGroup></s:HGroup>
+			<s:Label/>
+			<mx:TabNavigator id="local3" change="indexChangelocal(event)" width="100%" height="30" fontSize="20">
+				<mx:Panel horizontalAlign="center" id="localwritein" label="录入任务" headerHeight="0">
+				</mx:Panel>
+				<mx:Panel horizontalAlign="center"  id="localcheck" label="审核任务" headerHeight="0">
+				</mx:Panel>
+			</mx:TabNavigator>	
+		</s:VGroup>
+		<s:VGroup  height="100%" width="100%" top="150" horizontalAlign="center">
+			<s:DataGrid textAlign="left" id="local1"  selectionChange="" editable="true" width="100%" height="100%" contentBackgroundColor="white" color="gray" borderColor="black">
+				<s:columns>
+					<s:ArrayList>
+						<s:GridColumn editable="false" dataField="order" headerText="序号"/>
+						<s:GridColumn editable="false" dataField="nairename" headerText="问卷"/>
+						<s:GridColumn editable="false" dataField="evalobjname" headerText="测评对象"/>
+						<s:GridColumn editable="false" dataField="levelonezb" headerText="任务"/>
+						<s:GridColumn editable="false" dataField="input_status" headerText="录入任务状态"/>
+						<s:GridColumn editable="false" dataField="audit_status" headerText="审核任务状态"/>
+						<s:GridColumn headerText="操作" editable="false" dataField="operation">
+							<s:itemRenderer>
+								<fx:Component>
+									<s:GridItemRenderer horizontalCenter="">
+										
+										<fx:Script>
+											<![CDATA[
+												import mx.controls.Alert;
+												
+												protected function justlook(event:MouseEvent):void
+												{
+													// TODO Auto-generated method stub
+													Alert.show("就看一看");
+												}
+											]]>
+										</fx:Script>
+										
+										<mx:LinkButton label="编辑" visible="true" width="50%"/>
+										<mx:LinkButton label="查看" visible="true" click="justlook(event)"/>
+									</s:GridItemRenderer>							
+								</fx:Component>
+							</s:itemRenderer>
+						</s:GridColumn>
+					</s:ArrayList>
+				</s:columns>
+			</s:DataGrid>
+			<s:DataGrid textAlign="left" id="local2" selectionChange="" editable="true" width="100%" height="-6" contentBackgroundColor="white" color="gray" borderColor="black">
+				<s:columns>
+					<s:ArrayList>
+						<s:GridColumn editable="false" dataField="order" headerText="序号"/>
+						<s:GridColumn editable="false" dataField="nairename" headerText="问卷"/>
+						<s:GridColumn editable="false" dataField="evalobjname" headerText="测评对象"/>
+						<s:GridColumn editable="false" dataField="levelonezb" headerText="任务"/>
+						<s:GridColumn editable="false" dataField="input_status" headerText="录入任务状态"/>
+						<s:GridColumn editable="false" dataField="audit_status" headerText="审核任务状态"/>
+						<s:GridColumn headerText="操作" editable="false" dataField="id">
+							<s:itemRenderer>
+								<fx:Component>
+									<s:GridItemRenderer horizontalCenter="">
+										<mx:LinkButton label="编辑" visible="true" width="50%"/>
+										<mx:LinkButton label="查看" visible="true"/>
+									</s:GridItemRenderer>							
+								</fx:Component>
+							</s:itemRenderer>
+						</s:GridColumn>
+					</s:ArrayList>
+				</s:columns>
+			</s:DataGrid>
+		</s:VGroup>
+	</s:Group>
+	
 	
 	<!--创建本地用户页面-->
 	<s:Group id="makepage" visible="false" horizontalCenter="0">
