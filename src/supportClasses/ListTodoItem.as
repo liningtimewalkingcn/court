@@ -9,5 +9,6 @@ package supportClasses
 		public var levelonezb:String;
 		public var input_status:String;
 		public var audit_status:String;
+		public var num:int;
 	}
 }
