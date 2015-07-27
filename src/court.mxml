@@ -35,7 +35,8 @@
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
 			private var userself:UserItem = new UserItem();
 			private var newuser:UserItem = new UserItem();
-			private var httpurl:String = "http://192.168.1.107:8081/court";
+			//private var httpurl:String = "http://192.168.1.107:8081/court";
+			private var httpurl:String = "http://192.168.1.158:8289/court";
 				
 			//登录判断用户名密码是否正确
 			protected function login(event:MouseEvent):void
@@ -340,6 +341,8 @@
 				listpage.visible=false;
 				locallist.visible=false;
 				questionpage.visible=true;
+				
+				myhtml.htmlText = "<b>在这里写html</b>";
 			}
 			
 			protected function textarea(event:MouseEvent):void
@@ -357,10 +360,10 @@
 			//更新本地数据库，时间较长，就先註釋了
 			protected function updateSQLite(event:MouseEvent):void
 			{
-				/*HttpRequest.post(httpurl+"/OffLineClientController/updateLocal.vot",{"username":loginusernetusername.text},function(data)
+			HttpRequest.post(httpurl+"/OffLineClientController/updateLocal.vot",{"username":loginusernetusername.text},function(data)
 				{
 					var jobj:Object = JSON.parse(data);
-					if (jobj.list_audit.length >0)
+					/*if (jobj.list_audit.length >0)
 					{
 						dao.updateBySQL("delete from COURT_LIST_AUDIT");									
 						for(var i:int = 0; i<jobj.list_audit.length ; ++i)
@@ -375,11 +378,12 @@
 							list_audit_item.num = i+1;
 							dao.insertOrUpdate(list_audit_item);
 						}
-					}
+					}*/
 					if (jobj.list_todo.length >0)
 					{							
 						
 						dao.updateBySQL("delete from COURT_LIST_TODO");
+						Alert.show(jobj.list_todo.length + "") ; 
 						for(var i:int = 0; i<jobj.list_todo.length ; ++i)						
 						{
 							var list_todo_item:ListTodoItem = new ListTodoItem();								
@@ -390,10 +394,15 @@
 							list_todo_item.audit_status = JSON.stringify(jobj.list_todo[i].audit_status);
 							list_todo_item.input_status = JSON.stringify(jobj.list_todo[i].input_status);
 							list_todo_item.num = i+1;
-							dao.insertOrUpdate(list_todo_item);		
+							dao.insert(list_todo_item);
+							
+							if (i % 10 == 0) {
+								Alert.show(i + "");
+								//break;
+							}
 						}																			
 					}					
-				})*/			
+				})
 			}			
 		]]>
 	</fx:Script>
@@ -689,6 +698,9 @@
 	
 	<!--答题页面-->
 	<s:Group id="questionpage" width="100%" height="100%" visible="false">
+		
+
+		
 		<s:VGroup horizontalAlign="left" width="100%">
 			<s:HGroup fontSize="50">	
 				<s:Label/>
@@ -723,6 +735,11 @@
 				<!--从数据库中取出题目（题目需要从服务器端获取）-->
 			</s:HGroup>			
 		</s:VGroup>
+		
+		<mx:HTML id="myhtml" location="http://www.baidu.com" width="100%" height="100%">
+			
+		</mx:HTML>
+		
 	</s:Group>
 	
 	<!--统一修改备注-->
