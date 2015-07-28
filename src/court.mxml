@@ -45,6 +45,7 @@
 
 			private var httpurl:String = "http://192.168.1.104:8081/court";
 			private var buttonnum:int ;
+			private var n:int = 0;
 
 				
 			//登录判断用户名密码是否正确
@@ -364,7 +365,7 @@
 				var renwu:String = local1.selectedItem.nairename;
 				var wenjuan:String = local1.selectedItem.levelonezb;			
 				var quest_sid:String;
-				var n:int = 0;
+				
 				
 				//从数据库取出来的相应的题目
 				
@@ -373,10 +374,9 @@
 					nairname.text = wenjuan;
 					courtname.text = evalobjname;
 					nainame.text = renwu;
+					allquest.text = data.length;
 					dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
 					{
-						if(data.length>0 && data.length<6)
-						{
 							if(data.length == 1)
 							{
 								q1.visible = true;
@@ -429,7 +429,7 @@
 								question4.text = JSON.stringify(data[3+n].name);
 								tmsm4.text = JSON.stringify(data[3+n].memo);
 							}		
-							else if(data.length == 5)
+							else /*if(data.length == 5)*/
 							{
 								q1.visible = true;
 								q2.visible = true;
@@ -452,16 +452,10 @@
 								question5.text = JSON.stringify(data[4+n].name);
 								tmsm5.text = JSON.stringify(data[4+n].memo);
 							}	
-							else
+							if(data.length>5)
 							{
-								
+								nbutton.visible=true;
 							}
-						}
-						else if(data.length>5 && data.length < 11)
-						{
-							n=5;
-							
-						}
 					});
 				});	
 				
@@ -617,6 +611,91 @@
 			protected function goon(event:MouseEvent):void
 			{
 				
+			}
+			
+			protected function nextpage(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				n=5;
+				var zbsidnum:String = local1.selectedItem.zbsid;
+				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
+				{
+					if(data.length == 1)
+					{
+						q1.visible = true;
+						qnum1.text = String(1+n);
+						question1.text = JSON.stringify(data[0+n].name);
+						tmsm1.text = JSON.stringify(data[0+n].memo);
+					}
+					else if(data.length == 2)
+					{
+						q1.visible = true;
+						q2.visible = true;
+						qnum1.text = String(1+n);
+						question1.text = JSON.stringify(data[0+n].name);
+						tmsm1.text = JSON.stringify(data[0+n].memo);
+						qnum2.text = String(2+n);
+						question2.text = JSON.stringify(data[1+n].name);
+						tmsm2.text = JSON.stringify(data[1+n].memo);
+					}
+					else if(data.length == 3)
+					{
+						q1.visible = true;
+						q2.visible = true;
+						q3.visible = true;
+						qnum1.text = String(1+n);
+						question1.text = JSON.stringify(data[0+n].name);
+						tmsm1.text = JSON.stringify(data[0+n].memo);
+						qnum2.text = String(2+n);
+						question2.text = JSON.stringify(data[1+n].name);
+						tmsm2.text = JSON.stringify(data[1+n].memo);
+						qnum3.text = String(3+n);
+						question3.text = JSON.stringify(data[2+n].name);
+						tmsm3.text = JSON.stringify(data[2+n].memo);
+					}	
+					else if(data.length == 4)
+					{
+						q1.visible = true;
+						q2.visible = true;
+						q3.visible = true;
+						q4.visible = true;
+						qnum1.text = String(1+n);
+						question1.text = JSON.stringify(data[0+n].name);
+						tmsm1.text = JSON.stringify(data[0+n].memo);
+						qnum2.text = String(2+n);
+						question2.text = JSON.stringify(data[1+n].name);
+						tmsm2.text = JSON.stringify(data[1+n].memo);
+						qnum3.text = String(3+n);
+						question3.text = JSON.stringify(data[2+n].name);
+						tmsm3.text = JSON.stringify(data[2+n].memo);
+						qnum4.text = String(4+n);
+						question4.text = JSON.stringify(data[3+n].name);
+						tmsm4.text = JSON.stringify(data[3+n].memo);
+					}		
+					else /*if(data.length == 5)*/
+					{
+						q1.visible = true;
+						q2.visible = true;
+						q3.visible = true;
+						q4.visible = true;
+						q5.visible = true;
+						qnum1.text = String(1+n);
+						question1.text = JSON.stringify(data[0+n].name);
+						tmsm1.text = JSON.stringify(data[0+n].memo);
+						qnum2.text = String(2+n);
+						question2.text = JSON.stringify(data[1+n].name);
+						tmsm2.text = JSON.stringify(data[1+n].memo);
+						qnum3.text = String(3+n);
+						question3.text = JSON.stringify(data[2+n].name);
+						tmsm3.text = JSON.stringify(data[2+n].memo);
+						qnum4.text = String(4+n);
+						question4.text = JSON.stringify(data[3+n].name);
+						tmsm4.text = JSON.stringify(data[3+n].memo);
+						qnum5.text = String(5+n);
+						question5.text = JSON.stringify(data[4+n].name);
+						tmsm5.text = JSON.stringify(data[4+n].memo);
+					}	
+				});
 			}
 			
 		]]>
@@ -981,7 +1060,7 @@
 		<s:VGroup horizontalAlign="center">
 			<s:HGroup>
 				<s:Button label="上一页" visible="false" id="lbutton"/>
-				<s:Button label="下一页" visible="false" id="nbutton"/>
+				<s:Button label="下一页" visible="false" id="nbutton" click="nextpage(event)"/>
 			</s:HGroup>
 		</s:VGroup>
 		<s:VGroup width="100%" horizontalAlign="left" id="q1" visible="false">
@@ -1352,7 +1431,6 @@
 		
 		</s:VGroup>
 		</s:Group>
-			
 		</s:Scroller>
 	</s:Group>
 	
