@@ -42,7 +42,8 @@
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
 			private var userself:UserItem = new UserItem();
 			private var newuser:UserItem = new UserItem();
-			private var httpurl:String = "http://192.168.1.104:8081/court";
+//			private var httpurl:String = "http://192.168.1.104:8081/court";
+			private var httpurl:String = "http://192.168.1.158:8088/court";
 			private var buttonnum:int = 0;
 				
 			//登录判断用户名密码是否正确
@@ -893,6 +894,9 @@
 	
 	<!--题目-->
 	<s:Group id="qpage" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="25" top="300">
+		<s:Scroller width="100%" height="100%">
+		<s:Group width="100%" height="100%">
+			
 		
 		<s:VGroup width="100%" horizontalAlign="left">
 			<s:HGroup>
@@ -1260,6 +1264,9 @@
 				<s:Label text=" "/>
 			</s:HGroup>
 		</s:VGroup>
+		</s:Group>
+			
+		</s:Scroller>
 	</s:Group>
 	
 	
