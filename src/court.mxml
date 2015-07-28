@@ -43,7 +43,7 @@
 			private var userself:UserItem = new UserItem();
 			private var newuser:UserItem = new UserItem();
 
-			private var httpurl:String = "http://192.168.1.104:8081/court";
+			private var httpurl:String = "http://192.168.1.158:8088/court";
 			private var buttonnum:int ;
 
 				
@@ -375,87 +375,97 @@
 					nainame.text = renwu;
 					dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
 					{
+						
+						for (var i:int = 0; i < 5; ++i) {
+							var onequest:OneQuestion = new OneQuestion();
+							onequest.questdata = {name:'555' + i};
+							questcontainer.addElement(onequest);
+						}
+						
 						if(data.length>0 && data.length<6)
 						{
-							if(data.length == 1)
-							{
-								q1.visible = true;
-								qnum1.text = String(1+n);
-								question1.text = JSON.stringify(data[0+n].name);
-								tmsm1.text = JSON.stringify(data[0+n].memo);
-							}
-							else if(data.length == 2)
-							{
-								q1.visible = true;
-								q2.visible = true;
-								qnum1.text = String(1+n);
-								question1.text = JSON.stringify(data[0+n].name);
-								tmsm1.text = JSON.stringify(data[0+n].memo);
-								qnum2.text = String(2+n);
-								question2.text = JSON.stringify(data[1+n].name);
-								tmsm2.text = JSON.stringify(data[1+n].memo);
-							}
-							else if(data.length == 3)
-							{
-								q1.visible = true;
-								q2.visible = true;
-								q3.visible = true;
-								qnum1.text = String(1+n);
-								question1.text = JSON.stringify(data[0+n].name);
-								tmsm1.text = JSON.stringify(data[0+n].memo);
-								qnum2.text = String(2+n);
-								question2.text = JSON.stringify(data[1+n].name);
-								tmsm2.text = JSON.stringify(data[1+n].memo);
-								qnum3.text = String(3+n);
-								question3.text = JSON.stringify(data[2+n].name);
-								tmsm3.text = JSON.stringify(data[2+n].memo);
-							}	
-							else if(data.length == 4)
-							{
-								q1.visible = true;
-								q2.visible = true;
-								q3.visible = true;
-								q4.visible = true;
-								qnum1.text = String(1+n);
-								question1.text = JSON.stringify(data[0+n].name);
-								tmsm1.text = JSON.stringify(data[0+n].memo);
-								qnum2.text = String(2+n);
-								question2.text = JSON.stringify(data[1+n].name);
-								tmsm2.text = JSON.stringify(data[1+n].memo);
-								qnum3.text = String(3+n);
-								question3.text = JSON.stringify(data[2+n].name);
-								tmsm3.text = JSON.stringify(data[2+n].memo);
-								qnum4.text = String(4+n);
-								question4.text = JSON.stringify(data[3+n].name);
-								tmsm4.text = JSON.stringify(data[3+n].memo);
-							}		
-							else if(data.length == 5)
-							{
-								q1.visible = true;
-								q2.visible = true;
-								q3.visible = true;
-								q4.visible = true;
-								q5.visible = true;
-								qnum1.text = String(1+n);
-								question1.text = JSON.stringify(data[0+n].name);
-								tmsm1.text = JSON.stringify(data[0+n].memo);
-								qnum2.text = String(2+n);
-								question2.text = JSON.stringify(data[1+n].name);
-								tmsm2.text = JSON.stringify(data[1+n].memo);
-								qnum3.text = String(3+n);
-								question3.text = JSON.stringify(data[2+n].name);
-								tmsm3.text = JSON.stringify(data[2+n].memo);
-								qnum4.text = String(4+n);
-								question4.text = JSON.stringify(data[3+n].name);
-								tmsm4.text = JSON.stringify(data[3+n].memo);
-								qnum5.text = String(5+n);
-								question5.text = JSON.stringify(data[4+n].name);
-								tmsm5.text = JSON.stringify(data[4+n].memo);
-							}	
-							else
-							{
-								
-							}
+							
+							
+							
+//							if(data.length == 1)
+//							{
+//								q1.visible = true;
+//								qnum1.text = String(1+n);
+//								question1.text = JSON.stringify(data[0+n].name);
+//								tmsm1.text = JSON.stringify(data[0+n].memo);
+//							}
+//							else if(data.length == 2)
+//							{
+//								q1.visible = true;
+//								q2.visible = true;
+//								qnum1.text = String(1+n);
+//								question1.text = JSON.stringify(data[0+n].name);
+//								tmsm1.text = JSON.stringify(data[0+n].memo);
+//								qnum2.text = String(2+n);
+//								question2.text = JSON.stringify(data[1+n].name);
+//								tmsm2.text = JSON.stringify(data[1+n].memo);
+//							}
+//							else if(data.length == 3)
+//							{
+//								q1.visible = true;
+//								q2.visible = true;
+//								q3.visible = true;
+//								qnum1.text = String(1+n);
+//								question1.text = JSON.stringify(data[0+n].name);
+//								tmsm1.text = JSON.stringify(data[0+n].memo);
+//								qnum2.text = String(2+n);
+//								question2.text = JSON.stringify(data[1+n].name);
+//								tmsm2.text = JSON.stringify(data[1+n].memo);
+//								qnum3.text = String(3+n);
+//								question3.text = JSON.stringify(data[2+n].name);
+//								tmsm3.text = JSON.stringify(data[2+n].memo);
+//							}	
+//							else if(data.length == 4)
+//							{
+//								q1.visible = true;
+//								q2.visible = true;
+//								q3.visible = true;
+//								q4.visible = true;
+//								qnum1.text = String(1+n);
+//								question1.text = JSON.stringify(data[0+n].name);
+//								tmsm1.text = JSON.stringify(data[0+n].memo);
+//								qnum2.text = String(2+n);
+//								question2.text = JSON.stringify(data[1+n].name);
+//								tmsm2.text = JSON.stringify(data[1+n].memo);
+//								qnum3.text = String(3+n);
+//								question3.text = JSON.stringify(data[2+n].name);
+//								tmsm3.text = JSON.stringify(data[2+n].memo);
+//								qnum4.text = String(4+n);
+//								question4.text = JSON.stringify(data[3+n].name);
+//								tmsm4.text = JSON.stringify(data[3+n].memo);
+//							}		
+//							else if(data.length == 5)
+//							{
+//								q1.visible = true;
+//								q2.visible = true;
+//								q3.visible = true;
+//								q4.visible = true;
+//								q5.visible = true;
+//								qnum1.text = String(1+n);
+//								question1.text = JSON.stringify(data[0+n].name);
+//								tmsm1.text = JSON.stringify(data[0+n].memo);
+//								qnum2.text = String(2+n);
+//								question2.text = JSON.stringify(data[1+n].name);
+//								tmsm2.text = JSON.stringify(data[1+n].memo);
+//								qnum3.text = String(3+n);
+//								question3.text = JSON.stringify(data[2+n].name);
+//								tmsm3.text = JSON.stringify(data[2+n].memo);
+//								qnum4.text = String(4+n);
+//								question4.text = JSON.stringify(data[3+n].name);
+//								tmsm4.text = JSON.stringify(data[3+n].memo);
+//								qnum5.text = String(5+n);
+//								question5.text = JSON.stringify(data[4+n].name);
+//								tmsm5.text = JSON.stringify(data[4+n].memo);
+//							}	
+//							else
+//							{
+//								
+//							}
 						}
 						else if(data.length>5 && data.length < 11)
 						{
@@ -984,82 +994,11 @@
 				<s:Button label="下一页" visible="false" id="nbutton"/>
 			</s:HGroup>
 		</s:VGroup>
-		<s:VGroup width="100%" horizontalAlign="left" id="q1" visible="false">
-			<s:HGroup>
-				<s:Label text="第  "/>
-				<s:Label text="  " id="qnum1"/>
-				<s:Label text="题 : "/>
-				<s:Label text=" " id="question1"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
- 				<s:Label text="题目说明："/>
-				<s:Label text=" " id="tmsm1"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text="备选答案： A."/>
-				<s:RadioButton id="fora1"/>
-				<s:Label text=" " id="optiona1"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/>
-				<s:Label text="B."/>
-				<s:RadioButton id="forb1"/>
-				<s:Label text=" " id="optionb1"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/>				<s:Label text="C."/>
-				<s:RadioButton id="forc1"/>
-				<s:Label text=" " id="optionc1"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/>				<s:Label text="D."/>
-				<s:RadioButton id="ford1"/>
-				<s:Label text=" " id="optiond1"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text="录入员说明："/>
-				<s:Label text=" " id="luysm1"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:Button width="100%" height="1"/>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
+		<s:VGroup id="questcontainer" width="100%">
+			
 		</s:VGroup>
 		
-		<s:VGroup width="100%" horizontalAlign="left" top="480" id="q2" visible="false">
+	<!--	<s:VGroup width="100%" horizontalAlign="left" top="480" id="q2" visible="false">
 			<s:HGroup>
 				<s:Label text="第 "/>
 				<s:Label text=" " id="qnum2"/>
@@ -1350,7 +1289,7 @@
 				<s:Label text=" "/>
 			</s:HGroup>
 		
-		</s:VGroup>
+		</s:VGroup>-->
 		</s:Group>
 			
 		</s:Scroller>
