@@ -4,8 +4,7 @@
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx"
 	xmlns:supportClasses="supportClasses.*"
-
->
+	>
 	
 	<fx:Declarations>
 		<supportClasses:Dao id="dao" dbfilename="mydatabase"/>
@@ -24,26 +23,20 @@
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.http.mxml.HTTPService;
 			import mx.utils.UIDUtil;
-			import mx.utils.object_proxy;
-			
+			import mx.utils.object_proxy;			
 			import spark.events.GridItemEditorEvent;
-			import spark.events.GridSelectionEvent;
-			
-			import org.osmf.events.TimeEvent;
-			
-			import supportClasses.ListAnswer;
+			import spark.events.GridSelectionEvent;			
+			import org.osmf.events.TimeEvent;			
 			import supportClasses.ListAuditItem;
-			import supportClasses.ListOption;
-			import supportClasses.ListQuestion;
 			import supportClasses.ListTodoItem;
-			import supportClasses.ProjectItem;
-			import supportClasses.UserItem;
+			import supportClasses.ProjectItem;			
+			import supportClasses.UserItem; 
 
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
 			private var userself:UserItem = new UserItem();
 			private var newuser:UserItem = new UserItem();
-			private var httpurl:String = "http://192.168.1.104:8081/court";
-			private var buttonnum:int = 0;
+			//private var httpurl:String = "http://192.168.1.107:8081/court";
+			private var httpurl:String = "http://192.168.1.158:8289/court";
 				
 			//登录判断用户名密码是否正确
 			protected function login(event:MouseEvent):void
@@ -75,15 +68,14 @@
 					for (var i:int =0; i < dao.daoitems.length; ++i) {
 						dao.daoitems[i].conn.close();
 					}
-				});	
-				
+				});			
 				dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
 				{
 					local1.dataProvider = new ArrayList(date);
 					for (var i:int =0; i < dao.daoitems.length; ++i) {
 						dao.daoitems[i].conn.close();
 					}
-				});				
+				});
 			}
 			
 			//点击进入创建页面
@@ -168,7 +160,7 @@
 				{
 					local2.visible=true;
 					local2.percentHeight = 100;
-					local1.visible=false; 
+					local1.visible=false;
 					local1.height = -6;
 				}				
 			}
@@ -186,50 +178,46 @@
 					else
 					{
 						Alert.show("\t提示\n更新成功");
-						//列表更新						
-						var JsonObj:Object = JSON.parse(data);		
-						
+						//列表更新
+						var JsonObj:Object = JSON.parse(data);						
 						if (JsonObj.list_audit.length >0)
 						{
 							titlesgrid3.dataProvider = new ArrayList(JsonObj.list_audit);
+							
 							/*if (JsonObj.list_audit.length >0)
-							{															
-								dao.updateBySQL("delete from court_list_audit");
-								for(var i:int = 0; i<titlesgrid3.dataProvider.length ; ++i)						
+							{
+								dao.updateBySQL("delete from COURT_LIST_AUDIT");									
+								for(var i:int = 0; i<titlesgrid3.dataProvider.length ; ++i)
 								{
-									var list_audit_item:ListAuditItem = new ListAuditItem();								
+									var list_audit_item:ListAuditItem = new ListAuditItem();
 									list_audit_item.sid = JSON.stringify(JsonObj.list_audit[i].sid);
 									list_audit_item.nairename = JSON.stringify(JsonObj.list_audit[i].nairename);
 									list_audit_item.evalobjname = JSON.stringify(JsonObj.list_audit[i].evalobjname);
 									list_audit_item.levelonezb = JSON.stringify(JsonObj.list_audit[i].levelonezb);
 									list_audit_item.audit_status = JSON.stringify(JsonObj.list_audit[i].audit_status);
 									list_audit_item.input_status = JSON.stringify(JsonObj.list_audit[i].input_status);
-									list_audit_item.evalobjsid = JSON.stringify(JsonObj.list_audit[i].evalobjsid);
-									list_audit_item.zbsid = JSON.stringify(JsonObj.list_audit[i].zbsid);
-									list_audit_item.num = i+1;
-									dao.insertOrUpdate(list_audit_item);																																
-								}																			
+									dao.insertOrUpdate(list_audit_item);
+								}
 							}*/
 						}
 						if (JsonObj.list_todo.length >0)
 						{							
 							titlesgrid2.dataProvider = new ArrayList(JsonObj.list_todo);
-							/*if (JsonObj.list_todo.length >0)
-							{															
-								dao.updateBySQL("delete from COURT_LIST_TODO");
-								for(var i:int = 0; i<titlesgrid2.dataProvider.length ; ++i)						
+							
+							/*IF (JSONOBJ.LIST_TODO.LENGTH >0)
+							{							
+								
+								DAO.UPDATEBYSQL("DELETE FROM COURT_LIST_TODO");
+								FOR(VAR I:INT = 0; I<TITLESGRID2.DATAPROVIDER.LENGTH ; ++I)						
 								{
-									var list_todo_item:ListTodoItem = new ListTodoItem();								
-									list_todo_item.sid = JSON.stringify(JsonObj.list_todo[i].sid);
-									list_todo_item.nairename = JSON.stringify(JsonObj.list_todo[i].nairename);
-									list_todo_item.evalobjname = JSON.stringify(JsonObj.list_todo[i].evalobjname);
-									list_todo_item.levelonezb = JSON.stringify(JsonObj.list_todo[i].levelonezb);
-									list_todo_item.audit_status = JSON.stringify(JsonObj.list_todo[i].audit_status);
-									list_todo_item.input_status = JSON.stringify(JsonObj.list_todo[i].input_status);
-									list_todo_item.evalobjsid = JSON.stringify(JsonObj.list_todo[i].evalobjsid);
-									list_todo_item.zbsid = JSON.stringify(JsonObj.list_todo[i].zbsid);	
-									list_todo_item.num = i+1;
-									dao.insertOrUpdate(list_todo_item);		
+									VAR LIST_TODO_ITEM:LISTTODOITEM = NEW LISTTODOITEM();								
+									LIST_TODO_ITEM.SID = JSON.STRINGIFY(JSONOBJ.LIST_TODO[I].SID);
+									LIST_TODO_ITEM.NAIRENAME = JSON.STRINGIFY(JSONOBJ.LIST_TODO[I].NAIRENAME);
+									LIST_TODO_ITEM.EVALOBJNAME = JSON.STRINGIFY(JSONOBJ.LIST_TODO[I].EVALOBJNAME);
+									LIST_TODO_ITEM.LEVELONEZB = JSON.STRINGIFY(JSONOBJ.LIST_TODO[I].LEVELONEZB);
+									LIST_TODO_ITEM.AUDIT_STATUS = JSON.STRINGIFY(JSONOBJ.LIST_TODO[I].AUDIT_STATUS);
+									LIST_TODO_ITEM.INPUT_STATUS = JSON.STRINGIFY(JSONOBJ.LIST_TODO[I].INPUT_STATUS);
+									DAO.INSERTORUPDATE(LIST_TODO_ITEM);		
 								}																			
 							}*/
 						}	
@@ -312,7 +300,7 @@
 			
 			//留在当前页面
 			protected function stophere(event:MouseEvent):void
-			{ 
+			{
 				backpage.visible=false;
 				listpage.visible=true;
 				locallist.visible=true;
@@ -321,9 +309,7 @@
 			//答题页面的返回到列表
 			protected function backlist(event:MouseEvent):void
 			{
-				buttonnum = 0;
 				questionpage.visible=false;
-				qpage.visible=false;
 				listpage.visible=true;
 				locallist.visible=true;
 			}
@@ -355,141 +341,29 @@
 				listpage.visible=false;
 				locallist.visible=false;
 				questionpage.visible=true;
-				qpage.visible=true;
 				
-				var zbsidnum:String = local1.selectedItem.zbsid;
-				var evalobjname:String = local1.selectedItem.evalobjname;
-				var renwu:String = local1.selectedItem.nairename;
-				var wenjuan:String = local1.selectedItem.levelonezb;			
-				var quest_sid:String;
-				
-				//从数据库取出来的相应的题目
-				
-				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
-				{	
-					nairname.text = wenjuan;
-					courtname.text = evalobjname;
-					nainame.text = renwu;
-					dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
-					{
-						if(data.length>0 && data.length<5)
-						{
-							qnum1.text = String(1);
-							question1.text = JSON.stringify(data[0].name);
-							tmsm1.text = JSON.stringify(data[0].memo);
-							
-						}
-					});
-				});	
-				
-					
-				//把问题更新到本地数据库，速度太慢，注释
-				/*HttpRequest.post(httpurl+"/OffLineClientController/questionpage.vot",{"username":loginusernetusername.text},function(data)
-				{					
-					var quest:Object = JSON.parse(data);				
-					
-					if (quest.list_question.length>0)
-					{
-						dao.updateBySQL("delete from COURT_QUESTION");									
-						for(var i:int = 0; i<quest.list_question.length; ++i)
-						{
-							var list_question:ListQuestion = new ListQuestion();
-							list_question.sid = JSON.stringify(quest.list_question[i].sid);
-							list_question.name = JSON.stringify(quest.list_question[i].name);
-							list_question.zbsid = JSON.stringify(quest.list_question[i].zbsid);
-							list_question.memo = JSON.stringify(quest.list_question[i].memo);
-							list_question.createtime = JSON.stringify(quest.list_question[i].createtime);
-							list_question.filegroupsid = JSON.stringify(quest.list_question[i].filegroupsid);
-							list_question.sortfield = JSON.stringify(quest.list_question[i].sortfield);
-							list_question.maxscore = JSON.stringify(quest.list_question[i].maxscore);
-							list_question.modifytime = JSON.stringify(quest.list_question[i].modifytime);
-							list_question.willrest = JSON.stringify(quest.list_question[i].willrest);
-							list_question.questcode = JSON.stringify(quest.list_question[i].questcode);
-							list_question.questzbname = JSON.stringify(quest.list_question[i].questzbname);
-							dao.insertOrUpdate(list_question);
-						}
-					}
-				});*/
-				
-				//把答案更新到本地数据库，速度太慢，注释（更新了一晚上66681条）
-				/*HttpRequest.post(httpurl+"/OffLineClientController/answer.vot",{"username":loginusernetusername.text},function(data)
-				{					
-					var answer:Object = JSON.parse(data);				
-					
-					if (answer.list_answer.length>0)
-					{
-						dao.updateBySQL("delete from COURT_ANSWER");									
-						for(var i:int = 0; i< answer.list_answer.length; ++i)
-						{
-							var list_answer:ListAnswer = new ListAnswer();
-							list_answer.sid = JSON.stringify(answer.list_answer[i].sid);
-							list_answer.questsid = JSON.stringify(answer.list_answer[i].questsid);
-							list_answer.answeroptionsid = JSON.stringify(answer.list_answer[i].answeroptionsid);
-							list_answer.evalobjpapersid = JSON.stringify(answer.list_answer[i].evalobjpapersid);
-							list_answer.sore = JSON.stringify(answer.list_answer[i].sore);
-							list_answer.inputor_memo = JSON.stringify(answer.list_answer[i].inputor_memo);
-							list_answer.filegroupsid = JSON.stringify(answer.list_answer[i].filegroupsid);
-							list_answer.auditor_memo = JSON.stringify(answer.list_answer[i].auditor_memo);
-							list_answer.haserror = JSON.stringify(answer.list_answer[i].haserror);
-							list_answer.errortype = JSON.stringify(answer.list_answer[i].errortype);
-							list_answer.iddisabled = JSON.stringify(answer.list_answer[i].iddisabled);
-							list_answer.auditfilegroupsid = JSON.stringify(answer.list_answer[i].auditfilegroupsid);
-							dao.insertOrUpdate(list_answer);
-						}
-					}
-				});*/
-			
-			
-				//把选项更新到本地数据库，速度太慢，注释
-				/*HttpRequest.post(httpurl+"/OffLineClientController/option.vot",{"username":loginusernetusername.text},function(data)
-				{					
-					var option:Object = JSON.parse(data);				
-					
-					if (option.list_option.length>0)
-					{
-						dao.updateBySQL("delete from COURT_QUESTION_OPTION");									
-						for(var i:int = 0; i< option.list_option.length; ++i)
-						{
-							var list_option:ListOption = new ListOption();
-							list_option.sid = JSON.stringify(option.list_option[i].sid);
-							list_option.name = JSON.stringify(option.list_option[i].name);
-							list_option.questsid = JSON.stringify(option.list_option[i].questsid);
-							list_option.score = JSON.stringify(option.list_option[i].score);
-							list_option.sortfield = JSON.stringify(option.list_option[i].sortfield);
-							dao.insertOrUpdate(list_option);
-						}
-					}
-				});*/
-			}
-			
-			
-			//服务器端的编辑
-			public function sedit():void  
-			{
-				
+				myhtml.htmlText = "<b>在这里写html</b>";
 			}
 			
 			protected function textarea(event:MouseEvent):void
 			{			
 				questionpage.visible=false;
-				qpage.visible=false;
 				text_area.visible=true;
 			}
 			
 			protected function close_text_area(event:MouseEvent):void
 			{
 				questionpage.visible=true;
-				qpage.visible=true;
 				text_area.visible=false;
 			}
 			
 			//更新本地数据库，时间较长，就先註釋了
 			protected function updateSQLite(event:MouseEvent):void
 			{
-				/*HttpRequest.post(httpurl+"/OffLineClientController/updateLocal.vot",{"username":loginusernetusername.text},function(data)
+			HttpRequest.post(httpurl+"/OffLineClientController/updateLocal.vot",{"username":loginusernetusername.text},function(data)
 				{
 					var jobj:Object = JSON.parse(data);
-					if (jobj.list_audit.length >0)
+					/*if (jobj.list_audit.length >0)
 					{
 						dao.updateBySQL("delete from COURT_LIST_AUDIT");									
 						for(var i:int = 0; i<jobj.list_audit.length ; ++i)
@@ -504,10 +378,12 @@
 							list_audit_item.num = i+1;
 							dao.insertOrUpdate(list_audit_item);
 						}
-					}
+					}*/
 					if (jobj.list_todo.length >0)
-					{													
+					{							
+						
 						dao.updateBySQL("delete from COURT_LIST_TODO");
+						Alert.show(jobj.list_todo.length + "") ; 
 						for(var i:int = 0; i<jobj.list_todo.length ; ++i)						
 						{
 							var list_todo_item:ListTodoItem = new ListTodoItem();								
@@ -518,24 +394,16 @@
 							list_todo_item.audit_status = JSON.stringify(jobj.list_todo[i].audit_status);
 							list_todo_item.input_status = JSON.stringify(jobj.list_todo[i].input_status);
 							list_todo_item.num = i+1;
-							dao.insertOrUpdate(list_todo_item);		
+							dao.insert(list_todo_item);
+							
+							if (i % 10 == 0) {
+								Alert.show(i + "");
+								//break;
+							}
 						}																			
 					}					
-				})*/			
+				})
 			}			
-			
-			//上一题
-			protected function before(event:MouseEvent):void
-			{
-				
-			}
-			 
-			//下一题
-			protected function goon(event:MouseEvent):void
-			{
-				
-			}
-			
 		]]>
 	</fx:Script>
 	
@@ -618,17 +486,7 @@
 								<s:itemRenderer>
 									<fx:Component>
 										<s:GridItemRenderer horizontalCenter="">
-											
-											<fx:Script>
-												<![CDATA[
-													protected function serveredit(event:MouseEvent):void
-													{
-														outerDocument.sedit();  
-													}
-												]]>
-											</fx:Script>
-											
-											<mx:LinkButton label="编辑" click="serveredit(event)" visible="true" width="50%"/>
+											<mx:LinkButton label="编辑" visible="true" width="50%"/>
 											<mx:LinkButton label="查看" visible="true"/>
 										</s:GridItemRenderer>							
 									</fx:Component>
@@ -839,7 +697,10 @@
 	</s:Group>	
 	
 	<!--答题页面-->
-	<s:Group id="questionpage" visible="false" horizontalCenter="1" width="80%">
+	<s:Group id="questionpage" width="100%" height="100%" visible="false">
+		
+
+		
 		<s:VGroup horizontalAlign="left" width="100%">
 			<s:HGroup fontSize="50">	
 				<s:Label/>
@@ -848,420 +709,38 @@
 				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
 				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
 				<s:Button label="&lt; 返回列表  " click="backlist(event)"/>
-				<s:Label/><s:Label />
+				<s:Label/><s:Label/>
 				<s:Button label=" 暂存 " click="temporary(event)"/>
 				<s:Label/><s:Label/>
 				<s:Button label=" 提交 " click="submitanswer(event)"/>
 				<s:Label/><s:Label/>
 				<s:Button label=" 取消 " click="cancel(event)"/>
-			</s:HGroup>	
-			<s:Button width="100%" height="1"/>
-		</s:VGroup>
-		<s:VGroup horizontalAlign="center" width="80%" fontSize="25" top="120">			
-			<s:HGroup  verticalAlign="middle">
-				<s:Label/>
-				<s:Label text="当前问卷：" fontWeight="bold"/>
-				<s:Label text=" " id="nairname" color="red"/>
-				<s:Label/><s:Label/>
-				<s:Label text="当前测评对象: " fontWeight="bold"/>
-				<s:Label text=" " id="courtname" color="red"/>
-				<s:Label/><s:Label/>
-				<s:Label text="当前任务：" fontWeight="bold"/>
-				<s:Label text=" " id="nainame" color="red"/>
-				<s:Label/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup verticalAlign="bottom">
-				<s:Label text="共 "/>
-				<s:Label text=" " id="allquest" fontWeight="bold" color="red"/>
-				<s:Label text="道题"/>
 			</s:HGroup>			
 		</s:VGroup>
-		<s:VGroup horizontalAlign="left" fontSize="25" top="230">
+		<s:VGroup horizontalAlign="center" width="100%" fontSize="25" top="120">
+			<s:Button width="100%" height="1"/>
+			<s:Label/>
+			<s:Label text="当前问卷：'+ +'当前测评对象:'+ +'当前任务：'+ +' " fontWeight="bold"/>
+			<s:Label/>
+			<s:Button label="统一修改备注" fontSize="20" click="textarea(event)"/>
+			<s:Label />
+			<s:Label text="第'++'张"/>
+			<s:Label />
 			<s:HGroup verticalAlign="middle">
 				<s:Label text="问卷备注："/>
-				<s:TextArea  width="1500" height="30"/>
+				<s:TextArea  width="1500" height="50"/>
 			</s:HGroup>
 			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
+				<s:Label text="第'++'题: "/>
+				<!--从数据库中取出题目（题目需要从服务器端获取）-->
+			</s:HGroup>			
 		</s:VGroup>
+		
+		<mx:HTML id="myhtml" location="http://www.baidu.com" width="100%" height="100%">
+			
+		</mx:HTML>
+		
 	</s:Group>
-	
-	
-	<!--题目-->
-	<s:Group id="qpage" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="25" top="300">
-		
-		<s:VGroup width="100%" horizontalAlign="left">
-			<s:HGroup>
-				<s:Label text="第  "/>
-				<s:Label text="  " id="qnum1"/>
-				<s:Label text="题 : "/>
-				<s:Label text=" " id="question1"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
- 				<s:Label text="题目说明："/>
-				<s:Label text=" " id="tmsm1"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text="备选答案： A."/>
-				<s:RadioButton id="fora1"/>
-				<s:Label text=" " id="optiona1"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/>
-				<s:Label text="B."/>
-				<s:RadioButton id="forb1"/>
-				<s:Label text=" " id="optionb1"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/>				<s:Label text="C."/>
-				<s:RadioButton id="forc1"/>
-				<s:Label text=" " id="optionc1"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/>				<s:Label text="D."/>
-				<s:RadioButton id="ford1"/>
-				<s:Label text=" " id="optiond1"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text="录入员说明："/>
-				<s:Label text=" " id="luysm1"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:Button width="100%" height="1"/>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-		</s:VGroup>
-		
-		<s:VGroup width="100%" horizontalAlign="left" top="480">
-			<s:HGroup>
-				<s:Label text="第 "/>
-				<s:Label text=" " id="qnum2"/>
-				<s:Label text="题 :"/>
-				<s:Label text=" " id="question2"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text="题目说明："/>
-				<s:Label text=" " id="tmsm2"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text="备选答案： A."/>
-				<s:RadioButton id="fora2"/>
-				<s:Label text=" " id="optiona2"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/>				<s:Label text="B."/>
-				<s:RadioButton id="forb2"/>
-				<s:Label text=" " id="optionb2"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/>				<s:Label text="C."/>
-				<s:RadioButton id="forc2"/>
-				<s:Label text=" " id="optionc2"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/>				<s:Label text="D."/>
-				<s:RadioButton id="ford2"/>
-				<s:Label text=" " id="optiond2"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text="录入员说明："/>
-				<s:Label text=" " id="luysm2"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-		</s:VGroup>
-		
-		<s:VGroup width="100%" horizontalAlign="left" top="960">
-			<s:HGroup>
-				<s:Label text="第 "/>
-				<s:Label text=" " id="qnum3"/>
-				<s:Label text="题 :"/>
-				<s:Label text=" " id="question3"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text="题目说明："/>
-				<s:Label text=" " id="tmsm3"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text="备选答案： A."/>
-				<s:RadioButton id="fora3"/>
-				<s:Label text=" " id="optiona3"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/>				<s:Label text="B."/>
-				<s:RadioButton id="forb3"/>
-				<s:Label text=" " id="optionb3"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/>				<s:Label text="C."/>
-				<s:RadioButton id="forc3"/>
-				<s:Label text=" " id="optionc3"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/>				<s:Label text="D."/>
-				<s:RadioButton id="ford3"/>
-				<s:Label text=" " id="optiond3"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text="录入员说明："/>
-				<s:Label text=" " id="luysm3"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-		</s:VGroup>
-		
-		<s:VGroup width="100%" horizontalAlign="left" top="1440">
-			<s:HGroup>
-				<s:Label text="第 "/>
-				<s:Label text=" " id="qnum4"/>
-				<s:Label text="题 :"/>
-				<s:Label text=" " id="question4"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text="题目说明："/>
-				<s:Label text=" " id="tmsm4"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:HGroup>
-					<s:Label text=" "/>
-				</s:HGroup>
-				<s:Label text="备选答案： A."/>
-				<s:RadioButton id="fora4"/>
-				<s:Label text=" " id="optiona4"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/>				<s:Label text="B."/>
-				<s:RadioButton id="forb4"/>
-				<s:Label text=" " id="optionb4"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/>				<s:Label text="C."/>
-				<s:RadioButton id="forc4"/>
-				<s:Label text=" " id="optionc4"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/>				<s:Label text="D."/>
-				<s:RadioButton id="ford4"/>
-				<s:Label text=" " id="optiond4"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text="录入员说明："/>
-				<s:Label text=" " id="luysm4"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-		</s:VGroup>
-		
-		<s:VGroup width="100%" horizontalAlign="left" top="1920">
-			<s:HGroup>
-				<s:Label text="第 "/>
-				<s:Label text=" " id="qnum5"/>
-				<s:Label text="题 :"/>
-				<s:Label text=" " id="question5"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text="题目说明："/>
-				<s:Label text=" " id="tmsm5"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text="备选答案： A."/>
-				<s:RadioButton id="fora5"/>
-				<s:Label text=" " id="optiona5"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/>				<s:Label text="B."/>
-				<s:RadioButton id="forb5"/>
-				<s:Label text=" " id="optionb5"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/>				<s:Label text="C."/>
-				<s:RadioButton id="forc5"/>
-				<s:Label text=" " id="optionc5"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-				<s:Label text=" "/><s:Label text=" "/>				<s:Label text="D."/>
-				<s:RadioButton id="ford5"/>
-				<s:Label text=" " id="optiond5"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text="录入员说明："/>
-				<s:Label text=" " id="luysm5"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-		</s:VGroup>
-	</s:Group>
-	
 	
 	<!--统一修改备注-->
 	<s:Group id="text_area" visible="false" width="100%" height="100%" fontSize="25">

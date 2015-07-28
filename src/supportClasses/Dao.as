@@ -33,6 +33,15 @@ package supportClasses {
 			daoitems.push(daoitem);
 		}
 		
+		
+		public function insert(a:*):void {
+			var daoitem:DaoItem = new DaoItem();
+			daoitem.a = a;
+			daoitem.dbfilename = dbfilename;
+			daoitem.executeInsert();
+			daoitems.push(daoitem);
+		}
+		
 		public function query(sql:String, callback: Function):void {
 			var daoitem:DaoItem = new DaoItem();
 			daoitem.dbfilename = dbfilename;
