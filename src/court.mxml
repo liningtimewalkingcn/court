@@ -25,12 +25,9 @@
 			import mx.rpc.http.mxml.HTTPService;
 			import mx.utils.UIDUtil;
 			import mx.utils.object_proxy;
-			
 			import spark.events.GridItemEditorEvent;
 			import spark.events.GridSelectionEvent;
-			
 			import org.osmf.events.TimeEvent;
-			
 			import supportClasses.ListAnswer;
 			import supportClasses.ListAuditItem;
 			import supportClasses.ListOption;
@@ -43,7 +40,6 @@
 			private var userself:UserItem = new UserItem();
 			private var newuser:UserItem = new UserItem();
 			private var httpurl:String = "http://192.168.1.104:8081/court";
-			private var buttonnum:int = 0;
 				
 			//登录判断用户名密码是否正确
 			protected function login(event:MouseEvent):void
