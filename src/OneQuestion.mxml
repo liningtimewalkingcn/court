@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" horizontalAlign="left">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.core.UIComponent;
+			import mx.events.ItemClickEvent;
+			public var _answer:Object ;
+			public static var num:String ;
+			public static var sid2:String ;
+			public static var objs:Array = new Array();
+			
+			public function set questdata(val:*):void
+			{
+				tmsm1.text = val.tmsms;
+				qnum1.text = String(val.num+1);
+				question1.text = val.quests;
+				sid3.text = val.sid1;
+			}
+			
+			public function set optiondata(val:*):void
+			{			
+				optiona1.text = val.optionas;
+				optionb1.text = val.optionbs;
+				optionc1.text = val.optioncs;
+				optiond1.text = val.optionds;
+				optione1.text = val.optiones;
+				asid.text = val.opaid;
+				bsid.text = val.opbid;
+				csid.text = val.opcid;
+				dsid.text = val.opdid;
+				esid.text = val.opeid;
+				qaid.text = val.qstid;
+				qbid.text = val.qstid;
+				qcid.text = val.qstid;
+				qdid.text = val.qstid;
+				qeid.text = val.qstid;
+			}
+			
+			//点击每道题的可获取的id
+			public function fora1_clickHandler(event:MouseEvent):void
+			{
+				num=asid.text;
+				sid2=qaid.text;
+				var obj:Object =  new Object();
+				obj['num'] = num;
+				obj['sid'] = sid2;
+				var n: int = findThis(sid2)
+				if(n == -1)
+				{
+					objs.push(obj);
+				}
+				else
+				{
+					objs[n].num=num;
+				}
+			}
+			
+			protected function forb1_clickHandler(event:MouseEvent):void
+			{
+				num=bsid.text;
+				sid2=qbid.text;
+				var obj:Object =  new Object();
+				obj['num'] = num;
+				obj['sid'] = sid2;
+				var n: int = findThis(sid2)
+				if(n==-1)
+				{
+					objs.push(obj);
+				}else
+				{
+					objs[n].num=num;
+				}				
+			}
+		
+			protected function forc1_clickHandler(event:MouseEvent):void
+			{
+				num=csid.text;
+				sid2=qcid.text;
+				var obj:Object =  new Object();
+				obj['num'] = num;
+				obj['sid'] = sid2;
+				var n: int = findThis(sid2)
+				if(n==-1)
+				{
+					objs.push(obj);
+				}else
+				{
+					objs[n].num=num;
+				}			
+			}
+			
+			protected function ford1_clickHandler(event:MouseEvent):void
+			{
+				num=dsid.text;
+				sid2=qdid.text;
+				var obj:Object =  new Object();
+				obj['num'] = num;
+				obj['sid'] = sid2;
+				var n: int = findThis(sid2)
+				if(n==-1)
+				{
+					objs.push(obj);
+				}else
+				{
+					objs[n].num=num;
+				}				
+			}
+			
+			protected function fore1_clickHandler(event:MouseEvent):void
+			{
+				num=esid.text;
+				sid2=qeid.text;
+				var obj:Object =  new Object();
+				obj['num'] = num;
+				obj['sid'] = sid2;
+				var n: int = findThis(sid2)
+				if(n==-1)
+				{
+					objs.push(obj);
+				}
+				else
+				{
+					objs[n].num=num;
+				}
+			}
+			
+			public function set optall(val1:*):void
+			{				
+				this._answer = objs;
+			}
+			
+			public function get optall():Object
+			{			
+				for(var l:int = 0 ; l<objs.length ; l++)
+				{
+					objs.pop();
+				}
+				return _answer;
+			}
+			
+			/*protected function radioButton_itemClickHandler(event:ItemClickEvent):void
+			{
+				var now:String = new Date().toTimeString();
+				lbl.text = event.label + " (" + now + ")";
+			}*/
+			public function findThis( sid:String):int
+			{
+				for(var i:int =0 ; i < objs.length ; i++)
+				{
+				
+					if(objs[i].sid==sid)
+					{
+						return i;
+					}
+				}
+				return -1;
+			}
+		]]>
+	</fx:Script>
+
+	<s:HGroup>
+		<s:Label text=" "/>
+	</s:HGroup>
+	<s:HGroup>
+		<s:Label text="第  "/>
+		<s:Label text="  " id="qnum1"/>
+		<s:Label text="题 : "/>
+		<s:Label text=" " id="question1"/>
+	</s:HGroup>
+	<s:HGroup>
+		<s:Label text=" " visible="false" id="sid3"/>
+	</s:HGroup>
+	<s:HGroup>
+		<s:Label text="题目说明："/>
+		<s:Label text=" " id="tmsm1"/>
+	</s:HGroup>
+	<s:HGroup>
+		<s:Label text=" "/>
+	</s:HGroup>
+	
+	<!--<mx:ApplicationControlBar dock="true">
+		<mx:Label id="lbl" fontWeight="bold" />
+	</mx:ApplicationControlBar>-->
+	
+	<!--<fx:Declarations>
+		<s:RadioButtonGroup id="radioButton" itemClick="radioButton_itemClickHandler(event)"/>
+	</fx:Declarations>-->
+	<s:HGroup>
+		<s:Label text="备选答案： A."/>
+		<s:RadioButton id="fora1" click="fora1_clickHandler(event)"/><!--group="{radioButton}"-->
+		<s:Label text=" " id="optiona1"/>
+		<s:Label text=" " id="asid" visible="false"/>
+		<s:Label text=" " id="qaid" visible="false"/>	
+	</s:HGroup>
+	<s:HGroup>
+		<s:Label text=" "/>
+	</s:HGroup>
+	<s:HGroup>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/>
+		<s:Label text="B."/>
+		<s:RadioButton id="forb1" click="forb1_clickHandler(event)"/>
+		<s:Label text=" " id="optionb1"/>
+		<s:Label text=" " id="bsid" visible="false"/>
+		<s:Label text=" " id="qbid" visible="false"/>
+	</s:HGroup>
+	<s:HGroup> 
+		<s:Label text=" "/>
+	</s:HGroup>
+	<s:HGroup>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/>				<s:Label text="C."/>
+		<s:RadioButton id="forc1" click="forc1_clickHandler(event)"/>
+		<s:Label text=" " id="optionc1"/>
+		<s:Label text=" " id="csid" visible="false"/>
+		<s:Label text=" " id="qcid" visible="false"/>
+	</s:HGroup>
+	<s:HGroup>
+		<s:Label text=" "/>
+	</s:HGroup>
+	<s:HGroup>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/>				<s:Label text="D."/>
+		<s:RadioButton id="ford1" click="ford1_clickHandler(event)"/>
+		<s:Label text=" " id="optiond1"/>
+		<s:Label text=" " id="dsid" visible="false"/>
+		<s:Label text=" " id="qdid" visible="false"/>
+	</s:HGroup>
+	<s:HGroup>
+		<s:Label text=" "/>
+	</s:HGroup>
+	<s:HGroup>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/>				<s:Label text="E."/>
+		<s:RadioButton id="fore1" click="fore1_clickHandler(event)"/>
+		<s:Label text=" " id="optione1"/>
+		<s:Label text=" " id="esid" visible="false"/>
+		<s:Label text=" " id="qeid" visible="false"/>
+	</s:HGroup>
+	<s:HGroup>
+		<s:Label text=" "/>
+	</s:HGroup>
+
+
+	<s:HGroup>
+		<s:Label text="录入员说明："/>
+		<s:Label text=" " id="luysm1"/>
+	</s:HGroup>
+	<s:HGroup>
+		<s:Label text=" "/>
+	</s:HGroup>
+		<s:Button width="100%" height="1"/>
+	<s:HGroup>
+		<s:Label text=" "/>
+	</s:HGroup>
+</s:VGroup>
