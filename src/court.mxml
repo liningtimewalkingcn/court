@@ -40,13 +40,12 @@
 			import supportClasses.UserItem;			
 			
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
-			private var userself:UserItem = new UserItem();
 			private var newuser:UserItem = new UserItem();
-			private var httpurl:String = "http://192.168.1.104:8081/court";
+			private var httpurl:String = "http://192.168.1.102:8081/court";
 			private var n:int = 0;
 			private var answer:String; 		//选项的内容
 			private var qsid:String;		//问题的
-			private var userid:String;  	//网络用户名
+			private static var userid:String;  	//网络用户名
 			private var cname:String;   	//法院的名字
 			public var answerandquest:Object;		//获取题目与答案
 			
@@ -365,11 +364,17 @@
 				qaa = opt._answer;
 				
 				//把得到的数据存到数据库
-				var listoption:Option = new Option();
-				listoption.questsid = qaa.sid;
-				listoption.answersid = qaa.num;
-				listoption.evsid = cname;
-				listoption.usersid = userid;
+				for(var h:int = 0 ; h<qaa.length ; h++)
+				{
+					var listoption:Option = new Option();
+					listoption.sid = UIDUtil.createUID();
+					listoption.questsid = qaa[h].sid;
+					listoption.answersid = qaa[h].num;
+					listoption.evsid = cname;
+					listoption.usersid = loginusernetusername.text;
+					dao.insertOrUpdate(listoption);
+				}
+				Alert.show("提交成功！");
 			}
 			
 			//本地答题页面的取消
@@ -382,10 +387,13 @@
 			protected function temporary(event:MouseEvent):void
 			{	
 				var opt:OneQuestion = new OneQuestion();
-				opt.optall = "答案";			
-				var qaa:Object = new Object();
+				opt.optall = "答案";		
+				var qaa:Object = new Object();//JSON.parse(JSON.stringify(opt._answer));
 				qaa = opt._answer;
 				
+				Alert.show(qaa.length);
+				Alert.show(JSON.stringify(qaa));
+				//Alert.show(qaa[0].num);
 				//把题目和答案和法院名和用户民存入数据库
 				/*var listoption:Option = new Option();
 				listoption.questsid = qaa.sid;
@@ -404,7 +412,28 @@
 			//服务器答题页面的提交答案
 			protected function submitanswerserver(event:MouseEvent):void
 			{
+				//想要提交的话，得知道提交的内容
+				var opt:OneQuestion = new OneQuestion();
+				opt.optall = "答案";			
+				var qaa:Object = new Object();
+				qaa = opt._answer;
 				
+				//把得到的数据存送到服务器端
+				for(var h:int = 0 ; h<qaa.length ; h++)
+				{
+					var listoption:Option = new Option();
+					listoption.sid = UIDUtil.createUID();
+					listoption.questsid = qaa[h].sid;
+					listoption.answersid = qaa[h].num;
+					listoption.evsid = cname;
+					listoption.usersid = loginusernetusername.text;
+					HttpRequest.post(httpurl+"/OffLineClientController/submit.vot",{"sid":listoption.sid , "questsid":listoption.questsid , "answersid":listoption.answersid , "evsid":listoption.evsid , "usersid":listoption.usersid},function(abc)
+					{
+						Alert.show("已发送");
+						Alert.show(abc);
+					});
+				}
+				Alert.show("提交成功！");
 			}
 			
 			//服务器答题页面的取消
@@ -450,7 +479,6 @@
 						quest_sid = data[d].sid;
 						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
 						{	
-							
 							onequest.optiondata = {optionas:date[0].name , optionbs:date[1].name , optioncs:date[2].name , optionds:date[3].name ,optiones:date[4].name};
 						});
 						localchacklist.addElement(onequest);
@@ -615,8 +643,9 @@
 						questone.fore1.visible = false;
 						quest_sid = date[d].sid;			
 						HttpRequest.post(httpurl+"/OffLineClientController/listoption.vot",{"questsid":quest_sid},function(all)
+							
 						{	
-							var dete:Object = JSON.parse(all);
+							var dete:Object = JSON.parse(all);							
 							questone.optiondata = {optionas:dete[0].name , optionbs:dete[1].name , optioncs:dete[2].name , optionds:dete[3].name ,optiones:dete[4].name};
 						});
 						questionserver.addElement(questone);
@@ -650,16 +679,15 @@
 				{					
 					var date:Object = JSON.parse(data);
 					allquestserver.text = date.length;
-					
 					for (var d:int = 0; d < date.length; ++d) 
 					{
-						var questone:OneQuestion = new OneQuestion();
-						questone.questdata = {num:d , tmsms:date[d].memo , quests:date[d].name };
+						var questone:QuestObject = new QuestObject();
+						questone.questdata = {num:d , tmsms:date[d].memo , quests:date[d].name , sid1:date[d].sid};
 						quest_sid = date[d].sid;			
 						HttpRequest.post(httpurl+"/OffLineClientController/listoption.vot",{"questsid":quest_sid},function(all)
-						{	
+						{								
 							var dete:Object = JSON.parse(all);
-							questone.optiondata = {optionas:dete[0].name , optionbs:dete[1].name , optioncs:dete[2].name , optionds:dete[3].name ,optiones:dete[4].name};
+							questone.optiondata = {qstid:dete[0].questsid , opaid:dete[0].sid , opbid:dete[1].sid ,opcid:dete[2].sid , opdid:dete[3].sid , opeid:dete[4].sid , optionas:dete[0].name , optionbs:dete[1].name , optioncs:dete[2].name , optionds:dete[3].name ,optiones:dete[4].name};
 						});
 						serverquestion.addElement(questone);
 					}

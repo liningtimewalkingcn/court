@@ -23,7 +23,9 @@
 			
 			public function set optiondata(val:*):void
 			{			
+				
 				optiona1.text = val.optionas;
+				Alert.show(optiona1.text);
 				optionb1.text = val.optionbs;
 				optionc1.text = val.optioncs;
 				optiond1.text = val.optionds;

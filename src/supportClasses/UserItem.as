@@ -1,5 +1,7 @@
-package supportClasses {
-	public class UserItem {
+package supportClasses 
+{
+	public class UserItem 
+	{
 		public const _tablename_:String = "SYS_USER";
 		public var sid:String;
 		public var username:String;

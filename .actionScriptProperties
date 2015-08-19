@@ -13,7 +13,11 @@
     </libraryPath>
     <sourceAttachmentPath/>
   </compiler>
-  <applications/>
+  <applications>
+    <application path="court.mxml">
+      <airExcludes/>
+    </application>
+  </applications>
   <modules/>
   <workers/>
   <buildCSSFiles/>
