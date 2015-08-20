@@ -18,6 +18,7 @@
 				tmsm1.text = val.tmsms;
 				qnum1.text = String(val.num+1);
 				question1.text = val.quests;
+				//Alert.show(val);
 				sid3.text = val.sid1;
 			}
 			
@@ -25,7 +26,6 @@
 			{			
 				
 				optiona1.text = val.optionas;
-				Alert.show(optiona1.text);
 				optionb1.text = val.optionbs;
 				optionc1.text = val.optioncs;
 				optiond1.text = val.optionds;
@@ -144,6 +144,11 @@
 				return _answer;
 			}
 			
+			/*public function reset(val:*):void 
+			{
+				group.selection = null;
+			}*/
+			
 			/*protected function radioButton_itemClickHandler(event:ItemClickEvent):void
 			{
 				var now:String = new Date().toTimeString();
@@ -161,6 +166,13 @@
 				}
 				return -1;
 			}
+			
+			public function reset(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				group.selection = null;
+			}
+			
 		]]>
 	</fx:Script>
 
@@ -168,6 +180,7 @@
 		<s:Label text=" "/>
 	</s:HGroup>
 	<s:HGroup>
+		<s:Button label="清除" click="reset(event)"/>
 		<s:Label text="第  "/>
 		<s:Label text="  " id="qnum1"/>
 		<s:Label text="题 : "/>
@@ -188,12 +201,12 @@
 		<mx:Label id="lbl" fontWeight="bold" />
 	</mx:ApplicationControlBar>-->
 	
-	<!--<fx:Declarations>
-		<s:RadioButtonGroup id="radioButton" itemClick="radioButton_itemClickHandler(event)"/>
-	</fx:Declarations>-->
+	<fx:Declarations>
+		<s:RadioButtonGroup id="group"/>
+	</fx:Declarations>
 	<s:HGroup>
 		<s:Label text="备选答案： A."/>
-		<s:RadioButton id="fora1" click="fora1_clickHandler(event)"/><!--group="{radioButton}"-->
+		<s:RadioButton id="fora1" click="fora1_clickHandler(event)" group="{group}"/>
 		<s:Label text=" " id="optiona1"/>
 		<s:Label text=" " id="asid" visible="false"/>
 		<s:Label text=" " id="qaid" visible="false"/>	
@@ -208,7 +221,7 @@
 		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
 		<s:Label text=" "/><s:Label text=" "/>
 		<s:Label text="B."/>
-		<s:RadioButton id="forb1" click="forb1_clickHandler(event)"/>
+		<s:RadioButton id="forb1" click="forb1_clickHandler(event)" group="{group}"/>
 		<s:Label text=" " id="optionb1"/>
 		<s:Label text=" " id="bsid" visible="false"/>
 		<s:Label text=" " id="qbid" visible="false"/>
@@ -222,7 +235,7 @@
 		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
 		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
 		<s:Label text=" "/><s:Label text=" "/>				<s:Label text="C."/>
-		<s:RadioButton id="forc1" click="forc1_clickHandler(event)"/>
+		<s:RadioButton id="forc1" click="forc1_clickHandler(event)" group="{group}"/>
 		<s:Label text=" " id="optionc1"/>
 		<s:Label text=" " id="csid" visible="false"/>
 		<s:Label text=" " id="qcid" visible="false"/>
@@ -236,7 +249,7 @@
 		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
 		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
 		<s:Label text=" "/><s:Label text=" "/>				<s:Label text="D."/>
-		<s:RadioButton id="ford1" click="ford1_clickHandler(event)"/>
+		<s:RadioButton id="ford1" click="ford1_clickHandler(event)" group="{group}"/>
 		<s:Label text=" " id="optiond1"/>
 		<s:Label text=" " id="dsid" visible="false"/>
 		<s:Label text=" " id="qdid" visible="false"/>
@@ -250,7 +263,7 @@
 		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
 		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
 		<s:Label text=" "/><s:Label text=" "/>				<s:Label text="E."/>
-		<s:RadioButton id="fore1" click="fore1_clickHandler(event)"/>
+		<s:RadioButton id="fore1" click="fore1_clickHandler(event)" group="{group}"/>
 		<s:Label text=" " id="optione1"/>
 		<s:Label text=" " id="esid" visible="false"/>
 		<s:Label text=" " id="qeid" visible="false"/>

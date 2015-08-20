@@ -27,21 +27,20 @@
 			public function set optiondata(val:*):void
 			{			
 				optiona1.text = val.optionas;
-				Alert.show(optiona1.text);
 				optionb1.text = val.optionbs;
 				optionc1.text = val.optioncs;
 				optiond1.text = val.optionds;
 				optione1.text = val.optiones;
-				asid.text = val.opaid;
-				bsid.text = val.opbid;
-				csid.text = val.opcid;
-				dsid.text = val.opdid;
-				esid.text = val.opeid;
-				qaid.text = val.qstid;
-				qbid.text = val.qstid;
-				qcid.text = val.qstid;
-				qdid.text = val.qstid;
-				qeid.text = val.qstid;
+				asid.text = val.opaid1;
+				bsid.text = val.opbid1;
+				csid.text = val.opcid1;
+				dsid.text = val.opdid1;
+				esid.text = val.opeid1;
+				qaid.text = val.qstid1;
+				qbid.text = val.qstid1;
+				qcid.text = val.qstid1;
+				qdid.text = val.qstid1;
+				qeid.text = val.qstid1;
 			}
 			
 			//点击每道题的可获取的id

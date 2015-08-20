@@ -25,6 +25,7 @@
 			import mx.utils.UIDUtil;
 			import mx.utils.object_proxy;
 			
+			import spark.components.List;
 			import spark.events.GridItemEditorEvent;
 			import spark.events.GridSelectionEvent;
 			
@@ -380,7 +381,6 @@
 			//本地答题页面的取消
 			protected function cancel(event:MouseEvent):void
 			{
-				
 			}
 			
 			//本地答题页面的暂存
@@ -677,17 +677,16 @@
 				//从服务器端获取数据
 				HttpRequest.post(httpurl+"/OffLineClientController/onelist.vot",{"sid":zbsidnum},function(data)
 				{					
-					var date:Object = JSON.parse(data);
-					allquestserver.text = date.length;
+					var date:Object = JSON.parse(data);					
 					for (var d:int = 0; d < date.length; ++d) 
 					{
 						var questone:QuestObject = new QuestObject();
 						questone.questdata = {num:d , tmsms:date[d].memo , quests:date[d].name , sid1:date[d].sid};
-						quest_sid = date[d].sid;			
+						quest_sid = date[d].sid;
 						HttpRequest.post(httpurl+"/OffLineClientController/listoption.vot",{"questsid":quest_sid},function(all)
-						{								
+						{		
 							var dete:Object = JSON.parse(all);
-							questone.optiondata = {qstid:dete[0].questsid , opaid:dete[0].sid , opbid:dete[1].sid ,opcid:dete[2].sid , opdid:dete[3].sid , opeid:dete[4].sid , optionas:dete[0].name , optionbs:dete[1].name , optioncs:dete[2].name , optionds:dete[3].name ,optiones:dete[4].name};
+							questone.optiondata = {qstid:dete[0].questsid , opaid:dete[0].sid , opbid:dete[1].sid , opcid:dete[2].sid , opdid:dete[3].sid , opeid:dete[4].sid , optionas:dete[0].name , optionbs:dete[1].name , optioncs:dete[2].name , optionds:dete[3].name ,optiones:dete[4].name};
 						});
 						serverquestion.addElement(questone);
 					}
@@ -765,6 +764,12 @@
 				locallist.visible=false;
 				serverlist.visible = true;
 				listpage.visible=true;
+			}
+			
+			public function reset(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				/*group.selection = null;*/
 			}
 			
 		]]>
@@ -1090,7 +1095,7 @@
 				<s:Label/><s:Label/>
 				<s:Button label=" 提交 " click="submitanswer(event)"/>
 				<s:Label/><s:Label/>
-				<s:Button label=" 取消 " click="cancel(event)"/>
+				<s:Button label=" 取消 " click="reset(event)"/>
 			</s:HGroup>	
 			<s:Button width="100%" height="1"/>
 		</s:VGroup>
