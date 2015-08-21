@@ -528,81 +528,81 @@
 				
 				
 				//把问题更新到本地数据库，速度太慢，注释
-				/*HttpRequest.post(httpurl+"/OffLineClientController/questionpage.vot",{"username":loginusernetusername.text},function(data)
+				HttpRequest.post(httpurl+"/OffLineClientController/questionpage.vot",{"username":loginusernetusername.text},function(data)
 				{					
-				var quest:Object = JSON.parse(data);				
-				
-				if (quest.list_question.length>0)
-				{
-				dao.updateBySQL("delete from COURT_QUESTION");									
-				for(var i:int = 0; i<quest.list_question.length; ++i)
-				{
-				var list_question:ListQuestion = new ListQuestion();
-				list_question.sid = JSON.stringify(quest.list_question[i].sid);
-				list_question.name = JSON.stringify(quest.list_question[i].name);
-				list_question.zbsid = JSON.stringify(quest.list_question[i].zbsid);
-				list_question.memo = JSON.stringify(quest.list_question[i].memo);
-				list_question.createtime = JSON.stringify(quest.list_question[i].createtime);
-				list_question.filegroupsid = JSON.stringify(quest.list_question[i].filegroupsid);
-				list_question.sortfield = JSON.stringify(quest.list_question[i].sortfield);
-				list_question.maxscore = JSON.stringify(quest.list_question[i].maxscore);
-				list_question.modifytime = JSON.stringify(quest.list_question[i].modifytime);
-				list_question.willrest = JSON.stringify(quest.list_question[i].willrest);
-				list_question.questcode = JSON.stringify(quest.list_question[i].questcode);
-				list_question.questzbname = JSON.stringify(quest.list_question[i].questzbname);
-				dao.insertOrUpdate(list_question);
-				}
-				}
-				});*/
+					var quest:Object = JSON.parse(data);				
+					
+					if (quest.list_question.length>0)
+					{
+						dao.updateBySQL("delete from COURT_QUESTION");									
+						for(var i:int = 0; i<quest.list_question.length; ++i)
+						{
+							var list_question:ListQuestion = new ListQuestion();
+							list_question.sid = JSON.stringify(quest.list_question[i].sid);
+							list_question.name = JSON.stringify(quest.list_question[i].name);
+							list_question.zbsid = JSON.stringify(quest.list_question[i].zbsid);
+							list_question.memo = JSON.stringify(quest.list_question[i].memo);
+							list_question.createtime = JSON.stringify(quest.list_question[i].createtime);
+							list_question.filegroupsid = JSON.stringify(quest.list_question[i].filegroupsid);
+							list_question.sortfield = JSON.stringify(quest.list_question[i].sortfield);
+							list_question.maxscore = JSON.stringify(quest.list_question[i].maxscore);
+							list_question.modifytime = JSON.stringify(quest.list_question[i].modifytime);
+							list_question.willrest = JSON.stringify(quest.list_question[i].willrest);
+							list_question.questcode = JSON.stringify(quest.list_question[i].questcode);
+							list_question.questzbname = JSON.stringify(quest.list_question[i].questzbname);
+							dao.insertOrUpdate(list_question);
+						}
+					}
+				});
 				
 				//把答案更新到本地数据库，速度太慢，注释（更新了一晚上66681条）
-				/*HttpRequest.post(httpurl+"/OffLineClientController/answer.vot",{"username":loginusernetusername.text},function(data)
+				HttpRequest.post(httpurl+"/OffLineClientController/answer.vot",{"username":loginusernetusername.text},function(data)
 				{					
-				var answer:Object = JSON.parse(data);				
-				
-				if (answer.list_answer.length>0)
-				{
-				dao.updateBySQL("delete from COURT_ANSWER");									
-				for(var i:int = 0; i< answer.list_answer.length; ++i)
-				{
-				var list_answer:ListAnswer = new ListAnswer();
-				list_answer.sid = JSON.stringify(answer.list_answer[i].sid);
-				list_answer.questsid = JSON.stringify(answer.list_answer[i].questsid);
-				list_answer.answeroptionsid = JSON.stringify(answer.list_answer[i].answeroptionsid);
-				list_answer.evalobjpapersid = JSON.stringify(answer.list_answer[i].evalobjpapersid);
-				list_answer.sore = JSON.stringify(answer.list_answer[i].sore);
-				list_answer.inputor_memo = JSON.stringify(answer.list_answer[i].inputor_memo);
-				list_answer.filegroupsid = JSON.stringify(answer.list_answer[i].filegroupsid);
-				list_answer.auditor_memo = JSON.stringify(answer.list_answer[i].auditor_memo);
-				list_answer.haserror = JSON.stringify(answer.list_answer[i].haserror);
-				list_answer.errortype = JSON.stringify(answer.list_answer[i].errortype);
-				list_answer.iddisabled = JSON.stringify(answer.list_answer[i].iddisabled);
-				list_answer.auditfilegroupsid = JSON.stringify(answer.list_answer[i].auditfilegroupsid);
-				dao.insertOrUpdate(list_answer);
-				}
-				}
-				});*/
+					var answer:Object = JSON.parse(data);				
+					
+					if (answer.list_answer.length>0)
+					{
+						dao.updateBySQL("delete from COURT_ANSWER");									
+						for(var i:int = 0; i< answer.list_answer.length; ++i)
+						{
+							var list_answer:ListAnswer = new ListAnswer();
+							list_answer.sid = JSON.stringify(answer.list_answer[i].sid);
+							list_answer.questsid = JSON.stringify(answer.list_answer[i].questsid);
+							list_answer.answeroptionsid = JSON.stringify(answer.list_answer[i].answeroptionsid);
+							list_answer.evalobjpapersid = JSON.stringify(answer.list_answer[i].evalobjpapersid);
+							list_answer.sore = JSON.stringify(answer.list_answer[i].sore);
+							list_answer.inputor_memo = JSON.stringify(answer.list_answer[i].inputor_memo);
+							list_answer.filegroupsid = JSON.stringify(answer.list_answer[i].filegroupsid);
+							list_answer.auditor_memo = JSON.stringify(answer.list_answer[i].auditor_memo);
+							list_answer.haserror = JSON.stringify(answer.list_answer[i].haserror);
+							list_answer.errortype = JSON.stringify(answer.list_answer[i].errortype);
+							list_answer.iddisabled = JSON.stringify(answer.list_answer[i].iddisabled);
+							list_answer.auditfilegroupsid = JSON.stringify(answer.list_answer[i].auditfilegroupsid);
+							dao.insertOrUpdate(list_answer);
+						}
+					}
+				});
 				
 				//把选项更新到本地数据库，速度太慢，注释
-				/*HttpRequest.post(httpurl+"/OffLineClientController/option.vot",{"username":loginusernetusername.text},function(data)
+				HttpRequest.post(httpurl+"/OffLineClientController/option.vot",{"username":loginusernetusername.text},function(data)
 				{					
-				var option:Object = JSON.parse(data);				
-				
-				if (option.list_option.length>0)
-				{
-				dao.updateBySQL("delete from COURT_QUESTION_OPTION");									
-				for(var i:int = 0; i< option.list_option.length; ++i)
-				{
-				var list_option:ListOption = new ListOption();
-				list_option.sid = JSON.stringify(option.list_option[i].sid);
-				list_option.name = JSON.stringify(option.list_option[i].name);
-				list_option.questsid = JSON.stringify(option.list_option[i].questsid);
-				list_option.score = JSON.stringify(option.list_option[i].score);
-				list_option.sortfield = JSON.stringify(option.list_option[i].sortfield);
-				dao.insertOrUpdate(list_option);
-				}
-				}
-				});*/
+					var option:Object = JSON.parse(data);				
+					
+					if (option.list_option.length>0)
+					{
+						dao.updateBySQL("delete from COURT_QUESTION_OPTION");									
+						for(var i:int = 0; i< option.list_option.length; ++i)
+						{
+							var list_option:ListOption = new ListOption();
+							list_option.sid = JSON.stringify(option.list_option[i].sid);
+							list_option.name = JSON.stringify(option.list_option[i].name);
+							list_option.questsid = JSON.stringify(option.list_option[i].questsid);
+							list_option.score = JSON.stringify(option.list_option[i].score);
+							list_option.sortfield = JSON.stringify(option.list_option[i].sortfield);
+							dao.insertOrUpdate(list_option);
+						}
+					}
+				});
 			}
 			
 			
@@ -697,42 +697,42 @@
 			//更新本地数据库，时间较长，就先註釋了
 			protected function updateSQLite(event:MouseEvent):void
 			{
-				/*HttpRequest.post(httpurl+"/OffLineClientController/updateLocal.vot",{"username":loginusernetusername.text},function(data)
+				HttpRequest.post(httpurl+"/OffLineClientController/updateLocal.vot",{"username":loginusernetusername.text},function(data)
 				{
-				var jobj:Object = JSON.parse(data);
-				if (jobj.list_audit.length >0)
-				{
-				dao.updateBySQL("delete from COURT_LIST_AUDIT");									
-				for(var i:int = 0; i<jobj.list_audit.length ; ++i)
-				{
-				var list_audit_item:ListAuditItem = new ListAuditItem();
-				list_audit_item.sid = JSON.stringify(jobj.list_audit[i].sid);
-				list_audit_item.nairename = JSON.stringify(jobj.list_audit[i].nairename);
-				list_audit_item.evalobjname = JSON.stringify(jobj.list_audit[i].evalobjname);
-				list_audit_item.levelonezb = JSON.stringify(jobj.list_audit[i].levelonezb);
-				list_audit_item.audit_status = JSON.stringify(jobj.list_audit[i].audit_status);
-				list_audit_item.input_status = JSON.stringify(jobj.list_audit[i].input_status);
-				list_audit_item.num = i+1;
-				dao.insertOrUpdate(list_audit_item);
-				}
-				}
-				if (jobj.list_todo.length >0)
-				{													
-				dao.updateBySQL("delete from COURT_LIST_TODO");
-				for(var i:int = 0; i<jobj.list_todo.length ; ++i)						
-				{
-				var list_todo_item:ListTodoItem = new ListTodoItem();								
-				list_todo_item.sid = JSON.stringify(jobj.list_todo[i].sid);
-				list_todo_item.nairename = JSON.stringify(jobj.list_todo[i].nairename);
-				list_todo_item.evalobjname = JSON.stringify(jobj.list_todo[i].evalobjname);
-				list_todo_item.levelonezb = JSON.stringify(jobj.list_todo[i].levelonezb);
-				list_todo_item.audit_status = JSON.stringify(jobj.list_todo[i].audit_status);
-				list_todo_item.input_status = JSON.stringify(jobj.list_todo[i].input_status);
-				list_todo_item.num = i+1;
-				dao.insertOrUpdate(list_todo_item);		
-				}																			
-				}					
-				})*/			
+					var jobj:Object = JSON.parse(data);
+					if (jobj.list_audit.length >0)
+					{
+						dao.updateBySQL("delete from COURT_LIST_AUDIT");									
+						for(var i:int = 0; i<jobj.list_audit.length ; ++i)
+						{
+							var list_audit_item:ListAuditItem = new ListAuditItem();
+							list_audit_item.sid = JSON.stringify(jobj.list_audit[i].sid);
+							list_audit_item.nairename = JSON.stringify(jobj.list_audit[i].nairename);
+							list_audit_item.evalobjname = JSON.stringify(jobj.list_audit[i].evalobjname);
+							list_audit_item.levelonezb = JSON.stringify(jobj.list_audit[i].levelonezb);
+							list_audit_item.audit_status = JSON.stringify(jobj.list_audit[i].audit_status);
+							list_audit_item.input_status = JSON.stringify(jobj.list_audit[i].input_status);
+							list_audit_item.num = i+1;
+							dao.insertOrUpdate(list_audit_item);
+						}
+					}
+					if (jobj.list_todo.length >0)
+					{													
+						dao.updateBySQL("delete from COURT_LIST_TODO");
+						for(var i:int = 0; i<jobj.list_todo.length ; ++i)						
+						{
+							var list_todo_item:ListTodoItem = new ListTodoItem();								
+							list_todo_item.sid = JSON.stringify(jobj.list_todo[i].sid);
+							list_todo_item.nairename = JSON.stringify(jobj.list_todo[i].nairename);
+							list_todo_item.evalobjname = JSON.stringify(jobj.list_todo[i].evalobjname);
+							list_todo_item.levelonezb = JSON.stringify(jobj.list_todo[i].levelonezb);
+							list_todo_item.audit_status = JSON.stringify(jobj.list_todo[i].audit_status);
+							list_todo_item.input_status = JSON.stringify(jobj.list_todo[i].input_status);
+							list_todo_item.num = i+1;
+							dao.insertOrUpdate(list_todo_item);		
+						}																			
+					}					
+				});			
 			}			
 			
 			//本地的查看的返回列表
