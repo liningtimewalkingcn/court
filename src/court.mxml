@@ -42,7 +42,7 @@
 			
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
 			private var newuser:UserItem = new UserItem();
-			private var httpurl:String = "http://192.168.1.102:8081/court";
+			private var httpurl:String = "http://192.168.1.103:8081/court";
 			private var n:int = 0;
 			private var answer:String; 		//选项的内容
 			private var qsid:String;		//问题的
@@ -893,7 +893,17 @@
 							<s:itemRenderer>
 								<fx:Component>
 									<s:GridItemRenderer horizontalCenter="">											
-										<mx:LinkButton label="查看" visible="true"/>
+										
+										<fx:Script>
+											<![CDATA[
+												protected function linkbutton1_clickHandler(event:MouseEvent):void
+												{
+													outerDocument.serverchack();
+												}
+											]]>
+										</fx:Script>
+										
+										<mx:LinkButton label="查看" click="linkbutton1_clickHandler(event)" visible="true"/>
 									</s:GridItemRenderer>							
 								</fx:Component>
 							</s:itemRenderer>
@@ -974,8 +984,7 @@
 												
 												protected function justlook(event:MouseEvent):void
 												{
-													
-													Alert.show("就看一看");
+													outerDocument.chackout();
 												}
 											]]>
 										</fx:Script>
@@ -1001,6 +1010,7 @@
 			<s:Label/>
 			<s:Label/>
 			<s:HGroup>
+
 				<s:Label text="用户名 : "/>
 				<s:TextInput id="inputLoginName" prompt="请输入真实姓名" restrict="0-9\a-z\^{'[\一-\龥]'}"/>
 			</s:HGroup>

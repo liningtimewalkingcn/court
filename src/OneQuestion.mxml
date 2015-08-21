@@ -180,7 +180,6 @@
 		<s:Label text=" "/>
 	</s:HGroup>
 	<s:HGroup>
-		<s:Button label="清除" click="reset(event)"/>
 		<s:Label text="第  "/>
 		<s:Label text="  " id="qnum1"/>
 		<s:Label text="题 : "/>
