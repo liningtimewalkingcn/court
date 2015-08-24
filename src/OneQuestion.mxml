@@ -13,6 +13,7 @@
 			public static var sid2:String ;
 			public static var objs:Array = new Array();
 			
+			//填写题目
 			public function set questdata(val:*):void
 			{
 				tmsm1.text = val.tmsms;
@@ -22,6 +23,7 @@
 				sid3.text = val.sid1;
 			}
 			
+			//填写选项
 			public function set optiondata(val:*):void
 			{			
 				
@@ -130,6 +132,7 @@
 				}
 			}
 			
+			//发送答案
 			public function set optall(val1:*):void
 			{				
 				this._answer = objs;
@@ -167,6 +170,7 @@
 				return -1;
 			}
 			
+			//取消所有选项
 			public function reset(event:MouseEvent):void
 			{
 				// TODO Auto-generated method stub

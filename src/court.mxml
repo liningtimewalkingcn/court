@@ -28,9 +28,7 @@
 			import spark.components.List;
 			import spark.events.GridItemEditorEvent;
 			import spark.events.GridSelectionEvent;
-			
 			import org.osmf.events.TimeEvent;
-			
 			import supportClasses.ListAnswer;
 			import supportClasses.ListAuditItem;
 			import supportClasses.ListOption;
@@ -381,6 +379,7 @@
 			//本地答题页面的取消
 			protected function cancel(event:MouseEvent):void
 			{
+				
 			}
 			
 			//本地答题页面的暂存
