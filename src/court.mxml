@@ -487,7 +487,7 @@
 			//本地列表的編輯頁面
 			public function changepageOut():void  
 			{
-				/*listpage.visible=false;
+				listpage.visible=false;
 				locallist.visible=false;
 				serverquestion.visible = false;
 				questionpage.visible=true;
@@ -521,7 +521,7 @@
 						});
 						questcontainer.addElement(onequest);
 					}
-				});	*/
+				});	
 				
 				
 				//把问题更新到本地数据库，速度太慢，注释
