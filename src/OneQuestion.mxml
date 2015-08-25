@@ -21,6 +21,7 @@
 				question1.text = val.quests;
 				//Alert.show(val);
 				sid3.text = val.sid1;
+				forb1.selected = true;
 			}
 			
 			//填写选项
