@@ -9,7 +9,7 @@
 	<fx:Declarations>
 		<supportClasses:Dao id="dao" dbfilename="mydatabase"/>
 		<supportClasses:HTTPServicePool id="HttpRequest" />
-	</fx:Declarations>	
+	</fx:Declarations>
 	
 	<fx:Script>
 		<![CDATA[
@@ -40,7 +40,7 @@
 			
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
 			private var newuser:UserItem = new UserItem();
-			private var httpurl:String = "http://192.168.1.103:8081/court";
+			private var httpurl:String = "http://192.168.1.108:8081/court";
 			private var n:int = 0;
 			private var answer:String; 		//选项的内容
 			private var qsid:String;		//问题的
@@ -457,11 +457,10 @@
 				var wenjuan:String = local1.selectedItem.levelonezb;			
 				var quest_sid:String;
 				
-				
-				//从数据库取出来的相应的题目
-				
+				//从数据库取出来的相应的题目				
 				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
 				{	
+					
 					namenair.text = wenjuan;
 					namecourt.text = evalobjname;
 					namenai.text = renwu;
@@ -488,7 +487,7 @@
 			//本地列表的編輯頁面
 			public function changepageOut():void  
 			{
-				listpage.visible=false;
+				/*listpage.visible=false;
 				locallist.visible=false;
 				serverquestion.visible = false;
 				questionpage.visible=true;
@@ -522,17 +521,16 @@
 						});
 						questcontainer.addElement(onequest);
 					}
-					//这里应该得到选项与题目的sid
-				});	
+				});	*/
 				
 				
 				//把问题更新到本地数据库，速度太慢，注释
-				HttpRequest.post(httpurl+"/OffLineClientController/questionpage.vot",{"username":loginusernetusername.text},function(data)
+				/*HttpRequest.post(httpurl+"/OffLineClientController/questionpage.vot",{"username":loginusernetusername.text},function(data)
 				{					
 					var quest:Object = JSON.parse(data);				
 					
 					if (quest.list_question.length>0)
-					{
+	 				{
 						dao.updateBySQL("delete from COURT_QUESTION");									
 						for(var i:int = 0; i<quest.list_question.length; ++i)
 						{
@@ -552,13 +550,13 @@
 							dao.insertOrUpdate(list_question);
 						}
 					}
-				});
+				});*/
 				
 				//把答案更新到本地数据库，速度太慢，注释（更新了一晚上66681条）
-				HttpRequest.post(httpurl+"/OffLineClientController/answer.vot",{"username":loginusernetusername.text},function(data)
+				
+				/*HttpRequest.post(httpurl+"/OffLineClientController/answer.vot",{"username":loginusernetusername.text},function(data)
 				{					
 					var answer:Object = JSON.parse(data);				
-					
 					if (answer.list_answer.length>0)
 					{
 						dao.updateBySQL("delete from COURT_ANSWER");									
@@ -580,10 +578,10 @@
 							dao.insertOrUpdate(list_answer);
 						}
 					}
-				});
+				});*/
 				
 				//把选项更新到本地数据库，速度太慢，注释
-				HttpRequest.post(httpurl+"/OffLineClientController/option.vot",{"username":loginusernetusername.text},function(data)
+				/*HttpRequest.post(httpurl+"/OffLineClientController/option.vot",{"username":loginusernetusername.text},function(data)
 				{					
 					var option:Object = JSON.parse(data);				
 					
@@ -601,7 +599,7 @@
 							dao.insertOrUpdate(list_option);
 						}
 					}
-				});
+				});*/
 			}
 			
 			
@@ -696,7 +694,7 @@
 			//更新本地数据库，时间较长，就先註釋了
 			protected function updateSQLite(event:MouseEvent):void
 			{
-				HttpRequest.post(httpurl+"/OffLineClientController/updateLocal.vot",{"username":loginusernetusername.text},function(data)
+				/*HttpRequest.post(httpurl+"/OffLineClientController/updateLocal.vot",{"username":loginusernetusername.text},function(data)
 				{
 					var jobj:Object = JSON.parse(data);
 					if (jobj.list_audit.length >0)
@@ -731,7 +729,7 @@
 							dao.insertOrUpdate(list_todo_item);		
 						}																			
 					}					
-				});			
+				});	*/		
 			}			
 			
 			//本地的查看的返回列表

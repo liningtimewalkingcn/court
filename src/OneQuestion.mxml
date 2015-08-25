@@ -175,8 +175,7 @@
 			{
 				// TODO Auto-generated method stub
 				group.selection = null;
-			}
-			
+			}		
 		]]>
 	</fx:Script>
 
