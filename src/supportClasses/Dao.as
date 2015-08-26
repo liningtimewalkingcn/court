@@ -33,7 +33,8 @@ package supportClasses {
 			daoitems.push(daoitem);
 		}
 		
-		public function batchInsertWithHighSpeed(a:Array, callback:Function):void {
+		public function batchInsertWithHighSpeed(a:Array, callback:Function):void 
+		{
 			var daoitem:DaoItem = new DaoItem();
 			daoitem.dbfilename = dbfilename;
 			daoitem.batchInsertWithHighSpeed(a, callback);
