@@ -33,6 +33,12 @@ package supportClasses {
 			daoitems.push(daoitem);
 		}
 		
+		public function batchInsertWithHighSpeed(a:Array, callback:Function):void {
+			var daoitem:DaoItem = new DaoItem();
+			daoitem.dbfilename = dbfilename;
+			daoitem.batchInsertWithHighSpeed(a, callback);
+		}
+		
 		public function query(sql:String, callback: Function):void {
 			var daoitem:DaoItem = new DaoItem();
 			daoitem.dbfilename = dbfilename;

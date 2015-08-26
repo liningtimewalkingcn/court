@@ -37,6 +37,7 @@
 					var opid:String = JSON.stringify(val.ar[z]);
 					var nameid:String = JSON.stringify(val.list[z]);
 					var questid:String = JSON.stringify(val.qstid);
+					option.quest = quest;
 					option.optiondata = {all:n , n:z , opid:opid , nameid:nameid , questid:questid}
 					options.addElement(option);
 					if(val.bool == 0)

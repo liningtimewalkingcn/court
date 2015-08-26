@@ -7,6 +7,8 @@
 			
 			import mx.controls.Alert;
 			
+			public var quest:*;
+			
 			public function set optiondata (val:*):void
 			{
 				var all:int = val.all;
@@ -36,9 +38,9 @@
 			
 		]]>
 	</fx:Script>
-		
-<!--	<fx:Declarations>
-		<s:RadioButtonGroup id="quest"/>
+	
+	<!--	<fx:Declarations>
+	<s:RadioButtonGroup id="quest"/>
 	</fx:Declarations>
 	-->
 	<s:HGroup>

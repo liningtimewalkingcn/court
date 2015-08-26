@@ -738,12 +738,16 @@
 			//更新本地数据库，时间较长，就先註釋了
 			protected function updateSQLite(event:MouseEvent):void
 			{
-				/*HttpRequest.post(httpurl+"/OffLineClientController/updateLocal.vot",{"username":loginusernetusername.text},function(data)
+				
+				
+				HttpRequest.post(httpurl+"/OffLineClientController/updateLocal.vot",{"username":loginusernetusername.text},function(data)
 				{
 					var jobj:Object = JSON.parse(data);
 					if (jobj.list_audit.length >0)
 					{
-						dao.updateBySQL("delete from COURT_LIST_AUDIT");									
+						dao.updateBySQL("delete from COURT_LIST_AUDIT");			
+						
+						var audititemsArr:Array = [];
 						for(var i:int = 0; i<jobj.list_audit.length ; ++i)
 						{
 							var list_audit_item:ListAuditItem = new ListAuditItem();
@@ -754,26 +758,48 @@
 							list_audit_item.audit_status = JSON.stringify(jobj.list_audit[i].audit_status);
 							list_audit_item.input_status = JSON.stringify(jobj.list_audit[i].input_status);
 							list_audit_item.num = i+1;
-							dao.insertOrUpdate(list_audit_item);
+							audititemsArr.push(list_audit_item);
+							//	dao.insertOrUpdate(list_audit_item);
 						}
+						
+						dao.batchInsertWithHighSpeed(audititemsArr, function(status:*):void {
+							
+							updatestatus.text = JSON.stringify(status);
+							if (status.committed) {
+								
+								
+								if (jobj.list_todo.length >0)
+								{													
+									dao.updateBySQL("delete from COURT_LIST_TODO");
+									for(var i:int = 0; i<jobj.list_todo.length ; ++i)						
+									{
+										var todolistarr:Array = [];
+										var list_todo_item:ListTodoItem = new ListTodoItem();								
+										list_todo_item.sid = JSON.stringify(jobj.list_todo[i].sid);
+										list_todo_item.nairename = JSON.stringify(jobj.list_todo[i].nairename);
+										list_todo_item.evalobjname = JSON.stringify(jobj.list_todo[i].evalobjname);
+										list_todo_item.levelonezb = JSON.stringify(jobj.list_todo[i].levelonezb);
+										list_todo_item.audit_status = JSON.stringify(jobj.list_todo[i].audit_status);
+										list_todo_item.input_status = JSON.stringify(jobj.list_todo[i].input_status);
+										list_todo_item.num = i+1;
+										todolistarr.push(list_todo_item);
+										//dao.insertOrUpdate(list_todo_item);		
+									}			
+									
+									dao.batchInsertWithHighSpeed(todolistarr, function(status:*):void {
+										updatestatus.text = JSON.stringify(status);
+										
+										if (status.committed) {
+											Alert.show("更新完毕");
+										}
+										
+									});
+								}
+							}
+						});
 					}
-					if (jobj.list_todo.length >0)
-					{													
-						dao.updateBySQL("delete from COURT_LIST_TODO");
-						for(var i:int = 0; i<jobj.list_todo.length ; ++i)						
-						{
-							var list_todo_item:ListTodoItem = new ListTodoItem();								
-							list_todo_item.sid = JSON.stringify(jobj.list_todo[i].sid);
-							list_todo_item.nairename = JSON.stringify(jobj.list_todo[i].nairename);
-							list_todo_item.evalobjname = JSON.stringify(jobj.list_todo[i].evalobjname);
-							list_todo_item.levelonezb = JSON.stringify(jobj.list_todo[i].levelonezb);
-							list_todo_item.audit_status = JSON.stringify(jobj.list_todo[i].audit_status);
-							list_todo_item.input_status = JSON.stringify(jobj.list_todo[i].input_status);
-							list_todo_item.num = i+1;
-							dao.insertOrUpdate(list_todo_item);		
-						}																			
-					}					
-				});	*/		
+					
+				});			
 			}			
 			
 			//本地的查看的返回列表
@@ -852,6 +878,7 @@
 			<s:Label/>
 			<s:HGroup></s:HGroup>
 			<s:HGroup>
+				<s:Label id="updatestatus" />
 				<s:Button label="更新本地数据库" click="updateSQLite(event)"/>
 			</s:HGroup>
 			<s:HGroup>

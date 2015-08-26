@@ -3,6 +3,7 @@ package supportClasses {
 	import flash.data.SQLStatement;
 	import flash.events.SQLEvent;
 	import flash.filesystem.File;
+	import flash.net.Responder;
 	import flash.utils.describeType;
 	
 	import mx.controls.Alert;
@@ -19,6 +20,10 @@ package supportClasses {
 		
 		public var callback:Function;
 		
+		private var performednum:int;
+		
+		private var batchInertCallBack:Function;
+		
 		public function executeInsert():void {
 			var appStorage:File = File.applicationDirectory;
 			var dbFile:File = appStorage.resolvePath(dbfilename + ".db");
@@ -27,6 +32,96 @@ package supportClasses {
 			conn.open(dbFile);
 		}
 	
+		public function batchInsertWithHighSpeed(batchitems:Array, callback:Function):void {
+			this.batchInertCallBack = callback;
+			this.a = batchitems;
+			
+			var appStorage:File = File.applicationDirectory;
+			var dbFile:File = appStorage.resolvePath(dbfilename + ".db");
+			
+			conn.addEventListener(SQLEvent.OPEN, batchInsertOpenHandler);
+			conn.openAsync(dbFile);
+		}
+		
+		protected function batchInsertOpenHandler(event:SQLEvent):void {
+			conn.removeEventListener(SQLEvent.OPEN, batchInsertOpenHandler);
+			conn.addEventListener(SQLEvent.BEGIN, batchInsertBeginHandler);
+			conn.begin();
+		}
+		
+		protected function batchInsertBeginHandler(event:SQLEvent):void {
+			conn.removeEventListener(SQLEvent.BEGIN, beginHandler);
+			stmt.sqlConnection = conn;
+			
+			var batchItem:Array = a as Array;
+			
+			if (batchItem.length) {
+				var oneitem:* = batchItem[0];
+				var clazzinfo:XML =  describeType(oneitem);
+				
+				var props:XMLList = clazzinfo.variable;
+				
+				var colnames:Array = [];
+				
+				var questFlags:Array = [];
+				for each(var prop:XML in props) {
+					colnames.push(prop.@name);
+					questFlags.push("?");
+				}
+				
+				
+				for (var j:int = 0; j < batchItem.length; ++j) {
+					oneitem = batchItem[j];
+					stmt = new SQLStatement();
+					stmt.sqlConnection = conn;
+					stmt.addEventListener(SQLEvent.RESULT, batchInertResultHandler);
+					stmt.text = 
+						"INSERT INTO " + oneitem._tablename_ + " (" + colnames + ") " + 
+						"VALUES (" + questFlags + ")";
+					for (var i:int = 0; i < questFlags.length; ++i) {
+						stmt.parameters[i] = oneitem[colnames[i] + ""];
+					}
+					
+					stmt.execute();	
+				}
+				
+			}
+		}
+		
+		protected function batchInertResultHandler(event:SQLEvent):void {
+			performednum++;
+			if (performednum == (a as Array).length) {
+				
+				var responder:Responder = new Responder(batchInsertcommitResultRespond, batchInsertcommitErrorRespond);
+				conn.commit(responder);
+				return;
+			}
+			
+			if (performednum % 10 == 0) {
+				var status:* = {committed:false, executednum:performednum, totalnum:(a as Array).length};
+				batchInertCallBack(status);
+			}
+		}
+		
+		protected function batchInsertcommitResultRespond(result:SQLEvent):void {
+			var responder:Responder = new Responder(batchInsertCloseResultRespond, batchInsertCloseErrorRespond);
+			conn.close(responder);
+		}
+		
+		protected function batchInsertcommitErrorRespond(result:SQLEvent):void {
+			var responder:Responder = new Responder(batchInsertCloseResultRespond, batchInsertCloseErrorRespond);
+			conn.close(responder);
+		}
+		
+		protected function batchInsertCloseResultRespond(result:SQLEvent):void {
+			var status:* = {committed:true, executednum:performednum, totalnum:(a as Array).length};
+			batchInertCallBack(status);
+		}
+		
+		protected function batchInsertCloseErrorRespond(result:SQLEvent):void {
+			var status:* = {committed:true, executednum:performednum, totalnum:(a as Array).length};
+			batchInertCallBack(status);
+		}
 		
 		protected function openHandler(event:SQLEvent):void {
 			
