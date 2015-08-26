@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" horizontalAlign="left">
+	<fx:Script>
+		<![CDATA[
+			
+			import mx.controls.Alert;
+			
+			public function set optiondata (val:*):void
+			{
+				var all:int = val.all;
+				var num:int = val.n;
+				var s:String ;
+				s = change(num);
+				if( num < all)
+				{
+					foroption.group = quest;
+				}
+				sid.text = val.opid;
+				option.text = val.nameid;
+				word.text = s;
+				function change (val:int):String
+				{
+					var l:int = val;
+					var res:String = String.fromCharCode(65+l);
+					return res;
+				}
+			}
+			
+			protected function clickradiobutton(event:MouseEvent):void
+			{
+				
+				
+			}
+			
+		]]>
+	</fx:Script>
+		
+<!--	<fx:Declarations>
+		<s:RadioButtonGroup id="quest"/>
+	</fx:Declarations>
+	-->
+	<s:HGroup>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" " id="word"/>
+		<s:RadioButton id="foroption"  click="clickradiobutton(event)"/>
+		<s:Label text=" " id="option"/>
+		<s:Label text=" " id="sid" visible="false"/>
+		<s:Label text=" " id="bid" visible="false"/>
+	</s:HGroup>
+	<s:HGroup> 
+		<s:Label text=" "/>
+	</s:HGroup>	
+</s:VGroup>
+

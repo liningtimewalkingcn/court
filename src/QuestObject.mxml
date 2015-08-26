@@ -3,9 +3,6 @@
 		  xmlns:s="library://ns.adobe.com/flex/spark" 
 		  xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" horizontalAlign="left">
 
-	
-	
-	
 	<fx:Script>
 		<![CDATA[
 			import mx.controls.Alert;

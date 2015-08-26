@@ -28,7 +28,9 @@
 			import spark.components.List;
 			import spark.events.GridItemEditorEvent;
 			import spark.events.GridSelectionEvent;
+			
 			import org.osmf.events.TimeEvent;
+			
 			import supportClasses.ListAnswer;
 			import supportClasses.ListAuditItem;
 			import supportClasses.ListOption;
@@ -40,7 +42,7 @@
 			
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
 			private var newuser:UserItem = new UserItem();
-			private var httpurl:String = "http://192.168.1.108:8081/court";
+			private var httpurl:String = "http://192.168.1.101:8081/court";
 			private var n:int = 0;
 			private var answer:String; 		//选项的内容
 			private var qsid:String;		//问题的
@@ -426,10 +428,9 @@
 					listoption.answersid = qaa[h].num;
 					listoption.evsid = cname;
 					listoption.usersid = loginusernetusername.text;
-					HttpRequest.post(httpurl+"/OffLineClientController/submit.vot",{"sid":listoption.sid , "questsid":listoption.questsid , "answersid":listoption.answersid , "evsid":listoption.evsid , "usersid":listoption.usersid},function(abc)
+					HttpRequest.post(httpurl+"/OffLineClientController/submit.vot",{"sid":listoption.sid , "questsid":listoption.questsid , "answersid":listoption.answersid , "evsid":listoption.evsid , "usersid":listoption.usersid},function()
 					{
 						Alert.show("已发送");
-						Alert.show(abc);
 					});
 				}
 				Alert.show("提交成功！");
@@ -457,8 +458,41 @@
 				var wenjuan:String = local1.selectedItem.levelonezb;			
 				var quest_sid:String;
 				
-				//从数据库取出来的相应的题目				
+				//从数据库取出来的相应的题目	
 				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
+				{	
+					nairname.text = wenjuan;
+					courtname.text = evalobjname;
+					cname = evalobjname;
+					nainame.text = renwu;
+					allquest.text = data.length;
+					for (var d:int = 0; d < data.length; ++d) 
+					{
+						var onequest:OneQuestion = new OneQuestion();
+						onequest.questdata = {num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
+						quest_sid = data[d].sid;
+						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
+						{	
+							
+							var arr:Array =new Array();
+							var list:Array = new Array();
+							var num:int = date.length;
+							var zzz:int = 0;
+							for(var q :int ; q<date.length ; q++)
+							{		
+								arr.push( date[q].sid );
+								list.push( date[q].name);
+							}						
+							onequest.optiondata={bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+							//onequest.optiondata = {qstid:date[0].questsid , opaid:date[0].sid , opbid:date[1].sid , opcid:date[2].sid , opdid:date[3].sid , opeid:date[4].sid , optionas:date[0].name , optionbs:date[1].name , optioncs:date[2].name , optionds:date[3].name ,optiones:date[4].name};
+						});
+						localchacklist.addElement(onequest);
+					}
+				});	
+				
+				
+				
+				/*dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
 				{	
 					
 					namenair.text = wenjuan;
@@ -481,7 +515,7 @@
 						});
 						localchacklist.addElement(onequest);
 					}
-				});	
+				});	*/
 			}
 			
 			//本地列表的編輯頁面
@@ -517,7 +551,17 @@
 						quest_sid = data[d].sid;
 						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
 						{	
-							onequest.optiondata = {qstid:date[0].questsid , opaid:date[0].sid , opbid:date[1].sid , opcid:date[2].sid , opdid:date[3].sid , opeid:date[4].sid , optionas:date[0].name , optionbs:date[1].name , optioncs:date[2].name , optionds:date[3].name ,optiones:date[4].name};
+							var arr:Array =new Array();
+							var list:Array = new Array();
+							var num:int = date.length;
+							var zzz:int = 1;
+							for(var q :int ; q<date.length ; q++)
+							{		
+								arr.push( date[q].sid );
+								list.push( date[q].name);
+							}						
+							onequest.optiondata={bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+							//onequest.optiondata = {qstid:date[0].questsid , opaid:date[0].sid , opbid:date[1].sid , opcid:date[2].sid , opdid:date[3].sid , opeid:date[4].sid , optionas:date[0].name , optionbs:date[1].name , optioncs:date[2].name , optionds:date[3].name ,optiones:date[4].name};
 						});
 						questcontainer.addElement(onequest);
 					}
@@ -633,11 +677,11 @@
 					{
 						var questone:OneQuestion = new OneQuestion();						
 						questone.questdata = {num:d , tmsms:date[d].memo , quests:date[d].name };
-						questone.fora1.visible = false;
+						/*questone.fora1.visible = false;
 						questone.forb1.visible = false;
 						questone.forc1.visible = false;
 						questone.ford1.visible = false;
-						questone.fore1.visible = false;
+						questone.fore1.visible = false;*/
 						quest_sid = date[d].sid;			
 						HttpRequest.post(httpurl+"/OffLineClientController/listoption.vot",{"questsid":quest_sid},function(all)
 							

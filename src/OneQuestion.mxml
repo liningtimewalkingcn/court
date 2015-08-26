@@ -21,19 +21,40 @@
 				question1.text = val.quests;
 				//Alert.show(val);
 				sid3.text = val.sid1;
-				forb1.selected = true;
+				/*forb1.selected = true;*/
 			}
 			
+						
 			//填写选项
 			public function set optiondata(val:*):void
-			{			
+			{	
+				var n:int = val.num;
 				
-				optiona1.text = val.optionas;
+				for(var z:int = 0 ; z<n　; z++)
+				{
+					var option :OneOption = new OneOption();
+					
+					var opid:String = JSON.stringify(val.ar[z]);
+					var nameid:String = JSON.stringify(val.list[z]);
+					var questid:String = JSON.stringify(val.qstid);
+					option.optiondata = {all:n , n:z , opid:opid , nameid:nameid , questid:questid}
+					options.addElement(option);
+					if(val.bool == 0)
+					{
+						option.foroption.visible = false;
+					}
+					else
+					{
+						option.foroption.visible = true;
+					}
+				}
+				
+				/*optiona1.text = val.optionas;
 				optionb1.text = val.optionbs;
 				optionc1.text = val.optioncs;
 				optiond1.text = val.optionds;
 				optione1.text = val.optiones;
-				asid.text = val.opaid;
+				asid.text = val.[];
 				bsid.text = val.opbid;
 				csid.text = val.opcid;
 				dsid.text = val.opdid;
@@ -42,11 +63,11 @@
 				qbid.text = val.qstid;
 				qcid.text = val.qstid;
 				qdid.text = val.qstid;
-				qeid.text = val.qstid;
+				qeid.text = val.qstid;*/
 			}
 			
 			//点击每道题的可获取的id
-			public function fora1_clickHandler(event:MouseEvent):void
+/*			/*public function fora1_clickHandler(event:MouseEvent):void
 			{
 				num=asid.text;
 				sid2=qaid.text;
@@ -131,8 +152,8 @@
 				{
 					objs[n].num=num;
 				}
-			}
-			
+			}*/
+		
 			//发送答案
 			public function set optall(val1:*):void
 			{				
@@ -175,7 +196,7 @@
 			public function reset(event:MouseEvent):void
 			{
 				// TODO Auto-generated method stub
-				group.selection = null;
+				/*group.selection = null;*/
 			}		
 		]]>
 	</fx:Script>
@@ -205,9 +226,18 @@
 	</mx:ApplicationControlBar>-->
 	
 	<fx:Declarations>
-		<s:RadioButtonGroup id="group"/>
+		<s:RadioButtonGroup id="quest"/>
 	</fx:Declarations>
 	<s:HGroup>
+		<s:Label text="备选答案："/>
+	</s:HGroup>
+	
+	<s:VGroup id="options">	
+	</s:VGroup>
+
+	
+	
+	<!--<s:HGroup>
 		<s:Label text="备选答案： A."/>
 		<s:RadioButton id="fora1" click="fora1_clickHandler(event)" group="{group}"/>
 		<s:Label text=" " id="optiona1"/>
@@ -275,7 +305,6 @@
 		<s:Label text=" "/>
 	</s:HGroup>
 
-
 	<s:HGroup>
 		<s:Label text="录入员说明："/>
 		<s:Label text=" " id="luysm1"/>
@@ -286,5 +315,5 @@
 		<s:Button width="100%" height="1"/>
 	<s:HGroup>
 		<s:Label text=" "/>
-	</s:HGroup>
+	</s:HGroup>-->
 </s:VGroup>
