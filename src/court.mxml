@@ -42,7 +42,7 @@
 			
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
 			private var newuser:UserItem = new UserItem();
-			private var httpurl:String = "http://192.168.1.101:8081/court";
+			private var httpurl:String = "http://192.168.1.110:8081/court";
 			private var n:int = 0;
 			private var answer:String; 		//选项的内容
 			private var qsid:String;		//问题的
@@ -569,7 +569,7 @@
 				
 				
 				//把问题更新到本地数据库，速度太慢，注释
-				/*HttpRequest.post(httpurl+"/OffLineClientController/questionpage.vot",{"username":loginusernetusername.text},function(data)
+				HttpRequest.post(httpurl+"/OffLineClientController/questionpage.vot",{"username":loginusernetusername.text},function(data)
 				{					
 					var quest:Object = JSON.parse(data);				
 					
@@ -594,7 +594,7 @@
 							dao.insertOrUpdate(list_question);
 						}
 					}
-				});*/
+				});
 				
 				//把答案更新到本地数据库，速度太慢，注释（更新了一晚上66681条）
 				
@@ -738,15 +738,12 @@
 			//更新本地数据库，时间较长，就先註釋了
 			protected function updateSQLite(event:MouseEvent):void
 			{
-				
-				
 				HttpRequest.post(httpurl+"/OffLineClientController/updateLocal.vot",{"username":loginusernetusername.text},function(data)
 				{
 					var jobj:Object = JSON.parse(data);
 					if (jobj.list_audit.length >0)
 					{
 						dao.updateBySQL("delete from COURT_LIST_AUDIT");			
-						
 						var audititemsArr:Array = [];
 						for(var i:int = 0; i<jobj.list_audit.length ; ++i)
 						{
@@ -761,7 +758,6 @@
 							audititemsArr.push(list_audit_item);
 							//	dao.insertOrUpdate(list_audit_item);
 						}
-						
 						dao.batchInsertWithHighSpeed(audititemsArr, function(status:*):void {
 							
 							updatestatus.text = JSON.stringify(status);
@@ -878,7 +874,7 @@
 			<s:Label/>
 			<s:HGroup></s:HGroup>
 			<s:HGroup>
-				<s:Label id="updatestatus" />
+				<s:Label id="updatestatus" visible="false"/>
 				<s:Button label="更新本地数据库" click="updateSQLite(event)"/>
 			</s:HGroup>
 			<s:HGroup>
@@ -922,23 +918,18 @@
 							<s:itemRenderer>
 								<fx:Component>
 									<s:GridItemRenderer horizontalCenter="">
-										
 										<fx:Script>
 											<![CDATA[
 												protected function serveredit(event:MouseEvent):void
 												{
 													outerDocument.sedit();  
 												}
-												
 												protected function chackserver(event:MouseEvent):void
 												{
 													outerDocument.serverchack();
-													
 												}
-												
 											]]>
 										</fx:Script>
-										
 										<mx:LinkButton label="编辑" click="serveredit(event)" visible="true" width="50%"/>
 										<mx:LinkButton label="查看" click="chackserver(event)" visible="true"/>
 									</s:GridItemRenderer>							
@@ -970,7 +961,6 @@
 												}
 											]]>
 										</fx:Script>
-										
 										<mx:LinkButton label="查看" click="linkbutton1_clickHandler(event)" visible="true"/>
 									</s:GridItemRenderer>							
 								</fx:Component>
@@ -1010,9 +1000,7 @@
 									<s:GridItemRenderer horizontalCenter="">		
 										<fx:Script>
 											<![CDATA[
-												
 												import mx.controls.Alert;
-												
 												protected function justlook(event:MouseEvent):void
 												{													
 													outerDocument.chackout();  
