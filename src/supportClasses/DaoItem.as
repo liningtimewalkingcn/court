@@ -24,6 +24,8 @@ package supportClasses {
 		
 		private var batchInertCallBack:Function;
 		
+		private var batchInsertStmtArr:Array = [];
+		
 		public function executeInsert():void {
 			var appStorage:File = File.applicationDirectory;
 			var dbFile:File = appStorage.resolvePath(dbfilename + ".db");
@@ -69,7 +71,7 @@ package supportClasses {
 					questFlags.push("?");
 				}
 				
-				
+				batchInsertStmtArr.length = 0;
 				for (var j:int = 0; j < batchItem.length; ++j) {
 					oneitem = batchItem[j];
 					stmt = new SQLStatement();
@@ -83,6 +85,8 @@ package supportClasses {
 					}
 					
 					stmt.execute();	
+					
+					batchInsertStmtArr.push(stmt);
 				}
 				
 			}
@@ -116,6 +120,7 @@ package supportClasses {
 		protected function batchInsertCloseResultRespond(result:SQLEvent):void {
 			var status:* = {committed:true, executednum:performednum, totalnum:(a as Array).length};
 			batchInertCallBack(status);
+			batchInsertStmtArr.length = 0;
 		}
 		
 		protected function batchInsertCloseErrorRespond(result:SQLEvent):void {
