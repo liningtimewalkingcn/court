@@ -30,10 +30,13 @@
 			import mx.rpc.http.mxml.HTTPService;
 			import mx.utils.UIDUtil;
 			import mx.utils.object_proxy;
+			
 			import spark.components.List;
 			import spark.events.GridItemEditorEvent;
 			import spark.events.GridSelectionEvent;
+			
 			import org.osmf.events.TimeEvent;
+			
 			import supportClasses.ListAnswer;
 			import supportClasses.ListAuditItem;
 			import supportClasses.ListOption;
@@ -581,7 +584,7 @@
 							{		
 								arr.push( date[q].sid );
 								list.push( date[q].name);
-							}						
+							}			
 							onequest.optiondata={evalobjname:evalobjname , cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
 						});
 						questcontainer.addElement(onequest);
@@ -670,9 +673,9 @@
 					{
 						var questone:OneQuestion = new OneQuestion();
 						questone.questdata = {num:d , tmsms:date[d].memo , quests:date[d].name , sid1:date[d].sid};
-						quest_sid = date[d].sid;						
+						quest_sid = date[d].sid;
 						HttpRequest.post(httpurl+"/OffLineClientController/listoption.vot",{"questsid":quest_sid},function(all)
-						{		
+						{	
 							var dete:Object = JSON.parse(all);
 							var arr:Array =new Array();
 							var list:Array = new Array();
@@ -689,6 +692,7 @@
 					}
 				});
 			}
+
 			
 			//更新本地数据库
 			protected function updateSQLite(event:MouseEvent):void
