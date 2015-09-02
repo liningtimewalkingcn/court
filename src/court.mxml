@@ -11,6 +11,12 @@
 		<supportClasses:HTTPServicePool id="HttpRequest" />
 	</fx:Declarations>
 	
+	<!--如果要自定义控件样式，必须要要继承SparkSkin或者Skin。-->
+	<s:SparkSkin
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:fx="http://ns.adobe.com/mxml/2009">
+	</s:SparkSkin>
+	
 	<fx:Script>
 		<![CDATA[
 			import mx.controls.Alert;
@@ -129,7 +135,7 @@
 					{	
 						Alert.show("\t提示\n提交成功");
 						//提交列表
-						//HttpRequest.post(httpurl+"/OffLineClientController/checkPasswordthird.vot",{"username":loginusernetusername.text,"netPassword":submitNetPassword.text},function(str)
+						//HttapRequest.post(httpurl+"/OffLineClientController/checkPasswordthird.vot",{"username":loginusernetusername.text,"netPassword":submitNetPassword.text},function(str)
 						submitpage.visible=false;
 						locallist.visible=false;
 						listpage.visible=true;						
@@ -223,29 +229,12 @@
 						if (JsonObj.list_todo.length >0)
 						{							
 							titlesgrid2.dataProvider = new ArrayList(JsonObj.list_todo);
-							/*if (JsonObj.list_todo.length >0)
-							{															
-							dao.updateBySQL("delete from COURT_LIST_TODO");
-							for(var i:int = 0; i<titlesgrid2.dataProvider.length ; ++i)						
-							{
-							var list_todo_item:ListTodoItem = new ListTodoItem();								
-							list_todo_item.sid = JSON.stringify(JsonObj.list_todo[i].sid);
-							list_todo_item.nairename = JSON.stringify(JsonObj.list_todo[i].nairename);
-							list_todo_item.evalobjname = JSON.stringify(JsonObj.list_todo[i].evalobjname);
-							list_todo_item.levelonezb = JSON.stringify(JsonObj.list_todo[i].levelonezb);
-							list_todo_item.audit_status = JSON.stringify(JsonObj.list_todo[i].audit_status);
-							list_todo_item.input_status = JSON.stringify(JsonObj.list_todo[i].input_status);
-							list_todo_item.evalobjsid = JSON.stringify(JsonObj.list_todo[i].evalobjsid);
-							list_todo_item.zbsid = JSON.stringify(JsonObj.list_todo[i].zbsid);	
-							list_todo_item.num = i+1;
-							dao.insertOrUpdate(list_todo_item);		
-							}																			
-							}*/
 						}	
 						updatepage.visible=false;						
 						locallist.visible=false;
 						listpage.visible=true;
 						serverlist.visible = true;
+						tjbdda.visible = true;
 					}
 				})
 			}
@@ -308,6 +297,7 @@
 				locallist.visible=false;
 				serverlist.visible=false;
 				backpage.visible=true;
+				tjbdda.visible = false;
 			}
 			
 			//返回登录页面（未登录）
@@ -328,15 +318,15 @@
 				locallist.visible=true;
 			}
 			
-			//答题页面的返回到列表
+			//本地答题页面的返回到列表
 			protected function backlist(event:MouseEvent):void
 			{
 				questcontainer.removeAllElements();
-				serverquestion.removeAllElements();
+				/*serverquestion.removeAllElements();*/
 				questionpage.visible=false;
-				questionpageserver.visible = false;
+				/*questionpageserver.visible = false;*/
 				qpage.visible=false;
-				sqpage.visible=false;
+				/*sqpage.visible=false;*/
 				listpage.visible=true;
 				locallist.visible=true;
 			}
@@ -344,9 +334,9 @@
 			//服务器答题页面的返回到列表
 			protected function backlistserver(event:MouseEvent):void
 			{
-				questcontainer.removeAllElements();
+				/*questcontainer.removeAllElements();*/
 				serverquestion.removeAllElements();
-				questionpage.visible=false;
+				/*questionpage.visible=false;*/
 				questionpageserver.visible = false;
 				qpage.visible=false;
 				sqpage.visible=false;
@@ -359,55 +349,72 @@
 			protected function submitanswer(event:MouseEvent):void
 			{
 				//想要提交的话，得知道提交的内容
-				var opt:OneQuestion = new OneQuestion();
+				var opt:OneOption = new OneOption();
 				opt.optall = "答案";			
 				var qaa:Object = new Object();
 				qaa = opt._answer;
-				
+				/*Alert.show(JSON.stringify(qaa));*/
 				//把得到的数据存到数据库
+				var answerArr:Array = [];
 				for(var h:int = 0 ; h<qaa.length ; h++)
 				{
 					var listoption:Option = new Option();
 					listoption.sid = UIDUtil.createUID();
-					listoption.questsid = qaa[h].sid;
-					listoption.answersid = qaa[h].num;
+					listoption.questsid = qaa[h].questid;
+					listoption.answersid = qaa[h].answersid;
 					listoption.evsid = cname;
 					listoption.usersid = loginusernetusername.text;
-					dao.insertOrUpdate(listoption);
+					answerArr.push(listoption);
 				}
-				Alert.show("提交成功！");
+				dao.batchInsertWithHighSpeed(answerArr , function(status:*):void
+				{
+					if(status.committed)
+					{
+						opt.clear = "清空";
+						Alert.show("提交成功！");
+					}
+				});												
 			}
 			
 			//本地答题页面的取消
-			protected function cancel(event:MouseEvent):void
+			/*protected function cancel(event:MouseEvent):void
 			{
 				
-			}
+				
+			}*/
 			
 			//本地答题页面的暂存
 			protected function temporary(event:MouseEvent):void
 			{	
-				var opt:OneQuestion = new OneQuestion();
-				opt.optall = "答案";		
-				var qaa:Object = new Object();//JSON.parse(JSON.stringify(opt._answer));
+				//想要提交的话，得知道提交的内容
+				var opt:OneOption = new OneOption();
+				opt.optall = "答案";			
+				var qaa:Object = new Object();
 				qaa = opt._answer;
-				
-				Alert.show(qaa.length);
-				Alert.show(JSON.stringify(qaa));
-				//Alert.show(qaa[0].num);
-				//把题目和答案和法院名和用户民存入数据库
-				/*var listoption:Option = new Option();
-				listoption.questsid = qaa.sid;
-				listoption.answersid = qaa.num;
-				listoption.evsid = cname;
-				listoption.usersid = userid;
-				dao.insertOrUpdate(listoption);*/
+				var opp:OneQuestion = new OneQuestion();
+				opp.answer = {qaa:qaa};
+				var i:int = opp.bbb;
+				if(i == 1)
+				{
+					Alert.show("暂存成功");
+				}
 			}
 			
 			//服务器答题页面的暂存
 			protected function temporaryserver(event:MouseEvent):void
 			{
-				
+				//想要提交的话，得知道提交的内容
+				var opt:OneOption = new OneOption();
+				opt.optall = "答案";			
+				var qaa:Object = new Object();
+				qaa = opt._answer;
+				var opp:OneQuestion = new OneQuestion();
+				opp.answer = {qaa:qaa};
+				var i:int = opp.bbb;
+				if(i == 1)
+				{
+					Alert.show("暂存成功");
+				}
 			}
 			
 			//服务器答题页面的提交答案
@@ -439,7 +446,60 @@
 			//服务器答题页面的取消
 			protected function cancelserver(event:MouseEvent):void
 			{
+				serverquestion.removeAllElements();
+				localchacklist.removeAllElements();
+				questionserver.removeAllElements();
+				serverquestionpage.visible = false;
+				qpage.visible=false;
+				pagesq.visible=false;
 				
+				locallist.visible=false;
+				serverlist.visible = true;
+				listpage.visible=true;
+				
+				
+				listpage.visible=false;
+				serverlist.visible=false;
+				questionpageserver.visible = true;
+				sqpage.visible=true;
+				
+				var zbsidnum:String = titlesgrid2.selectedItem.zbsid;
+				var evalobjname:String = titlesgrid2.selectedItem.evalobjname;
+				var renwu:String = titlesgrid2.selectedItem.nairename;
+				var wenjuan:String = titlesgrid2.selectedItem.levelonezb;			
+				var quest_sid:String;
+				
+				nairnameserver.text = wenjuan;
+				courtnameserver.text = evalobjname;
+				nainameserver.text = renwu;
+				
+				//从服务器端获取数据
+				HttpRequest.post(httpurl+"/OffLineClientController/onelist.vot",{"sid":zbsidnum},function(data)
+				{					
+					var date:Object = JSON.parse(data);	
+					allquestserver.text = date.length;
+					for (var d:int = 0; d < date.length; ++d) 
+					{
+						var questone:OneQuestion = new OneQuestion();
+						questone.questdata = {num:d , tmsms:date[d].memo , quests:date[d].name , sid1:date[d].sid};
+						quest_sid = date[d].sid;
+						HttpRequest.post(httpurl+"/OffLineClientController/listoption.vot",{"questsid":quest_sid},function(all)
+						{		
+							var dete:Object = JSON.parse(all);
+							var arr:Array =new Array();
+							var list:Array = new Array();
+							var num:int = dete.length;
+							var zzz:int = 1;
+							for(var q :int ; q<dete.length ; q++)
+							{		
+								arr.push( dete[q].sid );
+								list.push( dete[q].name);
+							}
+							questone.optiondata = {qstid:dete[0].questsid , bool:zzz , ar:arr , num:num , list:list};
+						});
+						serverquestion.addElement(questone);
+					}
+				});
 			}
 			
 			//本地列表的查看页面
@@ -447,8 +507,6 @@
 			{
 				listpage.visible=false;
 				locallist.visible=false;
-				serverquestion.visible = false;				
-				questionpageserver.visible = false;
 				localchack.visible=true;
 				chacklocal.visible=true;
 				
@@ -459,6 +517,51 @@
 				var quest_sid:String;
 				
 				//从数据库取出来的相应的题目	
+				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
+				{	
+					namenair.text = wenjuan;
+					namecourt.text = evalobjname;
+					cname = evalobjname;
+					namenai.text = renwu;
+					questall.text = data.length;
+					for (var d:int = 0; d < data.length; ++d) 
+					{
+						var onequest:OneQuestion = new OneQuestion();
+						onequest.questdata = {num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
+						quest_sid = data[d].sid;
+						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
+						{	
+							var arr:Array =new Array();
+							var list:Array = new Array();
+							var num:int = date.length;
+							var zzz:int = 0;
+							for(var q :int ; q<date.length ; q++)
+							{		
+								arr.push( date[q].sid );
+								list.push( date[q].name);
+							}						
+							onequest.optiondata={bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+						});
+						localchacklist.addElement(onequest);
+					}
+				});	
+			}
+			
+			//本地列表的編輯頁面
+			public function changepageOut():void  
+			{
+				listpage.visible=false;
+				locallist.visible=false;
+				questionpage.visible=true;
+				qpage.visible=true;
+				
+				var zbsidnum:String = local1.selectedItem.zbsid;
+				var evalobjname:String = local1.selectedItem.evalobjname;
+				var renwu:String = local1.selectedItem.nairename;
+				var wenjuan:String = local1.selectedItem.levelonezb;			
+				var quest_sid:String;
+				
+				//从数据库取出来的相应的题目				
 				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
 				{	
 					nairname.text = wenjuan;
@@ -473,59 +576,348 @@
 						quest_sid = data[d].sid;
 						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
 						{	
-							
 							var arr:Array =new Array();
 							var list:Array = new Array();
 							var num:int = date.length;
-							var zzz:int = 0;
+							var zzz:int = 1;
 							for(var q :int ; q<date.length ; q++)
 							{		
 								arr.push( date[q].sid );
 								list.push( date[q].name);
-							}						
-							onequest.optiondata={bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
-							//onequest.optiondata = {qstid:date[0].questsid , opaid:date[0].sid , opbid:date[1].sid , opcid:date[2].sid , opdid:date[3].sid , opeid:date[4].sid , optionas:date[0].name , optionbs:date[1].name , optioncs:date[2].name , optionds:date[3].name ,optiones:date[4].name};
+							}			
+							onequest.optiondata={evalobjname:evalobjname , cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
 						});
-						localchacklist.addElement(onequest);
+						questcontainer.addElement(onequest);
 					}
 				});	
-				
-				
-				
-				/*dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
-				{	
-					
-					namenair.text = wenjuan;
-					namecourt.text = evalobjname;
-					namenai.text = renwu;
-					questall.text = data.length;
-					for (var d:int = 0; d < data.length; ++d) 
-					{
-						var onequest:OneQuestion = new OneQuestion();
-						onequest.questdata = {num:d , tmsms:data[d].memo , quests:data[d].name };
-						onequest.fora1.visible = false;
-						onequest.forb1.visible = false;
-						onequest.forc1.visible = false;
-						onequest.ford1.visible = false;
-						onequest.fore1.visible = false;
-						quest_sid = data[d].sid;
-						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
-						{	
-							onequest.optiondata = {optionas:date[0].name , optionbs:date[1].name , optioncs:date[2].name , optionds:date[3].name ,optiones:date[4].name};
-						});
-						localchacklist.addElement(onequest);
-					}
-				});	*/
 			}
 			
-			//本地列表的編輯頁面
-			public function changepageOut():void  
+			//服务器端的查看
+			public function serverchack():void  
+			{				
+				listpage.visible=false;
+				serverlist.visible=false;
+				/*questcontainer.visible = false;*/
+				/*questionpage.visible=false;*/
+				serverquestionpage.visible = true;
+				pagesq.visible=true;
+				
+				var zbsidnum:String = titlesgrid2.selectedItem.zbsid;
+				var evalobjname:String = titlesgrid2.selectedItem.evalobjname;
+				var renwu:String = titlesgrid2.selectedItem.nairename;
+				var wenjuan:String = titlesgrid2.selectedItem.levelonezb;			
+				var quest_sid:String;
+				
+				servernairname.text = wenjuan;
+				servercourtname.text = evalobjname;
+				servernainame.text = renwu;
+				
+				//从服务器端获取数据
+				HttpRequest.post(httpurl+"/OffLineClientController/onelist.vot",{"sid":zbsidnum},function(data)
+				{					
+					var date:Object = JSON.parse(data);
+					serverallquest.text = date.length;
+					
+					for (var d:int = 0; d < date.length; ++d) 
+					{
+						var questone:OneQuestion = new OneQuestion();						
+						questone.questdata = {num:d , tmsms:date[d].memo , quests:date[d].name };
+						quest_sid = date[d].sid;			
+						HttpRequest.post(httpurl+"/OffLineClientController/listoption.vot",{"questsid":quest_sid},function(all)
+							
+						{	
+							var dete:Object = JSON.parse(all);
+							var arr:Array =new Array();
+							var list:Array = new Array();
+							var num:int = dete.length;
+							var zzz:int = 0;
+							for(var q :int ; q<dete.length ; q++)
+							{		
+								arr.push( dete[q].sid );
+								list.push( dete[q].name);
+							}
+							questone.optiondata = {qstid:dete[0].questsid , bool:zzz , ar:arr , num:num , list:list};
+						});
+						questionserver.addElement(questone);
+					}
+				});
+			}
+			
+			
+			//服务器端的编辑
+			public function sedit():void  
 			{
 				listpage.visible=false;
+				serverlist.visible=false;
+				/*questcontainer.visible = false;*/
+				/*questionpage.visible=false;*/
+				questionpageserver.visible = true;
+				sqpage.visible=true;
+				
+				var zbsidnum:String = titlesgrid2.selectedItem.zbsid;
+				var evalobjname:String = titlesgrid2.selectedItem.evalobjname;
+				var renwu:String = titlesgrid2.selectedItem.nairename;
+				var wenjuan:String = titlesgrid2.selectedItem.levelonezb;			
+				var quest_sid:String;
+				
+				nairnameserver.text = wenjuan;
+				courtnameserver.text = evalobjname;
+				nainameserver.text = renwu;
+				
+				//从服务器端获取数据
+				HttpRequest.post(httpurl+"/OffLineClientController/onelist.vot",{"sid":zbsidnum},function(data)
+				{					
+					var date:Object = JSON.parse(data);	
+					allquestserver.text = date.length;
+					for (var d:int = 0; d < date.length; ++d) 
+					{
+						var questone:OneQuestion = new OneQuestion();
+						questone.questdata = {num:d , tmsms:date[d].memo , quests:date[d].name , sid1:date[d].sid};
+						quest_sid = date[d].sid;
+						HttpRequest.post(httpurl+"/OffLineClientController/listoption.vot",{"questsid":quest_sid},function(all)
+						{	
+							var dete:Object = JSON.parse(all);
+							var arr:Array =new Array();
+							var list:Array = new Array();
+							var num:int = dete.length;
+							var zzz:int = 1;
+							for(var q :int ; q<dete.length ; q++)
+							{		
+								arr.push( dete[q].sid );
+								list.push( dete[q].name);
+							}
+							questone.optiondata = {qstid:dete[0].questsid , bool:zzz , ar:arr , num:num , list:list};
+						});
+						serverquestion.addElement(questone);
+					}
+				});
+			}
+
+			
+			//更新本地数据库
+			protected function updateSQLite(event:MouseEvent):void
+			{
+				//更新court_list_todo和court_list_audit两个列表的数据库
+				HttpRequest.post(httpurl+"/OffLineClientController/updateLocal.vot",{"username":loginusernetusername.text},function(data)
+				{
+					var jobj:Object = JSON.parse(data);
+					if (jobj.list_audit.length >0)
+					{
+						dao.updateBySQL("delete from COURT_LIST_AUDIT");			
+						var audititemsArr:Array = [];
+						for(var i:int = 0; i<jobj.list_audit.length ; ++i)
+						{
+							var list_audit_item:ListAuditItem = new ListAuditItem();
+							list_audit_item.sid = (jobj.list_audit[i].sid);
+							list_audit_item.nairename = (jobj.list_audit[i].nairename);
+							list_audit_item.evalobjname = (jobj.list_audit[i].evalobjname);
+							list_audit_item.levelonezb = (jobj.list_audit[i].levelonezb);
+							list_audit_item.audit_status = (jobj.list_audit[i].audit_status);
+							list_audit_item.input_status = (jobj.list_audit[i].input_status);
+							list_audit_item.evalobjsid = (jobj.list_audit[i].evalobjsid);
+							list_audit_item.zbsid = (jobj.list_audit[i].zbsid);
+							list_audit_item.num = i+1;
+							audititemsArr.push(list_audit_item);
+						}												
+						dao.batchInsertWithHighSpeed(audititemsArr, function(status:*):void 
+						{
+							if (status.committed) 
+							{
+								if (jobj.list_todo.length >0)
+								{													
+									dao.updateBySQL("delete from COURT_LIST_TODO");
+									var todolistarr:Array = [];
+									for(var i:int = 0; i<jobj.list_todo.length ; ++i)						
+									{
+										var list_todo_item:ListTodoItem = new ListTodoItem();								
+										list_todo_item.sid = (jobj.list_todo[i].sid);
+										list_todo_item.nairename = (jobj.list_todo[i].nairename);
+										list_todo_item.evalobjname = (jobj.list_todo[i].evalobjname);
+										list_todo_item.levelonezb = (jobj.list_todo[i].levelonezb);
+										list_todo_item.audit_status = (jobj.list_todo[i].audit_status);
+										list_todo_item.input_status = (jobj.list_todo[i].input_status);
+										list_todo_item.evalobjsid = (jobj.list_todo[i].evalobjsid);
+										list_todo_item.zbsid = (jobj.list_todo[i].zbsid);	
+
+										list_todo_item.num = i+1;
+										todolistarr.push(list_todo_item);		
+									}			
+									
+									dao.batchInsertWithHighSpeed(todolistarr, function(status:*):void 
+									{										
+										if (status.committed) 
+										{
+											HttpRequest.post(httpurl+"/OffLineClientController/questionpage.vot",{"username":loginusernetusername.text},function(data)
+											{					
+												var quest:Object = JSON.parse(data);				
+												if (quest.list_question.length>0)
+												{
+													dao.updateBySQL("delete from COURT_QUESTION");
+													var questArr:Array = [];
+													for(var i:int = 0; i<quest.list_question.length; ++i)
+													{
+														var list_question:ListQuestion = new ListQuestion();
+														list_question.sid = (quest.list_question[i].sid);
+														list_question.name = (quest.list_question[i].name);
+														list_question.zbsid = (quest.list_question[i].zbsid);
+														list_question.memo = (quest.list_question[i].memo);
+														list_question.createtime = (quest.list_question[i].createtime);
+														list_question.filegroupsid = (quest.list_question[i].filegroupsid);
+														list_question.sortfield = (quest.list_question[i].sortfield);
+														list_question.maxscore = (quest.list_question[i].maxscore);
+														list_question.modifytime = (quest.list_question[i].modifytime);
+														list_question.willrest = (quest.list_question[i].willrest);
+														list_question.questcode = (quest.list_question[i].questcode);
+														list_question.questzbname = (quest.list_question[i].questzbname);
+														questArr.push(list_question);
+													}
+													dao.batchInsertWithHighSpeed(questArr, function(status:*):void 
+													{
+														if (status.committed) 
+														{
+															//Alert.show("court_question数据库表更新完毕");
+															//把答案更新到本地数据库court_answer
+															HttpRequest.post(httpurl+"/OffLineClientController/answer.vot",{"username":loginusernetusername.text},function(data)
+															{					
+																var answer:Object = JSON.parse(data);				
+																if (answer.list_answer.length>0)
+																{						
+																	dao.updateBySQL("delete from COURT_ANSWER");	
+																	var answerArr:Array = [];
+																	for(var i:int = 0; i< answer.list_answer.length; ++i)
+																	{
+																		var list_answer:ListAnswer = new ListAnswer();
+																		list_answer.sid = (answer.list_answer[i].sid);
+																		list_answer.questsid = (answer.list_answer[i].questsid);
+																		list_answer.answeroptionsid = (answer.list_answer[i].answeroptionsid);
+																		list_answer.evalobjpapersid = (answer.list_answer[i].evalobjpapersid);
+																		list_answer.sore = (answer.list_answer[i].sore);
+																		list_answer.inputor_memo = (answer.list_answer[i].inputor_memo);
+																		list_answer.filegroupsid = (answer.list_answer[i].filegroupsid);
+																		list_answer.auditor_memo = (answer.list_answer[i].auditor_memo);
+																		list_answer.haserror = (answer.list_answer[i].haserror);
+																		list_answer.errortype = (answer.list_answer[i].errortype);
+																		list_answer.iddisabled = (answer.list_answer[i].iddisabled);
+																		list_answer.auditfilegroupsid = (answer.list_answer[i].auditfilegroupsid);
+																		answerArr.push(list_answer);
+																	}
+																	dao.batchInsertWithHighSpeed(answerArr, function(status:*):void 
+																	{
+																		if (status.committed) 
+																		{
+																			//Alert.show("court_answer数据库表更新完毕");
+																			//把选项更新到本地数据库court_question_option
+																			HttpRequest.post(httpurl+"/OffLineClientController/option.vot",{"username":loginusernetusername.text},function(data)
+																			{					
+																				var option:Object = JSON.parse(data);				
+																				
+																				if (option.list_option.length>0)
+																				{
+																					dao.updateBySQL("delete from COURT_QUESTION_OPTION");	
+																					var optionArr:Array = [];
+																					for(var i:int = 0; i< option.list_option.length; ++i)
+																					{
+																						var list_option:ListOption = new ListOption();
+																						list_option.sid = (option.list_option[i].sid);
+																						list_option.name = (option.list_option[i].name);
+																						list_option.questsid = (option.list_option[i].questsid);
+																						list_option.score = (option.list_option[i].score);
+																						list_option.sortfield = (option.list_option[i].sortfield);
+																						optionArr.push(list_option);
+																					}
+																					dao.batchInsertWithHighSpeed(optionArr, function(status:*):void 
+																					{
+																						if (status.committed) 
+																						{
+																							Alert.show("更新完毕");
+																							dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
+																							{					
+																								local2.dataProvider = new ArrayList(data);
+																								for (var i:int =0; i < dao.daoitems.length; ++i) 
+																								{
+																									dao.daoitems[i].conn.close();
+																								}
+																							});	
+																							
+																							dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
+																							{
+																								local1.dataProvider = new ArrayList(date);
+																								for (var i:int =0; i < dao.daoitems.length; ++i) 
+																								{
+																									dao.daoitems[i].conn.close();
+																								}
+																							});
+																						}
+																					});
+																				}
+																			});
+																		}
+																	});
+																}
+															});
+														}
+													});
+												}
+											});
+										}										
+									});
+								}
+							}
+						});
+					}
+				});			
+			}
+
+			
+			//本地的查看的返回列表
+			protected function backagain(event:MouseEvent):void
+			{
+				localchacklist.removeAllElements();
+				questionserver.removeAllElements();
+				/*questionpage.visible=false;*/
+				/*questionpageserver.visible = false;*/
+				qpage.visible=false;
+				/*sqpage.visible=false;*/
+				localchack.visible=false;
+				chacklocal.visible=false;
+				listpage.visible=true;
+				locallist.visible=true;
+				
+			}
+			
+			//服务器的查看的返回列表
+			protected function backserverchack(event:MouseEvent):void
+			{
+				localchacklist.removeAllElements();
+				questionserver.removeAllElements();
+				/*questionpage.visible=false;*/
+				serverquestionpage.visible = false;
+				qpage.visible=false;
+				pagesq.visible=false;
+				
 				locallist.visible=false;
-				serverquestion.visible = false;
+				serverlist.visible = true;
+				listpage.visible=true;
+			}
+			
+			//本地答题页面的取消
+			public function reset(event:MouseEvent):void
+			{
+				questcontainer.removeAllElements();
+				/*serverquestion.removeAllElements();*/
+				questionpage.visible=false;
+				/*questionpageserver.visible = false;*/
+				qpage.visible=false;
+				/*sqpage.visible=false;*/
+				listpage.visible=true;
+				locallist.visible=true;
+				
+				
+				listpage.visible=false;
+				locallist.visible=false;
+				/*serverquestion.visible = false;*/
 				questionpage.visible=true;
-				questionpageserver.visible = false;
+				/*questionpageserver.visible = false;*/
 				qpage.visible=true;
 				
 				var zbsidnum:String = local1.selectedItem.zbsid;
@@ -534,9 +926,7 @@
 				var wenjuan:String = local1.selectedItem.levelonezb;			
 				var quest_sid:String;
 				
-				
-				//从数据库取出来的相应的题目
-				
+				//从数据库取出来的相应的题目				
 				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
 				{	
 					nairname.text = wenjuan;
@@ -560,287 +950,34 @@
 								arr.push( date[q].sid );
 								list.push( date[q].name);
 							}						
-							onequest.optiondata={bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
-							//onequest.optiondata = {qstid:date[0].questsid , opaid:date[0].sid , opbid:date[1].sid , opcid:date[2].sid , opdid:date[3].sid , opeid:date[4].sid , optionas:date[0].name , optionbs:date[1].name , optioncs:date[2].name , optionds:date[3].name ,optiones:date[4].name};
+							onequest.optiondata={evalobjname:evalobjname , cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
 						});
 						questcontainer.addElement(onequest);
 					}
 				});	
-				
-				
-				//把问题更新到本地数据库，速度太慢，注释
-				/*HttpRequest.post(httpurl+"/OffLineClientController/questionpage.vot",{"username":loginusernetusername.text},function(data)
-				{					
-					var quest:Object = JSON.parse(data);				
-					
-					if (quest.list_question.length>0)
-	 				{
-						dao.updateBySQL("delete from COURT_QUESTION");									
-						for(var i:int = 0; i<quest.list_question.length; ++i)
-						{
-							var list_question:ListQuestion = new ListQuestion();
-							list_question.sid = JSON.stringify(quest.list_question[i].sid);
-							list_question.name = JSON.stringify(quest.list_question[i].name);
-							list_question.zbsid = JSON.stringify(quest.list_question[i].zbsid);
-							list_question.memo = JSON.stringify(quest.list_question[i].memo);
-							list_question.createtime = JSON.stringify(quest.list_question[i].createtime);
-							list_question.filegroupsid = JSON.stringify(quest.list_question[i].filegroupsid);
-							list_question.sortfield = JSON.stringify(quest.list_question[i].sortfield);
-							list_question.maxscore = JSON.stringify(quest.list_question[i].maxscore);
-							list_question.modifytime = JSON.stringify(quest.list_question[i].modifytime);
-							list_question.willrest = JSON.stringify(quest.list_question[i].willrest);
-							list_question.questcode = JSON.stringify(quest.list_question[i].questcode);
-							list_question.questzbname = JSON.stringify(quest.list_question[i].questzbname);
-							dao.insertOrUpdate(list_question);
-						}
-					}
-				});*/
-				
-				//把答案更新到本地数据库，速度太慢，注释（更新了一晚上66681条）
-				
-				/*HttpRequest.post(httpurl+"/OffLineClientController/answer.vot",{"username":loginusernetusername.text},function(data)
-				{					
-					var answer:Object = JSON.parse(data);				
-					if (answer.list_answer.length>0)
+			}
+			
+			//提交本地的答案
+			protected function submitlocal(event:MouseEvent):void
+			{	
+				dao.query("select * from COURT_OPTION",function(data:*):void
+				{		
+					HttpRequest.post(httpurl+"/OffLineClientController/submit.vot",{"all":JSON.stringify(data)},function(dete)
 					{
-						dao.updateBySQL("delete from COURT_ANSWER");									
-						for(var i:int = 0; i< answer.list_answer.length; ++i)
-						{
-							var list_answer:ListAnswer = new ListAnswer();
-							list_answer.sid = JSON.stringify(answer.list_answer[i].sid);
-							list_answer.questsid = JSON.stringify(answer.list_answer[i].questsid);
-							list_answer.answeroptionsid = JSON.stringify(answer.list_answer[i].answeroptionsid);
-							list_answer.evalobjpapersid = JSON.stringify(answer.list_answer[i].evalobjpapersid);
-							list_answer.sore = JSON.stringify(answer.list_answer[i].sore);
-							list_answer.inputor_memo = JSON.stringify(answer.list_answer[i].inputor_memo);
-							list_answer.filegroupsid = JSON.stringify(answer.list_answer[i].filegroupsid);
-							list_answer.auditor_memo = JSON.stringify(answer.list_answer[i].auditor_memo);
-							list_answer.haserror = JSON.stringify(answer.list_answer[i].haserror);
-							list_answer.errortype = JSON.stringify(answer.list_answer[i].errortype);
-							list_answer.iddisabled = JSON.stringify(answer.list_answer[i].iddisabled);
-							list_answer.auditfilegroupsid = JSON.stringify(answer.list_answer[i].auditfilegroupsid);
-							dao.insertOrUpdate(list_answer);
-						}
-					}
-				});*/
-				
-				//把选项更新到本地数据库，速度太慢，注释
-				/*HttpRequest.post(httpurl+"/OffLineClientController/option.vot",{"username":loginusernetusername.text},function(data)
-				{					
-					var option:Object = JSON.parse(data);				
-					
-					if (option.list_option.length>0)
-					{
-						dao.updateBySQL("delete from COURT_QUESTION_OPTION");									
-						for(var i:int = 0; i< option.list_option.length; ++i)
-						{
-							var list_option:ListOption = new ListOption();
-							list_option.sid = JSON.stringify(option.list_option[i].sid);
-							list_option.name = JSON.stringify(option.list_option[i].name);
-							list_option.questsid = JSON.stringify(option.list_option[i].questsid);
-							list_option.score = JSON.stringify(option.list_option[i].score);
-							list_option.sortfield = JSON.stringify(option.list_option[i].sortfield);
-							dao.insertOrUpdate(list_option);
-						}
-					}
-				});*/
+						Alert.show(dete);
+					});
+				});				
 			}
-			
-			
-			//服务器端的查看
-			public function serverchack():void  
-			{				
-				listpage.visible=false;
-				serverlist.visible=false;
-				questcontainer.visible = false;
-				questionpage.visible=false;
-				serverquestionpage.visible = true;
-				pagesq.visible=true;
-				
-				var zbsidnum:String = titlesgrid2.selectedItem.zbsid;
-				var evalobjname:String = titlesgrid2.selectedItem.evalobjname;
-				var renwu:String = titlesgrid2.selectedItem.nairename;
-				var wenjuan:String = titlesgrid2.selectedItem.levelonezb;			
-				var quest_sid:String;
-				
-				servernairname.text = wenjuan;
-				servercourtname.text = evalobjname;
-				servernainame.text = renwu;
-				
-				//从服务器端获取数据
-				HttpRequest.post(httpurl+"/OffLineClientController/onelist.vot",{"sid":zbsidnum},function(data)
-				{					
-					var date:Object = JSON.parse(data);
-					allquestserver.text = date.length;
-					
-					for (var d:int = 0; d < date.length; ++d) 
-					{
-						var questone:OneQuestion = new OneQuestion();						
-						questone.questdata = {num:d , tmsms:date[d].memo , quests:date[d].name };
-						/*questone.fora1.visible = false;
-						questone.forb1.visible = false;
-						questone.forc1.visible = false;
-						questone.ford1.visible = false;
-						questone.fore1.visible = false;*/
-						quest_sid = date[d].sid;			
-						HttpRequest.post(httpurl+"/OffLineClientController/listoption.vot",{"questsid":quest_sid},function(all)
-							
-						{	
-							var dete:Object = JSON.parse(all);							
-							questone.optiondata = {optionas:dete[0].name , optionbs:dete[1].name , optioncs:dete[2].name , optionds:dete[3].name ,optiones:dete[4].name};
-						});
-						questionserver.addElement(questone);
-					}
-				});
-			}
-			
-			
-			//服务器端的编辑
-			public function sedit():void  
-			{
-				listpage.visible=false;
-				serverlist.visible=false;
-				questcontainer.visible = false;
-				questionpage.visible=false;
-				questionpageserver.visible = true;
-				sqpage.visible=true;
-				
-				var zbsidnum:String = titlesgrid2.selectedItem.zbsid;
-				var evalobjname:String = titlesgrid2.selectedItem.evalobjname;
-				var renwu:String = titlesgrid2.selectedItem.nairename;
-				var wenjuan:String = titlesgrid2.selectedItem.levelonezb;			
-				var quest_sid:String;
-				
-				nairnameserver.text = wenjuan;
-				courtnameserver.text = evalobjname;
-				nainameserver.text = renwu;
-				
-				//从服务器端获取数据
-				HttpRequest.post(httpurl+"/OffLineClientController/onelist.vot",{"sid":zbsidnum},function(data)
-				{					
-					var date:Object = JSON.parse(data);					
-					for (var d:int = 0; d < date.length; ++d) 
-					{
-						var questone:QuestObject = new QuestObject();
-						questone.questdata = {num:d , tmsms:date[d].memo , quests:date[d].name , sid1:date[d].sid};
-						quest_sid = date[d].sid;
-						HttpRequest.post(httpurl+"/OffLineClientController/listoption.vot",{"questsid":quest_sid},function(all)
-						{		
-							var dete:Object = JSON.parse(all);
-							questone.optiondata = {qstid:dete[0].questsid , opaid:dete[0].sid , opbid:dete[1].sid , opcid:dete[2].sid , opdid:dete[3].sid , opeid:dete[4].sid , optionas:dete[0].name , optionbs:dete[1].name , optioncs:dete[2].name , optionds:dete[3].name ,optiones:dete[4].name};
-						});
-						serverquestion.addElement(questone);
-					}
-				});
-			}
-			
-			
-			//更新本地数据库，时间较长，就先註釋了
-			protected function updateSQLite(event:MouseEvent):void
-			{
-				
-				
-				HttpRequest.post(httpurl+"/OffLineClientController/updateLocal.vot",{"username":loginusernetusername.text},function(data)
-				{
-					var jobj:Object = JSON.parse(data);
-					if (jobj.list_audit.length >0)
-					{
-						dao.updateBySQL("delete from COURT_LIST_AUDIT");			
-						
-						var audititemsArr:Array = [];
-						for(var i:int = 0; i<jobj.list_audit.length ; ++i)
-						{
-							var list_audit_item:ListAuditItem = new ListAuditItem();
-							list_audit_item.sid = JSON.stringify(jobj.list_audit[i].sid);
-							list_audit_item.nairename = JSON.stringify(jobj.list_audit[i].nairename);
-							list_audit_item.evalobjname = JSON.stringify(jobj.list_audit[i].evalobjname);
-							list_audit_item.levelonezb = JSON.stringify(jobj.list_audit[i].levelonezb);
-							list_audit_item.audit_status = JSON.stringify(jobj.list_audit[i].audit_status);
-							list_audit_item.input_status = JSON.stringify(jobj.list_audit[i].input_status);
-							list_audit_item.num = i+1;
-							audititemsArr.push(list_audit_item);
-							//	dao.insertOrUpdate(list_audit_item);
-						}
-						
-						dao.batchInsertWithHighSpeed(audititemsArr, function(status:*):void {
-							
-							updatestatus.text = JSON.stringify(status);
-							if (status.committed) {
-								
-								
-								if (jobj.list_todo.length >0)
-								{													
-									dao.updateBySQL("delete from COURT_LIST_TODO");
-									for(var i:int = 0; i<jobj.list_todo.length ; ++i)						
-									{
-										var todolistarr:Array = [];
-										var list_todo_item:ListTodoItem = new ListTodoItem();								
-										list_todo_item.sid = JSON.stringify(jobj.list_todo[i].sid);
-										list_todo_item.nairename = JSON.stringify(jobj.list_todo[i].nairename);
-										list_todo_item.evalobjname = JSON.stringify(jobj.list_todo[i].evalobjname);
-										list_todo_item.levelonezb = JSON.stringify(jobj.list_todo[i].levelonezb);
-										list_todo_item.audit_status = JSON.stringify(jobj.list_todo[i].audit_status);
-										list_todo_item.input_status = JSON.stringify(jobj.list_todo[i].input_status);
-										list_todo_item.num = i+1;
-										todolistarr.push(list_todo_item);
-										//dao.insertOrUpdate(list_todo_item);		
-									}			
-									
-									dao.batchInsertWithHighSpeed(todolistarr, function(status:*):void {
-										updatestatus.text = JSON.stringify(status);
-										
-										if (status.committed) {
-											Alert.show("更新完毕");
-										}
-										
-									});
-								}
-							}
-						});
-					}
-					
-				});			
-			}			
-			
-			//本地的查看的返回列表
-			protected function backagain(event:MouseEvent):void
-			{
-				localchacklist.removeAllElements();
-				questionserver.removeAllElements();
-				questionpage.visible=false;
-				questionpageserver.visible = false;
-				qpage.visible=false;
-				sqpage.visible=false;
-				localchack.visible=false;
-				chacklocal.visible=false;
-				listpage.visible=true;
-				locallist.visible=true;
-				
-			}
-			
-			//服务器的查看的返回列表
-			protected function backserverchack(event:MouseEvent):void
-			{
-				localchacklist.removeAllElements();
-				questionserver.removeAllElements();
-				questionpage.visible=false;
-				serverquestionpage.visible = false;
-				qpage.visible=false;
-				pagesq.visible=false;
-				
-				locallist.visible=false;
-				serverlist.visible = true;
-				listpage.visible=true;
-			}
-			
-			public function reset(event:MouseEvent):void
-			{
-				// TODO Auto-generated method stub
-				/*group.selection = null;*/
-			}
-			
 		]]>
 	</fx:Script>
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	<!--进入系统后显示的页面-->
 	<s:VGroup id="loginpage" fontSize="15" visible="true" height="100%" width="100%" horizontalAlign="center">
@@ -863,6 +1000,8 @@
 			<s:Button label="创建本地用户" click="makeUser(event)"/>
 			<s:Button label="登录" click="login(event)"/>
 		</s:HGroup>
+		
+		
 	</s:VGroup>
 	
 	<!--成功登录后的页面-->	
@@ -878,10 +1017,11 @@
 			<s:Label/>
 			<s:HGroup></s:HGroup>
 			<s:HGroup>
-				<s:Label id="updatestatus" />
+				<s:Label id="updatestatus" visible="false"/>
 				<s:Button label="更新本地数据库" click="updateSQLite(event)"/>
 			</s:HGroup>
 			<s:HGroup>
+				<s:Button label="提交本地答案" id="tjbdda" visible="false" click="submitlocal(event)"/>
 				<s:Button label="退出当前用户" click="backtologin(event)"/>
 			</s:HGroup>			
 		</s:VGroup>
@@ -922,23 +1062,18 @@
 							<s:itemRenderer>
 								<fx:Component>
 									<s:GridItemRenderer horizontalCenter="">
-										
 										<fx:Script>
 											<![CDATA[
 												protected function serveredit(event:MouseEvent):void
 												{
 													outerDocument.sedit();  
 												}
-												
 												protected function chackserver(event:MouseEvent):void
 												{
 													outerDocument.serverchack();
-													
 												}
-												
 											]]>
 										</fx:Script>
-										
 										<mx:LinkButton label="编辑" click="serveredit(event)" visible="true" width="50%"/>
 										<mx:LinkButton label="查看" click="chackserver(event)" visible="true"/>
 									</s:GridItemRenderer>							
@@ -970,7 +1105,6 @@
 												}
 											]]>
 										</fx:Script>
-										
 										<mx:LinkButton label="查看" click="linkbutton1_clickHandler(event)" visible="true"/>
 									</s:GridItemRenderer>							
 								</fx:Component>
@@ -1010,9 +1144,7 @@
 									<s:GridItemRenderer horizontalCenter="">		
 										<fx:Script>
 											<![CDATA[
-												
 												import mx.controls.Alert;
-												
 												protected function justlook(event:MouseEvent):void
 												{													
 													outerDocument.chackout();  
@@ -1320,16 +1452,14 @@
 			</s:HGroup>			
 		</s:VGroup>
 	</s:Group>
-	
+
 	<!--本地查看题目-->
 	<s:Group id="chacklocal" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="25" top="230">
 		<s:Scroller width="100%" height="100%">
 			<s:Group width="100%" height="100%">
 				<s:VGroup horizontalAlign="center">
-					
 				</s:VGroup>
-				<s:VGroup id="localchacklist" width="100%">
-					
+				<s:VGroup id="localchacklist" width="100%">					
 				</s:VGroup>
 			</s:Group>
 		</s:Scroller>

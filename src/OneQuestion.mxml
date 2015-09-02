@@ -12,6 +12,8 @@
 			public static var num:String ;
 			public static var sid2:String ;
 			public static var objs:Array = new Array();
+			public static var allAnswer:Object;
+			public  var bbb:int;
 			
 			//填写题目
 			public function set questdata(val:*):void
@@ -19,26 +21,47 @@
 				tmsm1.text = val.tmsms;
 				qnum1.text = String(val.num+1);
 				question1.text = val.quests;
-				//Alert.show(val);
 				sid3.text = val.sid1;
-				/*forb1.selected = true;*/
+
 			}
 			
+			
+			public function set answer(val:*):void
+			{
+				allAnswer = val.qaa;
+				var aaa:int = 1;
+				this.bbb = aaa;
+			}
+			
+			public function get answer():int
+			{
+				return bbb;
+			}
 						
 			//填写选项
 			public function set optiondata(val:*):void
 			{	
 				var n:int = val.num;
-				
 				for(var z:int = 0 ; z<n　; z++)
 				{
 					var option :OneOption = new OneOption();
-					
-					var opid:String = JSON.stringify(val.ar[z]);
-					var nameid:String = JSON.stringify(val.list[z]);
-					var questid:String = JSON.stringify(val.qstid);
+					var opid:String = (val.ar[z]);
+					var nameid:String = (val.list[z]);
+					var questid:String = (val.qstid);
+					if( allAnswer != null )
+					{
+						var zlen:int = allAnswer.length;
+						
+						for(var r:int = 0 ; r<zlen ; r++)
+						{						
+							if( (opid == allAnswer[r].answersid) && (questid == allAnswer[r].questid) && (val.cname == allAnswer[r].evalobjname)  )
+							{
+								option.foroption.selected = true;
+							}
+						}
+					}
 					option.quest = quest;
-					option.optiondata = {all:n , n:z , opid:opid , nameid:nameid , questid:questid}
+					option.optiondata = {evalobjname:val.evalobjname , all:n , n:z , opid:opid , nameid:nameid , questid:questid}
 					options.addElement(option);
 					if(val.bool == 0)
 					{
@@ -49,112 +72,8 @@
 						option.foroption.visible = true;
 					}
 				}
+			}
 				
-				/*optiona1.text = val.optionas;
-				optionb1.text = val.optionbs;
-				optionc1.text = val.optioncs;
-				optiond1.text = val.optionds;
-				optione1.text = val.optiones;
-				asid.text = val.[];
-				bsid.text = val.opbid;
-				csid.text = val.opcid;
-				dsid.text = val.opdid;
-				esid.text = val.opeid;
-				qaid.text = val.qstid;
-				qbid.text = val.qstid;
-				qcid.text = val.qstid;
-				qdid.text = val.qstid;
-				qeid.text = val.qstid;*/
-			}
-			
-			//点击每道题的可获取的id
-/*			/*public function fora1_clickHandler(event:MouseEvent):void
-			{
-				num=asid.text;
-				sid2=qaid.text;
-				var obj:Object =  new Object();
-				obj['num'] = num;
-				obj['sid'] = sid2;
-				var n: int = findThis(sid2)
-				if(n == -1)
-				{
-					objs.push(obj);
-				}
-				else
-				{
-					objs[n].num=num;
-				}
-			}
-			
-			protected function forb1_clickHandler(event:MouseEvent):void
-			{
-				num=bsid.text;
-				sid2=qbid.text;
-				var obj:Object =  new Object();
-				obj['num'] = num;
-				obj['sid'] = sid2;
-				var n: int = findThis(sid2)
-				if(n==-1)
-				{
-					objs.push(obj);
-				}else
-				{
-					objs[n].num=num;
-				}				
-			}
-		
-			protected function forc1_clickHandler(event:MouseEvent):void
-			{
-				num=csid.text;
-				sid2=qcid.text;
-				var obj:Object =  new Object();
-				obj['num'] = num;
-				obj['sid'] = sid2;
-				var n: int = findThis(sid2)
-				if(n==-1)
-				{
-					objs.push(obj);
-				}else
-				{
-					objs[n].num=num;
-				}			
-			}
-			
-			protected function ford1_clickHandler(event:MouseEvent):void
-			{
-				num=dsid.text;
-				sid2=qdid.text;
-				var obj:Object =  new Object();
-				obj['num'] = num;
-				obj['sid'] = sid2;
-				var n: int = findThis(sid2)
-				if(n==-1)
-				{
-					objs.push(obj);
-				}else
-				{
-					objs[n].num=num;
-				}				
-			}
-			
-			protected function fore1_clickHandler(event:MouseEvent):void
-			{
-				num=esid.text;
-				sid2=qeid.text;
-				var obj:Object =  new Object();
-				obj['num'] = num;
-				obj['sid'] = sid2;
-				var n: int = findThis(sid2)
-				if(n==-1)
-				{
-					objs.push(obj);
-				}
-				else
-				{
-					objs[n].num=num;
-				}
-			}*/
-		
 			//发送答案
 			public function set optall(val1:*):void
 			{				
@@ -163,24 +82,10 @@
 			
 			public function get optall():Object
 			{			
-				for(var l:int = 0 ; l<objs.length ; l++)
-				{
-					objs.pop();
-				}
 				return _answer;
 			}
 			
-			/*public function reset(val:*):void 
-			{
-				group.selection = null;
-			}*/
-			
-			/*protected function radioButton_itemClickHandler(event:ItemClickEvent):void
-			{
-				var now:String = new Date().toTimeString();
-				lbl.text = event.label + " (" + now + ")";
-			}*/
-			public function findThis( sid:String):int
+		public function findThis( sid:String):int
 			{
 				for(var i:int =0 ; i < objs.length ; i++)
 				{
@@ -194,10 +99,9 @@
 			}
 			
 			//取消所有选项
-			public function reset(event:MouseEvent):void
+			public function cancel(event:MouseEvent):void
 			{
-				// TODO Auto-generated method stub
-				/*group.selection = null;*/
+				quest.selection=null;
 			}		
 		]]>
 	</fx:Script>
@@ -222,13 +126,10 @@
 		<s:Label text=" "/>
 	</s:HGroup>
 	
-	<!--<mx:ApplicationControlBar dock="true">
-		<mx:Label id="lbl" fontWeight="bold" />
-	</mx:ApplicationControlBar>-->
-	
 	<fx:Declarations>
-		<s:RadioButtonGroup id="quest"/>
+		<s:RadioButtonGroup id="quest"/>		
 	</fx:Declarations>
+	
 	<s:HGroup>
 		<s:Label text="备选答案："/>
 	</s:HGroup>
@@ -236,85 +137,4 @@
 	<s:VGroup id="options">	
 	</s:VGroup>
 
-	
-	
-	<!--<s:HGroup>
-		<s:Label text="备选答案： A."/>
-		<s:RadioButton id="fora1" click="fora1_clickHandler(event)" group="{group}"/>
-		<s:Label text=" " id="optiona1"/>
-		<s:Label text=" " id="asid" visible="false"/>
-		<s:Label text=" " id="qaid" visible="false"/>	
-	</s:HGroup>
-	<s:HGroup>
-		<s:Label text=" "/>
-	</s:HGroup>
-	<s:HGroup>
-		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-		<s:Label text=" "/><s:Label text=" "/>
-		<s:Label text="B."/>
-		<s:RadioButton id="forb1" click="forb1_clickHandler(event)" group="{group}"/>
-		<s:Label text=" " id="optionb1"/>
-		<s:Label text=" " id="bsid" visible="false"/>
-		<s:Label text=" " id="qbid" visible="false"/>
-	</s:HGroup>
-	<s:HGroup> 
-		<s:Label text=" "/>
-	</s:HGroup>
-	<s:HGroup>
-		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-		<s:Label text=" "/><s:Label text=" "/>				<s:Label text="C."/>
-		<s:RadioButton id="forc1" click="forc1_clickHandler(event)" group="{group}"/>
-		<s:Label text=" " id="optionc1"/>
-		<s:Label text=" " id="csid" visible="false"/>
-		<s:Label text=" " id="qcid" visible="false"/>
-	</s:HGroup>
-	<s:HGroup>
-		<s:Label text=" "/>
-	</s:HGroup>
-	<s:HGroup>
-		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-		<s:Label text=" "/><s:Label text=" "/>				<s:Label text="D."/>
-		<s:RadioButton id="ford1" click="ford1_clickHandler(event)" group="{group}"/>
-		<s:Label text=" " id="optiond1"/>
-		<s:Label text=" " id="dsid" visible="false"/>
-		<s:Label text=" " id="qdid" visible="false"/>
-	</s:HGroup>
-	<s:HGroup>
-		<s:Label text=" "/>
-	</s:HGroup>
-	<s:HGroup>
-		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-		<s:Label text=" "/><s:Label text=" "/>				<s:Label text="E."/>
-		<s:RadioButton id="fore1" click="fore1_clickHandler(event)" group="{group}"/>
-		<s:Label text=" " id="optione1"/>
-		<s:Label text=" " id="esid" visible="false"/>
-		<s:Label text=" " id="qeid" visible="false"/>
-	</s:HGroup>
-	<s:HGroup>
-		<s:Label text=" "/>
-	</s:HGroup>
-
-	<s:HGroup>
-		<s:Label text="录入员说明："/>
-		<s:Label text=" " id="luysm1"/>
-	</s:HGroup>
-	<s:HGroup>
-		<s:Label text=" "/>
-	</s:HGroup>
-		<s:Button width="100%" height="1"/>
-	<s:HGroup>
-		<s:Label text=" "/>
-	</s:HGroup>-->
 </s:VGroup>
