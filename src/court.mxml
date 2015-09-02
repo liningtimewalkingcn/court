@@ -3,7 +3,7 @@
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx"
-	xmlns:supportClasses="supportClasses.*"
+	xmlns:supportClasses="supportClasses.*" skinClass="skins.appbgSkin"
 	>
 	
 	<fx:Declarations>
@@ -1005,7 +1005,7 @@
 	</s:VGroup>
 	
 	<!--成功登录后的页面-->	
-	<s:Group id="listpage" fontSize="15" visible="false" width="100%" height="100%">			
+	<s:SkinnableContainer id="listpage" skinClass="skins.ToolBarBgSkin" fontSize="15" visible="false" width="100%" height="100%">			
 		<s:VGroup >
 			<s:HGroup >
 				<s:Label text="当前登陆者 : " id="loginuser" fontSize="25"/>	
@@ -1030,11 +1030,11 @@
 			<s:Label/>
 			<s:HGroup></s:HGroup>
 			<s:HGroup>
-				<s:Button label="更新待办任务" click="updateWork(event)"/>
-				<s:Button label="提交待办任务" click="submitWork(event)"/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="更新待办任务" click="updateWork(event)"/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="提交待办任务" click="submitWork(event)"/>
 			</s:HGroup>	
 		</s:VGroup>
-	</s:Group>
+	</s:SkinnableContainer>
 	
 	<!--从服务器端更新的列表-->
 	<s:Group id="serverlist" visible="false" width="100%" height="100%">
