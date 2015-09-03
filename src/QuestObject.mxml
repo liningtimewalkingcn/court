@@ -23,21 +23,7 @@
 			
 			public function set optiondata(val:*):void
 			{			
-				optiona1.text = val.optionas;
-				optionb1.text = val.optionbs;
-				optionc1.text = val.optioncs;
-				optiond1.text = val.optionds;
-				optione1.text = val.optiones;
-				asid.text = val.opaid1;
-				bsid.text = val.opbid1;
-				csid.text = val.opcid1;
-				dsid.text = val.opdid1;
-				esid.text = val.opeid1;
-				qaid.text = val.qstid1;
-				qbid.text = val.qstid1;
-				qcid.text = val.qstid1;
-				qdid.text = val.qstid1;
-				qeid.text = val.qstid1;
+				Alert.show(JSON.stringify(val));
 			}
 			
 			//点击每道题的可获取的id

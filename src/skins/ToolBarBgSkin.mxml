@@ -28,8 +28,10 @@
       @playerversion AIR 1.5
       @productversion Flex 4
 -->
-<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark" 
-    xmlns:fb="http://ns.adobe.com/flashbuilder/2009" alpha.disabled="0.5">
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+  	    xmlns:fb="http://ns.adobe.com/flashbuilder/2009" 
+		alpha.disabled="0.5">
 
     <fx:Metadata>
     <![CDATA[ 
@@ -47,14 +49,17 @@
     
     <!--- Defines the appearance of the SkinnableContainer class's background. -->
     <s:Rect id="background" left="30" right="30" top="30" height="102">
+		
         <s:fill>
             <!--- @private -->
-            <s:SolidColor id="bgFill" color="#FFFFFF"/>
+			
+            <s:SolidColor id="bgFill" color="0x00bfff"/>
         </s:fill>
 		<s:stroke>
 			<s:SolidColorStroke color="#91c6fc" weight="1"/>
 		</s:stroke>
     </s:Rect>
+	
 	
     
     <!--
@@ -64,7 +69,7 @@
     -->
     <!--- @copy spark.components.SkinnableContainer#contentGroup -->
     <s:Group id="contentGroup" left="0" right="0" top="0" bottom="0" minWidth="0" minHeight="0">
-        <s:layout>
+		<s:layout>
             <s:BasicLayout/>
         </s:layout>
     </s:Group>

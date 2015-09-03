@@ -3,7 +3,8 @@
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx"
-	xmlns:supportClasses="supportClasses.*" skinClass="skins.appbgSkin"
+	xmlns:supportClasses="supportClasses.*" 
+	skinClass="skins.appbgSkin"
 	>
 	
 	<fx:Declarations>
@@ -48,7 +49,7 @@
 			
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
 			private var newuser:UserItem = new UserItem();
-			private var httpurl:String = "http://192.168.1.158:8289/court";
+			private var httpurl:String = "http://192.168.1.101:8289/court";
 			private var n:int = 0;
 			private var answer:String; 		//选项的内容
 			private var qsid:String;		//问题的
@@ -376,13 +377,6 @@
 				});												
 			}
 			
-			//本地答题页面的取消
-			/*protected function cancel(event:MouseEvent):void
-			{
-				
-				
-			}*/
-			
 			//本地答题页面的暂存
 			protected function temporary(event:MouseEvent):void
 			{	
@@ -671,7 +665,7 @@
 					allquestserver.text = date.length;
 					for (var d:int = 0; d < date.length; ++d) 
 					{
-						var questone:OneQuestion = new OneQuestion();
+						var questone:QuestObject = new QuestObject();
 						questone.questdata = {num:d , tmsms:date[d].memo , quests:date[d].name , sid1:date[d].sid};
 						quest_sid = date[d].sid;
 						HttpRequest.post(httpurl+"/OffLineClientController/listoption.vot",{"questsid":quest_sid},function(all)
@@ -971,14 +965,6 @@
 		]]>
 	</fx:Script>
 	
-	
-	
-	
-	
-	
-	
-	
-	
 	<!--进入系统后显示的页面-->
 	<s:VGroup id="loginpage" fontSize="15" visible="true" height="100%" width="100%" horizontalAlign="center">
 		<s:Label/>
@@ -1018,11 +1004,11 @@
 			<s:HGroup></s:HGroup>
 			<s:HGroup>
 				<s:Label id="updatestatus" visible="false"/>
-				<s:Button label="更新本地数据库" click="updateSQLite(event)"/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="更新本地数据库" click="updateSQLite(event)"/>
 			</s:HGroup>
 			<s:HGroup>
-				<s:Button label="提交本地答案" id="tjbdda" visible="false" click="submitlocal(event)"/>
-				<s:Button label="退出当前用户" click="backtologin(event)"/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="提交本地答案" id="tjbdda" visible="false" click="submitlocal(event)"/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="退出当前用户" click="backtologin(event)"/>
 			</s:HGroup>			
 		</s:VGroup>
 		<s:VGroup fontSize="20" horizontalAlign="center"  height="100%" width="100%" >				
@@ -1030,7 +1016,7 @@
 			<s:Label/>
 			<s:HGroup></s:HGroup>
 			<s:HGroup>
-				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="更新待办任务" click="updateWork(event)"/>
+				<s:Button skinClass="skins.adsf" label="更新待办任务" click="updateWork(event)"/>
 				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="提交待办任务" click="submitWork(event)"/>
 			</s:HGroup>	
 		</s:VGroup>
