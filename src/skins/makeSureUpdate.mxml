@@ -43,6 +43,7 @@
         ]]>
     </fx:Metadata>
     
+        
     <!-- states -->
     <s:states>
         <s:State name="up" />
@@ -51,15 +52,15 @@
         <s:State name="disabled" />
     </s:states>
     
-	<s:Image source="@Embed('assets/button_106.png')"/>
+    <s:Image source="@Embed('assets/button_15.png')"/>
     
     <!-- layer 8: text -->
     <!--- @copy spark.components.supportClasses.ButtonBase#labelDisplay  -->
-    <s:Label id="labelDisplay" 
+    <s:Label id="labelDisplay"
              textAlign="center"
              maxDisplayedLines="1"
              horizontalCenter="0" verticalCenter="1" verticalAlign="middle"
-             left="10" right="10" top="2" bottom="2" color="0x000000">
+             left="10" right="10" top="2" bottom="2">
     </s:Label>
     
 </s:SparkButtonSkin>

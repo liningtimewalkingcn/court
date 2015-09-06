@@ -12,7 +12,6 @@
 		<supportClasses:HTTPServicePool id="HttpRequest" />
 	</fx:Declarations>
 	
-	<!--如果要自定义控件样式，必须要要继承SparkSkin或者Skin。-->
 	<s:SparkSkin
 		xmlns:s="library://ns.adobe.com/flex/spark"
 		xmlns:fx="http://ns.adobe.com/mxml/2009">
@@ -49,7 +48,7 @@
 			
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
 			private var newuser:UserItem = new UserItem();
-			private var httpurl:String = "http://192.168.1.101:8289/court";
+			private var httpurl:String = "http://192.168.1.100:8081/court";
 			private var n:int = 0;
 			private var answer:String; 		//选项的内容
 			private var qsid:String;		//问题的
@@ -70,7 +69,7 @@
 						loginpage.visible = false;
 						listpage.visible = true;
 						locallist.visible = true;
-						loginuser.text = "当前登陆者："+inputUserName.text+"";
+						loginuser.text = " "+inputUserName.text+"";
 						loginusernetusername.text = data[0].server_username;
 					}
 					else
@@ -673,15 +672,18 @@
 							var dete:Object = JSON.parse(all);
 							var arr:Array =new Array();
 							var list:Array = new Array();
+							var qlist:Array = new Array();
 							var num:int = dete.length;
 							var zzz:int = 1;
 							for(var q :int ; q<dete.length ; q++)
 							{		
 								arr.push( dete[q].sid );
 								list.push( dete[q].name);
+								qlist.push(dete[q].questsid);
 							}
-							questone.optiondata = {qstid:dete[0].questsid , bool:zzz , ar:arr , num:num , list:list};
+							questone.optiondata = {qlist:qlist , bool:zzz , ar:arr , num:num , list:list};
 						});
+						
 						serverquestion.addElement(questone);
 					}
 				});
@@ -966,65 +968,83 @@
 	</fx:Script>
 	
 	<!--进入系统后显示的页面-->
-	<s:VGroup id="loginpage" fontSize="15" visible="true" height="100%" width="100%" horizontalAlign="center">
+	<s:SkinnableContainer skinClass="skins.loginBackground" id="loginpage" fontSize="20" visible="true" height="100%" width="100%">
 		<s:Label/>
 		<s:Label/>
-		<s:Label text="欢迎登陆法制指数系统平台" fontWeight="bold" fontSize="30"  lineHeight="50"/>
+		<s:Label text=" " fontWeight="bold" fontSize="30"  lineHeight="50"/>
 		<s:Label/>
 		<s:Label/>
-		<s:HGroup>
-			<s:Label text="用户名"/>
+		<s:HGroup top="450" left="960">
+			<s:Label text="用户名   " fontWeight="bold" color="blue" />
 			<s:TextInput id="inputUserName"/>
 		</s:HGroup>
 		<s:Label/>
-		<s:HGroup>
-			<s:Label text=" 密  码 "/>
+		<s:HGroup top="510" left="960">
+			<s:Label text=" 密  码     "  fontWeight="bold" color="blue"/>
 			<s:TextInput id="inputPassWord" displayAsPassword="true"/>
 		</s:HGroup>
 		<s:Label/>
-		<s:HGroup>
-			<s:Button label="创建本地用户" click="makeUser(event)"/>
-			<s:Button label="登录" click="login(event)"/>
+		<s:HGroup  top="580" left="975" fontSize="50">
+			<s:Button skinClass="skins.makeUserButton" label=" " click="makeUser(event)"/>
+			<s:Button skinClass="skins.login" label=" " click="login(event)"/>
 		</s:HGroup>
-		
-		
-	</s:VGroup>
+	</s:SkinnableContainer>
 	
 	<!--成功登录后的页面-->	
-	<s:SkinnableContainer id="listpage" skinClass="skins.ToolBarBgSkin" fontSize="15" visible="false" width="100%" height="100%">			
-		<s:VGroup >
-			<s:HGroup >
-				<s:Label text="当前登陆者 : " id="loginuser" fontSize="25"/>	
-				<s:Label visible="false" id="loginusernetusername" fontSize="25"/>	
-			</s:HGroup>
-		</s:VGroup>
-		<s:VGroup fontSize="20" horizontalAlign="right"  height="100%" width="100%" >				
-			<s:Label/>	 
-			<s:Label/>
-			<s:HGroup></s:HGroup>
-			<s:HGroup>
-				<s:Label id="updatestatus" visible="false"/>
-				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="更新本地数据库" click="updateSQLite(event)"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="提交本地答案" id="tjbdda" visible="false" click="submitlocal(event)"/>
-				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="退出当前用户" click="backtologin(event)"/>
-			</s:HGroup>			
-		</s:VGroup>
-		<s:VGroup fontSize="20" horizontalAlign="center"  height="100%" width="100%" >				
-			<s:Label/>	
-			<s:Label/>
-			<s:HGroup></s:HGroup>
-			<s:HGroup>
-				<s:Button skinClass="skins.adsf" label="更新待办任务" click="updateWork(event)"/>
-				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="提交待办任务" click="submitWork(event)"/>
-			</s:HGroup>	
-		</s:VGroup>
+	<s:SkinnableContainer id="listpage" skinClass="skins.ToolBarBgSkin" fontSize="15" visible="false" width="100%" height="100%">							
+		<s:layout>
+			<s:VerticalLayout/>
+		</s:layout>
+		<s:SkinnableContainer width="100%">
+			<s:Button label=" " skinClass="skins.head"/>
+			<s:VGroup horizontalAlign="right" verticalAlign="middle" width="100%">
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>		
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>
+				<s:HGroup fontSize="20">
+					<s:Button label=" " skinClass="skins.serverUserName"/>	
+					<s:Label text=" " id="loginuser" fontSize="25"/>	
+					<s:Label visible="false" id="loginusernetusername" fontSize="25" color="white"/>	
+					<s:Button label=" " skinClass="skins.news"/>
+					<s:Label text=" 0 " id="unfinishedNews"/> 
+					<s:Label text="    "/>
+					<s:Button label=" " skinClass="skins.backToLogin"  click="backtologin(event)"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:SkinnableContainer>
+		
+		<s:SkinnableContainer top="70" skinClass="skins.middle" width="97%">
+			<s:VGroup  fontSize="20" horizontalAlign="right"  height="100%" width="100%" >				
+				<s:Label/>	 
+				<s:Label/>
+				<s:HGroup></s:HGroup>
+				<s:HGroup>
+					<s:Label id="updatestatus" visible="false"/>
+					<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="提交本地答案" id="tjbdda" visible="false" click="submitlocal(event)"/>
+					<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="更新本地数据库" click="updateSQLite(event)"/>			
+				</s:HGroup>			
+			</s:VGroup>
+			<s:VGroup  fontSize="20" horizontalAlign="center"  height="100%" width="100%" >				
+				<s:Label/>	
+				<s:Label/>
+				<s:HGroup></s:HGroup>
+				<s:HGroup>
+					<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="更新待办任务" click="updateWork(event)"/>
+					<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="提交待办任务" click="submitWork(event)"/>
+				</s:HGroup>	
+			</s:VGroup>
+		</s:SkinnableContainer>
+			
+				
+		
 	</s:SkinnableContainer>
 	
 	<!--从服务器端更新的列表-->
-	<s:Group id="serverlist" visible="false" width="100%" height="100%">
-		<s:VGroup  height="100%" width="100%" top="80" horizontalAlign="left">
+	<s:SkinnableContainer  top="110 " id="serverlist" visible="false" width="100%" height="100%">
+		<s:VGroup  top="100 " height="100%" width="100%" horizontalAlign="left">
 			<s:HGroup></s:HGroup>
 			<s:Label/>
 			<mx:TabNavigator id="tabnavigator1" change="indexChangeFunc(event)" width="100%" height="30" fontSize="20">
@@ -1100,11 +1120,11 @@
 				</s:columns>
 			</s:DataGrid>
 		</s:VGroup>
-	</s:Group>
+	</s:SkinnableContainer>
 	
 	<!--从本地更新的列表-->
-	<s:Group id="locallist" visible="false" width="100%" height="100%">
-		<s:VGroup  height="100%" width="100%" top="80" horizontalAlign="left">
+	<s:Group id="locallist" top="110 " visible="false" width="97%" height="100%" horizontalCenter="1">
+		<s:VGroup  height="100%" width="100%" top="100" horizontalAlign="left">
 			<s:HGroup></s:HGroup>
 			<s:Label/>
 			<mx:TabNavigator id="local3" change="indexChangelocal(event)" width="100%" height="30" fontSize="20">
@@ -1186,46 +1206,39 @@
 	</s:Group>
 	
 	<!--创建本地用户页面-->
-	<s:Group id="makepage" visible="false" horizontalCenter="0">
-		<s:VGroup horizontalAlign="center">		
+	<s:SkinnableContainer skinClass="skins.makeUserPage" id="makepage" visible="false" fontSize="15" width="100%" height="100%">
+		
 			<s:Label/>
 			<s:Label/>
-			<s:Label text="请输入本地用户用户名密码" fontWeight="bold" fontSize="30"  lineHeight="50"/>	
-		</s:VGroup>
-		<s:VGroup fontSize="15" horizontalAlign="right" top="66">
-			<s:Label/>
-			<s:Label/>
-			<s:HGroup>
-
-				<s:Label text="用户名 : "/>
+			<s:HGroup top="400" left="980">
+				<s:Label text="用户名 : " fontWeight="bold" color="blue"/>
 				<s:TextInput id="inputLoginName" prompt="请输入真实姓名" restrict="0-9\a-z\^{'[\一-\龥]'}"/>
 			</s:HGroup>
 			<s:Label/>
-			<s:HGroup>
-				<s:Label text="密码 : "/>
+			<s:HGroup top="450" left="981">
+				<s:Label text=" 密 码  : " fontWeight="bold" color="blue"/>
 				<s:TextInput id="inputFirstPassWord" prompt="请输入6~16位字符" displayAsPassword="true" restrict="a-zA-Z0-9"/>
 			</s:HGroup>
 			<s:Label/>
-			<s:HGroup>
-				<s:Label text="重复密码 : "/>
+			<s:HGroup top="500" left="964">
+				<s:Label text="重复密码 : " fontWeight="bold" color="blue"/>
 				<s:TextInput id="inputSecondPassWord" prompt="只许使用字母与数字" displayAsPassword="true"/>
 			</s:HGroup>
 			<s:Label/>
-			<s:HGroup>
-				<s:Label text="关联网络用户名 : "/>
+			<s:HGroup top="550" left="920">
+				<s:Label text="关联网络用户名 : " fontWeight="bold" color="blue"/>
 				<s:TextInput id="inputNetName"/>
 			</s:HGroup>
 			<s:Label/>
-			<s:HGroup>
-				<s:Button label="返回登陆" click="backlogin(event)"/>
+			<s:HGroup top="600" left="960">
+				<s:Button skinClass="skins.backLogin" label="返回登陆" click="backlogin(event)"/>
 				<s:Label/><s:Label/><s:Label/><s:Label/>
-				<s:Button label="确定创建" click="makeSure(event)"/>				
+				<s:Button skinClass="skins.makeUserSure" label="确定创建" click="makeSure(event)"/>				
 			</s:HGroup>	
-		</s:VGroup>
 		<s:VGroup horizontalAlign="center" top="300" >
 			<s:Label/>	
 		</s:VGroup>
-	</s:Group>
+	</s:SkinnableContainer>
 	
 	<!--关联网络用户更新待办页面-->
 	<s:Group id="updatepage" visible="false" horizontalCenter="0">
@@ -1240,7 +1253,7 @@
 				<s:TextInput id="updetNetPassword" displayAsPassword="true"/>
 			</s:HGroup>
 			<s:Label/>
-			<s:Button label="确定更新" click="updatetask(event)"/>			
+			<s:Button label=" " skinClass="skins.makeSureUpdate" click="updatetask(event)"/>			
 		</s:VGroup>		
 	</s:Group>
 	

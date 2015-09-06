@@ -60,11 +60,10 @@
     <s:Rect id="backgroundRect" left="0" right="0" top="0" bottom="0" >
         <s:fill>
             <!--- @private -->
-            <s:SolidColor id="backgroundFill" color="#70dbdb"/>
-			
+            <s:SolidColor id="backgroundFill" color="#edeee8"/>			
         </s:fill>
     </s:Rect>
-	<s:Image source="@Embed('assets/bj.png')"/>
+	
 		
     <!-- layer 2: content + status bar -->
     <s:Group left="0" right="0" top="0" bottom="0" minHeight="24" minWidth="0" >

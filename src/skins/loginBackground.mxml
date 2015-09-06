@@ -28,10 +28,8 @@
       @playerversion AIR 1.5
       @productversion Flex 4
 -->
-<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" 
-		xmlns:s="library://ns.adobe.com/flex/spark" 
-  	    xmlns:fb="http://ns.adobe.com/flashbuilder/2009" 
-		alpha.disabled="0.5">
+<s:Skin xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark" 
+    xmlns:fb="http://ns.adobe.com/flashbuilder/2009" alpha.disabled="0.5">
 
     <fx:Metadata>
     <![CDATA[ 
@@ -48,17 +46,13 @@
     </s:states>
     
     <!--- Defines the appearance of the SkinnableContainer class's background. -->
-    <s:Rect id="background" left="260" right="0" top="0" height="110">
+    <s:Rect id="background" left="0" right="0" top="0" bottom="0">
         <s:fill>
-            <s:SolidColor id="bgFill" color="#74a7e8"/>
+            <!--- @private -->
+            <s:SolidColor id="bgFill" color="#1277cc"/>
         </s:fill>
-		<s:stroke>
-			<s:SolidColorStroke color="#91c6fc" weight="1"/>
-		</s:stroke>
     </s:Rect>
-	
-	
-    
+	<s:Image source="@Embed('assets/111(1).png')" width="100%" height="100%"/>
     <!--
         Note: setting the minimum size to 0 here so that changes to the host component's
         size will not be thwarted by this skin part's minimum size.   This is a compromise,
@@ -66,7 +60,7 @@
     -->
     <!--- @copy spark.components.SkinnableContainer#contentGroup -->
     <s:Group id="contentGroup" left="0" right="0" top="0" bottom="0" minWidth="0" minHeight="0">
-		<s:layout>
+        <s:layout>
             <s:BasicLayout/>
         </s:layout>
     </s:Group>
