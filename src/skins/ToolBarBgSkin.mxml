@@ -53,7 +53,7 @@
             <s:SolidColor id="bgFill" color="#74a7e8"/>
         </s:fill>
 		<s:stroke>
-			<s:SolidColorStroke color="#91c6fc" weight="1"/>
+			<s:SolidColorStroke color="#ffffff" weight="1"/>
 		</s:stroke>
     </s:Rect>
 	

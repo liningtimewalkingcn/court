@@ -180,7 +180,20 @@ declarations define DataGrid skin parts except <code>headerColumnSeparator</code
         <!--- Defines the value of the headerRenderer property for the columnHeaderGroup. 
               The default is spark.skins.spark.DefaultGridHeaderRenderer -->
         <fx:Component id="headerRenderer">
-            <s:DefaultGridHeaderRenderer />
+            <s:DefaultGridHeaderRenderer >
+				
+				<s:Rect left="0" right="0" top="0" height="52">
+					<s:fill>
+						<s:SolidColor id="bgFill" color="#ffffff"/>
+					</s:fill>
+					<s:stroke>
+						<s:SolidColorStroke color="#ffffff" weight="1"/>
+					</s:stroke>
+				</s:Rect>
+				
+				<s:Image source="@Embed('assets/123_25.png')"/>
+			</s:DefaultGridHeaderRenderer>
+			
 			
         </fx:Component>
 		
