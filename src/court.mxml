@@ -54,9 +54,17 @@
 			public var answerandquest:Object;		//获取题目与答案
 			
 			
+			[Bindable]
+			public static var resX:int = Capabilities.screenResolutionX;   
+			[Bindable]
+			public static var resY:int = Capabilities.screenResolutionY; 
+
+			
+			
 			//登录判断用户名密码是否正确
 			protected function login(event:MouseEvent):void
 			{						
+
 				var namelist :ArrayList = new ArrayList();
 				dao.query("select * from SYS_USER where username = '"+inputUserName.text+"' and userpassword = '"+inputPassWord.text+"' ", function (data:*):void 
 				{	
@@ -67,7 +75,9 @@
 						listpage.visible = true;
 						locallist.visible = true;
 						loginuser.text = " "+inputUserName.text+"";
+						loginusers.text = " "+inputUserName.text+"";
 						loginusernetusername.text = data[0].server_username;
+						loginusernetusernames.text = data[0].server_username;
 					}
 					else
 					{
@@ -971,12 +981,12 @@
 		<s:Label text=" " fontWeight="bold" fontSize="30"  lineHeight="50"/>
 		<s:Label/>
 		<s:Label/>
-		<s:HGroup top="450" left="960">
+		<s:HGroup top="resY:450" left="resX:960">
 			<s:Label text="用户名   " fontWeight="bold" color="blue" />
 			<s:TextInput id="inputUserName"/>
 		</s:HGroup>
 		<s:Label/>
-		<s:HGroup top="510" left="960">
+		<s:HGroup top="resY:510" left="resX:960">
 			<s:Label text=" 密  码     "  fontWeight="bold" color="blue"/>
 			<s:TextInput id="inputPassWord" displayAsPassword="true"/>
 		</s:HGroup>
@@ -1037,8 +1047,8 @@
 	</s:SkinnableContainer>
 	
 	<!--从服务器端更新的列表-->
-	<s:SkinnableContainer  top="110 " id="serverlist" visible="false" width="100%" height="100%">
-		<s:VGroup  top="100 " height="100%" width="100%" horizontalAlign="left">
+	<s:SkinnableContainer horizontalCenter="1"  top="160 " id="serverlist" visible="false" width="98%" height="100%">
+		<s:VGroup  top="120 " height="100%" width="100%" horizontalAlign="left">
 			<s:HGroup></s:HGroup>
 			<s:Label/>
 			<mx:TabNavigator id="tabnavigator1" change="indexChangeFunc(event)" width="100%" height="30" fontSize="20">
@@ -1048,7 +1058,7 @@
 				</mx:Panel>
 			</mx:TabNavigator>	
 		</s:VGroup>
-		<s:VGroup  height="100%" width="100%" top="150" horizontalAlign="center">
+		<s:VGroup  height="100%" width="100%" top="180" horizontalAlign="center">
 			<s:DataGrid textAlign="left" id="titlesgrid2"  selectionChange="" editable="true" width="100%" height="100%" contentBackgroundColor="white" color="gray" borderColor="black">
 				<s:columns>
 					<s:ArrayList>
@@ -1124,7 +1134,7 @@
 	</s:SkinnableContainer>
 	
 	<!--从本地更新的列表-->
-	<s:Group id="locallist" top="160 " visible="false" width="97%" height="100%" horizontalCenter="1">
+	<s:Group id="locallist" top="160 " visible="false" width="98%" height="100%" horizontalCenter="1">
 		<s:VGroup  height="100%" width="100%" top="120" horizontalAlign="left">
 			<s:HGroup></s:HGroup>
 			<s:Label/>
@@ -1136,10 +1146,10 @@
 			</mx:TabNavigator>	
 		</s:VGroup>
 		<s:VGroup  height="100%" width="100%" top="180" horizontalAlign="center">
-			<s:DataGrid skinClass="skins.statusBar" textAlign="left" id="local1"  selectionChange="" editable="true" width="99%" height="100%" contentBackgroundColor="white" color="0x000000" borderColor="black">
-				<s:columns>
+			<s:DataGrid skinClass="skins.statusBar" textAlign="center" id="local1"  selectionChange="" editable="true" width="100%" height="100%" contentBackgroundColor="white" color="0x000000" borderColor="black">
+				<s:columns>	
 					<s:ArrayList>
-						<s:GridColumn editable="false" dataField="num" headerText="序号"/>
+						<s:GridColumn  editable="false" dataField="num" headerText="序号" />
 						<s:GridColumn editable="false" dataField="nairename" headerText="问卷"/>
 						<s:GridColumn editable="false" dataField="evalobjname" headerText="测评对象"/>
 						<s:GridColumn editable="false" dataField="levelonezb" headerText="任务"/>
@@ -1148,7 +1158,7 @@
 						<s:GridColumn headerText="操作" editable="false" dataField="operation">
 							<s:itemRenderer>
 								<fx:Component>
-									<s:GridItemRenderer horizontalCenter="">		
+									<s:GridItemRenderer horizontalCenter="1">		
 										<fx:Script>
 											<![CDATA[
 												import mx.controls.Alert;
@@ -1298,26 +1308,47 @@
 	</s:Group>	
 	
 	<!--本地答题首-->
-	<s:Group id="questionpage" visible="false" horizontalCenter="1" width="80%">
-		<s:VGroup horizontalAlign="left" width="100%">
-			<s:HGroup fontSize="50">	
-				<s:Label/>
-			</s:HGroup>
-			<s:HGroup horizontalAlign="left" fontSize="30">
+	<s:SkinnableContainer skinClass="skins.questList" id="questionpage" visible="false" horizontalCenter="1" width="100%">
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center"/>
+		</s:layout>
+		<s:SkinnableContainer width="100%">
+			<s:Button label=" " skinClass="skins.head"/>
+			<s:VGroup horizontalAlign="right" verticalAlign="middle" width="100%">
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>		
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>
+				<s:HGroup fontSize="20">
+					<s:Button label=" " skinClass="skins.serverUserName"/>	
+					<s:Label text=" " id="loginusers" fontSize="25"/>	
+					<s:Label visible="false" id="loginusernetusernames" fontSize="25" color="white"/>	
+					<s:Button label=" " skinClass="skins.news"/>
+					<s:Label text=" 0 " id="unfinishedNew"/> 
+					<s:Label text="    "/>
+					<s:Button label=" " skinClass="skins.backToLogin"  click="backtologin(event)"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:SkinnableContainer>
+
+		<s:SkinnableContainer  width="100%" >
+			<s:HGroup horizontalAlign="left" top="45" fontSize="30">
 				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
 				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
-				<s:Button label="&lt; 返回列表  " click="backlist(event)"/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="&lt;&lt; 返回列表  " click="backlist(event)"/>
 				<s:Label/><s:Label />
-				<s:Button label=" 暂存 " click="temporary(event)"/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label=" 暂存 " click="temporary(event)"/>
 				<s:Label/><s:Label/>
-				<s:Button label=" 提交 " click="submitanswer(event)"/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label=" 提交 " click="submitanswer(event)"/>
 				<s:Label/><s:Label/>
-				<s:Button label=" 取消 " click="reset(event)"/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label=" 取消 " click="reset(event)"/>
 			</s:HGroup>	
-			<s:Button width="100%" height="1"/>
-		</s:VGroup>
-		<s:VGroup horizontalAlign="center" width="80%" fontSize="25" top="120">			
-			<s:HGroup  verticalAlign="middle">
+		</s:SkinnableContainer>
+		
+		<s:SkinnableContainer top="500" skinClass="skins.queatHead" width="96%" fontSize="25">
+			<s:HGroup horizontalAlign="center" top="40" width="100%">
 				<s:Label/>
 				<s:Label text="当前问卷：" fontWeight="bold"/>
 				<s:Label text=" " id="nairname" color="red"/>
@@ -1332,22 +1363,20 @@
 			<s:HGroup>
 				<s:Label text=" "/>
 			</s:HGroup>
-			<s:HGroup verticalAlign="bottom">
+			<s:HGroup verticalAlign="bottom" top="75" horizontalAlign="center" width="100%">
 				<s:Label text="共 "/>
 				<s:Label text=" " id="allquest" fontWeight="bold" color="red"/>
 				<s:Label text="道题"/>
 			</s:HGroup>			
-		</s:VGroup>
-		<s:VGroup horizontalAlign="left" fontSize="25" top="230">
-			<s:HGroup verticalAlign="middle">
+			<s:HGroup verticalAlign="middle" top="120" left="120" width="88%" horizontalAlign="center">
 				<s:Label text="问卷备注："/>
 				<s:TextArea  width="1500" height="30"/>
 			</s:HGroup>
 			<s:HGroup>
 				<s:Label text=" "/>
 			</s:HGroup>
-		</s:VGroup>
-	</s:Group>
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
 	
 	<!--服务器端答题首-->
 	<s:Group id="questionpageserver" visible="false" horizontalCenter="1" width="80%">
@@ -1403,7 +1432,7 @@
 	
 	
 	<!--本地题目-->
-	<s:Group id="qpage" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="25" top="300">
+	<s:Group id="qpage" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="25" top="450">
 		<s:Scroller width="100%" height="100%">
 			<s:Group width="100%" height="100%">
 				<s:VGroup horizontalAlign="center">
