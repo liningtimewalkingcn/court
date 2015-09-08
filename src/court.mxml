@@ -991,7 +991,7 @@
 			<s:TextInput id="inputPassWord" displayAsPassword="true"/>
 		</s:HGroup>
 		<s:Label/>
-		<s:HGroup  top="580" left="975" fontSize="50">
+		<s:HGroup  top="resY:580" left="resX:975" fontSize="50">
 			<s:Button skinClass="skins.makeUserButton" label=" " click="makeUser(event)"/>
 			<s:Button skinClass="skins.login" label=" " click="login(event)"/>
 		</s:HGroup>
@@ -1023,24 +1023,28 @@
 			</s:VGroup>
 		</s:SkinnableContainer>
 		
-		<s:SkinnableContainer top="35" skinClass="skins.middle" width="98%">
-			<s:VGroup  fontSize="20" horizontalAlign="right"  height="100%" width="100%" >				
+		<s:SkinnableContainer skinClass="skins.middle" width="98%">
+			<s:VGroup right="100"  fontSize="20" horizontalAlign="right"  height="100%" width="100%" >				
 				<s:Label/>	 
 				<s:Label/>
 				<s:HGroup></s:HGroup>
 				<s:HGroup>
 					<s:Label id="updatestatus" visible="false"/>
-					<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="提交本地答案" id="tjbdda" visible="false" click="submitlocal(event)"/>
-					<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="更新本地数据库" click="updateSQLite(event)"/>			
+					<s:Button skinClass="skins.submitSQL" label="提交本地答案" id="tjbdda" visible="false" click="submitlocal(event)"/>
+					<s:Button skinClass="skins.unpdateSQL" label=" " click="updateSQLite(event)" color="#333333"/>			
+					<s:Label text="更新本地数据库" color="#333333" fontSize="22"/>
 				</s:HGroup>			
 			</s:VGroup>
-			<s:VGroup  fontSize="20" horizontalAlign="center"  height="100%" width="100%" >				
+			<s:VGroup left="100"  fontSize="20" horizontalAlign="left"  height="100%" width="100%" >				
 				<s:Label/>	
 				<s:Label/>
 				<s:HGroup></s:HGroup>
 				<s:HGroup>
-					<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="更新待办任务" click="updateWork(event)"/>
-					<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="提交待办任务" click="submitWork(event)"/>
+					<s:Button skinClass="skins.updateWork" label=" " click="updateWork(event)"/>
+					<s:Label text="更新待办任务" color="#333333" fontSize="22"/>
+					<s:Label text="       " />
+					<s:Button skinClass="skins.submitWork" label=" " click="submitWork(event)"/>
+					<s:Label text="提交待办任务" color="#333333" fontSize="22"/>
 				</s:HGroup>	
 			</s:VGroup>
 		</s:SkinnableContainer>
