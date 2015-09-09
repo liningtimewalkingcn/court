@@ -1834,7 +1834,10 @@
 	
 	<!--关联网络用户更新待办页面-->
 	<s:SkinnableContainer skinClass="skins.littlePage" id="updatepage" visible="false" verticalCenter="0" horizontalCenter="0">
-		<s:VGroup fontSize="15">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="center"/>
+		</s:layout>
+		<s:VGroup fontSize="15" horizontalCenter="0">
 			<s:Label/>
 			<s:Label/>
 			<s:Label text="请输入网络用户密码" fontWeight="bold" fontSize="30"  lineHeight="50"/>			
@@ -1851,6 +1854,9 @@
 	
 	<!--关联网络用户提交待办页面-->
 	<s:SkinnableContainer skinClass="skins.littlePage" id="submitpage" visible="false" verticalCenter="0" horizontalCenter="0">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="center"/>
+		</s:layout>
 		<s:VGroup fontSize="15" horizontalAlign="center">
 			<s:Label/>
 			<s:Label/>
