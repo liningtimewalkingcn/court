@@ -146,7 +146,7 @@
 
 	<s:HGroup>
 		<s:Label text="录入员说明:"/>
-		<s:TextArea width="1200" height="30"/>
+		<s:TextArea width="1000" height="30"/>
 	</s:HGroup>
 	
 	<s:HGroup>

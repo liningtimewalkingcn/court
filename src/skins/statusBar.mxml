@@ -359,11 +359,10 @@ declarations define DataGrid skin parts except <code>headerColumnSeparator</code
             which is inset by the Scroller's minViewportInset, which provides room for the 
             DataGrid border - the last Rect element below.
         -->
-        <s:GridColumnHeaderGroup id="columnHeaderGroup" width="100%" height="15" textAlign="center" 
+        <s:GridColumnHeaderGroup id="columnHeaderGroup" width="100%" height="40" textAlign="center" 
             paddingLeft="0"  paddingRight="0" paddingTop="0"
             columnSeparator="{headerColumnSeparator}"
-            headerRenderer="{headerRenderer}"/>
-		<!--<s:Image source="@Embed('assetzs/123_25.png')" width="100%"/>-->
+            headerRenderer="{headerRenderer}"/>		
         <s:Group height="100%">
             
             <!--- @private -->
