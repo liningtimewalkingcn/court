@@ -363,7 +363,7 @@ declarations define DataGrid skin parts except <code>headerColumnSeparator</code
             paddingLeft="0"  paddingRight="0" paddingTop="0"
             columnSeparator="{headerColumnSeparator}"
             headerRenderer="{headerRenderer}"/>
-		<s:Image source="@Embed('assets/123_25.png')" width="100%"/>
+		<!--<s:Image source="@Embed('assetzs/123_25.png')" width="100%"/>-->
         <s:Group height="100%">
             
             <!--- @private -->

@@ -1236,8 +1236,32 @@
 			<s:DataGrid textAlign="left" id="titlesgrid2"  selectionChange="" editable="true" width="100%" height="100%" contentBackgroundColor="white" color="gray" borderColor="black">
 				<s:columns>
 					<s:ArrayList>
-						<s:GridColumn editable="false" dataField="n" headerText="序号"/>
-						<s:GridColumn editable="false" dataField="nairename" headerText="问卷"/>
+						<s:GridColumn editable="false" dataField="n" headerText="序号">
+							<s:headerRenderer>
+								<fx:Component>
+									<s:DefaultGridHeaderRenderer>
+										<s:Rect width="100%" height="100%">
+											<s:fill>
+												<s:SolidColor color="#ff0000"/>
+											</s:fill>
+										</s:Rect>
+									</s:DefaultGridHeaderRenderer>
+								</fx:Component>
+							</s:headerRenderer>
+						</s:GridColumn>
+						<s:GridColumn editable="false" dataField="nairename" headerText="问卷">
+							<s:headerRenderer>
+								<fx:Component>
+									<s:DefaultGridHeaderRenderer>
+										<s:Rect width="100%" height="100%">
+											<s:fill>
+												<s:SolidColor color="#00ff00"/>
+											</s:fill>
+										</s:Rect>
+									</s:DefaultGridHeaderRenderer>
+								</fx:Component>
+							</s:headerRenderer>
+						</s:GridColumn>
 						<s:GridColumn editable="false" dataField="evalobjname" headerText="测评对象"/>
 						<s:GridColumn editable="false" dataField="levelonezb" headerText="任务" id="Task"/>
 						<s:GridColumn editable="false" dataField="input_status" headerText="录入任务状态"/>
@@ -1323,8 +1347,34 @@
 			<s:DataGrid horizontalCenter="1" skinClass="skins.statusBar" textAlign="center" id="local1"  selectionChange="" editable="true" width="100%" height="100%" contentBackgroundColor="white" color="0x000000" borderColor="black">
 				<s:columns>	
 					<s:ArrayList>
-						<s:GridColumn editable="false" dataField="num" headerText="序号" />
-						<s:GridColumn editable="false" dataField="nairename" headerText="问卷"/>
+						<s:GridColumn editable="false" dataField="num" headerText="序号" >
+							<s:headerRenderer>
+								<fx:Component>
+									<s:DefaultGridHeaderRenderer >
+										<s:Rect width="100%" height="100%">
+											<s:fill>
+												<s:SolidColor color="#ff0000"/>
+											</s:fill>
+										</s:Rect>
+										<s:Label id="titlelabel" text="序号"/>
+									</s:DefaultGridHeaderRenderer>
+								</fx:Component>
+							</s:headerRenderer>
+						</s:GridColumn>
+						<s:GridColumn editable="false" dataField="nairename" headerText="问卷">
+							<s:headerRenderer>
+								<fx:Component>
+									<s:DefaultGridHeaderRenderer>
+										<s:Rect width="100%" height="100%">
+											<s:fill>
+												<s:SolidColor color="#00ff00"/>
+											</s:fill>
+										</s:Rect>
+										<s:Label id="titlelabel" text="问卷"/>
+									</s:DefaultGridHeaderRenderer>
+								</fx:Component>
+							</s:headerRenderer>
+						</s:GridColumn>
 						<s:GridColumn editable="false" dataField="evalobjname" headerText="测评对象"/>
 						<s:GridColumn editable="false" dataField="levelonezb" headerText="任务"/>
 						<s:GridColumn editable="false" dataField="input_status" headerText="录入任务状态"/>
