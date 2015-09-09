@@ -169,7 +169,7 @@
 		</s:stroke>
 	</s:Rect>
 	
-	<s:Image source="Embed('assets/icon23.png')"/>
+	<s:Image source="@Embed('assets/icon23.png')"/>
 	
     
     <!-- layer 8: text -->

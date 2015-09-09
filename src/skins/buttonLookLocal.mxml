@@ -43,55 +43,6 @@
         ]]>
     </fx:Metadata>
     
-    <fx:Script fb:purpose="styling">
-        <![CDATA[         
-            import spark.components.Group;
-            /* Define the skin elements that should not be colorized. 
-            For button, the graphics are colorized but the label is not. */
-            static private const exclusions:Array = ["iconDisplay", "labelDisplay"];
-            
-            /** 
-             * @private
-             */     
-            override public function get colorizeExclusions():Array {return exclusions;}
-            
-            /**
-             * @private
-             */
-            override protected function initializationComplete():void
-            {
-                useChromeColor = true;
-                super.initializationComplete();
-            }  
-            
-            /**
-             *  @private
-             */
-            override protected function updateDisplayList(unscaledWidth:Number, unscaledHeight:Number) : void
-            {
-                var cr:Number = getStyle("cornerRadius");
-                
-                if (cornerRadius != cr)
-                {
-                    cornerRadius = cr;
-                    shadow.radiusX = cornerRadius;
-                    fill.radiusX = cornerRadius;
-                    lowlight.radiusX = cornerRadius;
-                    highlight.radiusX = cornerRadius;
-                    border.radiusX = cornerRadius;
-                }
-                
-                if (highlightStroke) highlightStroke.radiusX = cornerRadius;
-                if (hldownstroke1) hldownstroke1.radiusX = cornerRadius;
-                if (hldownstroke2) hldownstroke2.radiusX = cornerRadius;
-                
-                super.updateDisplayList(unscaledWidth, unscaledHeight);
-            }
-            
-            private var cornerRadius:Number = 2;
-                                 
-        ]]>        
-    </fx:Script>
         
     <!-- states -->
     <s:states>
@@ -101,8 +52,8 @@
         <s:State name="disabled" />
     </s:states>
     
-    <!-- layer 1: shadow -->
-    <!--- @private -->
+	<!-- layer 1: shadow -->
+	<!--- @private -->
 	<s:Rect id="shadow" left="0" right="0" top="0" bottom="0" radiusX="0">
 		<s:fill>
 			<s:LinearGradient rotation="0">
@@ -114,12 +65,12 @@
 								 color.down="0xFFFFFF" 
 								 alpha="0"
 								 alpha.down="0" />
-            </s:LinearGradient>
-        </s:fill>
-    </s:Rect>
-    
-    <!-- layer 2: fill -->
-    <!--- @private -->
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	
+	<!-- layer 2: fill -->
+	<!--- @private -->
 	<s:Rect id="fill" left="0" right="0" top="0" bottom="0" radiusX="0">
 		<s:fill>
 			<s:LinearGradient rotation="0">
@@ -131,24 +82,24 @@
 								 color.over="0xFFFFFF" 
 								 color.down="0xFFFFFF" 
 								 alpha="0" />
-            </s:LinearGradient>
-        </s:fill>
-    </s:Rect>
-
-    <!-- layer 3: fill lowlight -->
-    <!--- @private -->
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	
+	<!-- layer 3: fill lowlight -->
+	<!--- @private -->
 	<s:Rect id="lowlight" left="0" right="0" top="0" bottom="0" radiusX="0">
 		<s:fill>
 			<s:LinearGradient rotation="270">
 				<s:GradientEntry color="0xFFFFFF" ratio="0" alpha="0" />
 				<s:GradientEntry color="0xFFFFFF" ratio="0" alpha="0" />
 				<s:GradientEntry color="0xFFFFFF" ratio="0" alpha="0" />
-            </s:LinearGradient>
-        </s:fill>
-    </s:Rect>
-    
-    <!-- layer 4: fill highlight -->
-    <!--- @private -->
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	
+	<!-- layer 4: fill highlight -->
+	<!--- @private -->
 	<s:Rect id="highlight" left="0" right="0" top="0" bottom="0" radiusX="0">
 		<s:fill>
 			<s:LinearGradient rotation="0">
@@ -165,23 +116,23 @@
 				<s:GradientEntry color="0xFFFFFF"
 								 ratio="0"
 								 alpha="0" />
-            </s:LinearGradient>
-        </s:fill>
-    </s:Rect>
-    
-    <!-- layer 5: highlight stroke (all states except down) -->
-    <!--- @private -->
+			</s:LinearGradient>
+		</s:fill>
+	</s:Rect>
+	
+	<!-- layer 5: highlight stroke (all states except down) -->
+	<!--- @private -->
 	<s:Rect id="highlightStroke" left="0" right="0" top="0" bottom="0" radiusX="0" excludeFrom="down">
 		<s:stroke>
 			<s:LinearGradientStroke rotation="90" weight="0">
 				<s:GradientEntry color="0xFFFFFF" alpha.over="0" />
 				<s:GradientEntry color="0xFFFFFF" alpha.over="0" />
-            </s:LinearGradientStroke>
-        </s:stroke>
-    </s:Rect>
-    
-    <!-- layer 6: highlight stroke (down state only) -->
-    <!--- @private -->
+			</s:LinearGradientStroke>
+		</s:stroke>
+	</s:Rect>
+	
+	<!-- layer 6: highlight stroke (down state only) -->
+	<!--- @private -->
 	<s:Rect id="hldownstroke1" left="0" right="0" top="0" bottom="0" radiusX="0" includeIn="down">
 		<s:stroke>
 			<s:LinearGradientStroke rotation="0" weight="0">
@@ -190,21 +141,21 @@
 				<s:GradientEntry color="0xFFFFFF" alpha="0" ratio="0" />
 				<s:GradientEntry color="0xFFFFFF" alpha="0" ratio="0" />
 				<s:GradientEntry color="0xFFFFFF" alpha="0.00" ratio="0" />
-            </s:LinearGradientStroke>
-        </s:stroke>
-    </s:Rect>
-    <!--- @private -->
+			</s:LinearGradientStroke>
+		</s:stroke>
+	</s:Rect>
+	<!--- @private -->
 	<s:Rect id="hldownstroke2" left="0" right="0" top="0" bottom="0" radiusX="0" includeIn="down">
 		<s:stroke>
 			<s:LinearGradientStroke rotation="90" weight="0">
 				<s:GradientEntry color="0xFFFFFF" alpha="0.00" ratio="0.0" />
 				<s:GradientEntry color="0xFFFFFF" alpha="0.00" ratio="0" />
-            </s:LinearGradientStroke>
-        </s:stroke>
-    </s:Rect>
-
-    <!-- layer 7: border - put on top of the fill so it doesn't disappear when scale is less than 1 -->
-    <!--- @private -->
+			</s:LinearGradientStroke>
+		</s:stroke>
+	</s:Rect>
+	
+	<!-- layer 7: border - put on top of the fill so it doesn't disappear when scale is less than 1 -->
+	<!--- @private -->
 	<s:Rect id="border" left="0" right="0" top="0" bottom="0" width="20" height="20" radiusX="0">
 		<s:stroke>
 			<s:LinearGradientStroke rotation="0" weight="0">
@@ -214,9 +165,9 @@
 				<s:GradientEntry color="0xFFFFFF" 
 								 alpha="0" 
 								 alpha.down="0" />
-            </s:LinearGradientStroke>
-        </s:stroke>
-    </s:Rect>
+			</s:LinearGradientStroke>
+		</s:stroke>
+	</s:Rect>
     
 	<s:Image source="@Embed('assets/icon5.png')"/>
 	

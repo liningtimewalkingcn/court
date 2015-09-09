@@ -47,14 +47,11 @@
     </s:states>
     
     <!--- Defines the appearance of the SkinnableContainer class's background. -->
-    <s:Rect id="background" left="25" right="-15" top="10" bottom="0" height="98">
+    <s:Rect id="background" left="0" right="0" top="0" bottom="0" height="100%" width="100%">
         <s:fill>
             <!--- @private -->
-            <s:SolidColor id="bgFill" color="#FFFFFF"/>
+            <s:SolidColor id="bgFill" color="#edeee8"/>
         </s:fill>
-		<s:stroke>
-			<s:SolidColorStroke color="#91c6fc" weight="1"/>
-		</s:stroke>
     </s:Rect>
     
     <!--

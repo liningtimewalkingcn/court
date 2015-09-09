@@ -85,7 +85,16 @@
 				return _answer;
 			}
 			
-		public function findThis( sid:String):int
+			public function set removeall(val:*):void
+			{
+				var j:int = allAnswer.length;
+				for(var i:int = 0 ; i<j ; i++)
+				{
+					allAnswer.pop();
+				}
+			}
+			
+			public function findThis( sid:String):int
 			{
 				for(var i:int =0 ; i < objs.length ; i++)
 				{

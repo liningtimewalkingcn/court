@@ -7,6 +7,7 @@
 	skinClass="skins.appbgSkin"
 	>
 	
+	
 	<fx:Declarations>
 		<supportClasses:Dao id="dao" dbfilename="mydatabase"/>
 		<supportClasses:HTTPServicePool id="HttpRequest" />
@@ -64,7 +65,6 @@
 			//登录判断用户名密码是否正确
 			protected function login(event:MouseEvent):void
 			{						
-
 				var namelist :ArrayList = new ArrayList();
 				dao.query("select * from SYS_USER where username = '"+inputUserName.text+"' and userpassword = '"+inputPassWord.text+"' ", function (data:*):void 
 				{	
@@ -75,9 +75,15 @@
 						listpage.visible = true;
 						locallist.visible = true;
 						loginuser.text = " "+inputUserName.text+"";
+						loginuserq.text = " "+inputUserName.text+"";
+						loginusera.text = " "+inputUserName.text+"";
 						loginusers.text = " "+inputUserName.text+"";
+						loginuserss.text = " "+inputUserName.text+"";
 						loginusernetusername.text = data[0].server_username;
+						loginusernetusernameq.text = data[0].server_username;
 						loginusernetusernames.text = data[0].server_username;
+						loginusernetusernamess.text = data[0].server_username;
+						loginusernetusernamea.text = data[0].server_username;
 					}
 					else
 					{
@@ -242,6 +248,7 @@
 						listpage.visible=true;
 						serverlist.visible = true;
 						tjbdda.visible = true;
+						tijiao.visible = true;
 					}
 				})
 			}
@@ -305,6 +312,48 @@
 				serverlist.visible=false;
 				backpage.visible=true;
 				tjbdda.visible = false;
+				tijiao.visible = false;
+			}
+			
+			//答题界面的退出当前用户页面（已登录）
+			protected function questbacktologin(event:MouseEvent):void
+			{
+				listpage.visible=false;
+				locallist.visible=false;
+				serverlist.visible=false;
+				backpage.visible=true;
+				tjbdda.visible = false;
+				tijiao.visible = false;
+				questionpage.visible=false;
+				qpage.visible=false;
+			}
+			
+			//退出当前用户页面（已登录取消）
+			protected function questbacktologinlook(event:MouseEvent):void
+			{
+				listpage.visible=false;
+				locallist.visible=false;
+				serverlist.visible=false;
+				backpage.visible=true;
+				tjbdda.visible = false;
+				tijiao.visible = false;
+				localchack.visible=false;
+				chacklocal.visible=false;
+			}
+			
+			//答题界面的退出当前用户页面（服务器已登录）
+			protected function backtologinser(event:MouseEvent):void
+			{
+				listpage.visible=false;
+				locallist.visible=false;
+				serverlist.visible=false;
+				backpage.visible=true;
+				tjbdda.visible = false;
+				tijiao.visible = false;
+				questionpage.visible=false;
+				qpage.visible=false;
+				questionpageserver.visible = false;
+				sqpage.visible=false;
 			}
 			
 			//返回登录页面（未登录）
@@ -359,7 +408,7 @@
 				var opt:OneOption = new OneOption();
 				opt.optall = "答案";			
 				var qaa:Object = new Object();
-				qaa = opt._answer;
+				qaa = opt._answer;		//从oneoption获得的objs
 				/*Alert.show(JSON.stringify(qaa));*/
 				//把得到的数据存到数据库
 				var answerArr:Array = [];
@@ -386,7 +435,6 @@
 			//本地答题页面的暂存
 			protected function temporary(event:MouseEvent):void
 			{	
-				//想要提交的话，得知道提交的内容
 				var opt:OneOption = new OneOption();
 				opt.optall = "答案";			
 				var qaa:Object = new Object();
@@ -397,6 +445,10 @@
 				if(i == 1)
 				{
 					Alert.show("暂存成功");
+				}
+				else
+				{
+					Alert.show("暂存失败");
 				}
 			}
 			
@@ -420,6 +472,7 @@
 			//服务器答题页面的提交答案
 			protected function submitanswerserver(event:MouseEvent):void
 			{
+				
 				//想要提交的话，得知道提交的内容
 				var opt:OneQuestion = new OneQuestion();
 				opt.optall = "答案";			
@@ -502,7 +555,7 @@
 				});
 			}
 			
-			//本地列表的查看页面
+			//本地列表的查看页面(录入任务)
 			public function chackout():void  
 			{
 				listpage.visible=false;
@@ -514,6 +567,51 @@
 				var evalobjname:String = local1.selectedItem.evalobjname;
 				var renwu:String = local1.selectedItem.nairename;
 				var wenjuan:String = local1.selectedItem.levelonezb;			
+				var quest_sid:String;
+				
+				//从数据库取出来的相应的题目	
+				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
+				{	
+					namenair.text = wenjuan;
+					namecourt.text = evalobjname;
+					cname = evalobjname;
+					namenai.text = renwu;
+					questall.text = data.length;
+					for (var d:int = 0; d < data.length; ++d) 
+					{
+						var onequest:OneQuestion = new OneQuestion();
+						onequest.questdata = {num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
+						quest_sid = data[d].sid;
+						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
+						{	
+							var arr:Array =new Array();
+							var list:Array = new Array();
+							var num:int = date.length;
+							var zzz:int = 0;
+							for(var q :int ; q<date.length ; q++)
+							{		
+								arr.push( date[q].sid );
+								list.push( date[q].name);
+							}						
+							onequest.optiondata={bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+						});
+						localchacklist.addElement(onequest);
+					}
+				});	
+			}
+			
+			//本地列表的查看页面(审核任务)
+			public function chackoutsh():void  
+			{
+				listpage.visible=false;
+				locallist.visible=false;
+				localchack.visible=true;
+				chacklocal.visible=true;
+				
+				var zbsidnum:String = local2.selectedItem.zbsid;
+				var evalobjname:String = local2.selectedItem.evalobjname;
+				var renwu:String = local2.selectedItem.nairename;
+				var wenjuan:String = local2.selectedItem.levelonezb;			
 				var quest_sid:String;
 				
 				//从数据库取出来的相应的题目	
@@ -592,7 +690,7 @@
 				});	
 			}
 			
-			//服务器端的查看
+			//服务器端的查看(录入任务)
 			public function serverchack():void  
 			{				
 				listpage.visible=false;
@@ -606,6 +704,57 @@
 				var evalobjname:String = titlesgrid2.selectedItem.evalobjname;
 				var renwu:String = titlesgrid2.selectedItem.nairename;
 				var wenjuan:String = titlesgrid2.selectedItem.levelonezb;			
+				var quest_sid:String;
+				
+				servernairname.text = wenjuan;
+				servercourtname.text = evalobjname;
+				servernainame.text = renwu;
+				
+				//从服务器端获取数据
+				HttpRequest.post(httpurl+"/OffLineClientController/onelist.vot",{"sid":zbsidnum},function(data)
+				{					
+					var date:Object = JSON.parse(data);
+					serverallquest.text = date.length;
+					
+					for (var d:int = 0; d < date.length; ++d) 
+					{
+						var questone:OneQuestion = new OneQuestion();						
+						questone.questdata = {num:d , tmsms:date[d].memo , quests:date[d].name };
+						quest_sid = date[d].sid;			
+						HttpRequest.post(httpurl+"/OffLineClientController/listoption.vot",{"questsid":quest_sid},function(all)
+							
+						{	
+							var dete:Object = JSON.parse(all);
+							var arr:Array =new Array();
+							var list:Array = new Array();
+							var num:int = dete.length;
+							var zzz:int = 0;
+							for(var q :int ; q<dete.length ; q++)
+							{		
+								arr.push( dete[q].sid );
+								list.push( dete[q].name);
+							}
+							questone.optiondata = {qstid:dete[0].questsid , bool:zzz , ar:arr , num:num , list:list};
+						});
+						questionserver.addElement(questone);
+					}
+				});
+			}
+			
+			//服务器端的查看(审核任务)
+			public function serverchacksh():void  
+			{				
+				listpage.visible=false;
+				serverlist.visible=false;
+				/*questcontainer.visible = false;*/
+				/*questionpage.visible=false;*/
+				serverquestionpage.visible = true;
+				pagesq.visible=true;
+				
+				var zbsidnum:String = titlesgrid3.selectedItem.zbsid;
+				var evalobjname:String = titlesgrid3.selectedItem.evalobjname;
+				var renwu:String = titlesgrid3.selectedItem.nairename;
+				var wenjuan:String = titlesgrid3.selectedItem.levelonezb;			
 				var quest_sid:String;
 				
 				servernairname.text = wenjuan;
@@ -952,7 +1101,8 @@
 							{		
 								arr.push( date[q].sid );
 								list.push( date[q].name);
-							}						
+							}	
+							onequest.removeall = "清空allanswer";
 							onequest.optiondata={evalobjname:evalobjname , cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
 						});
 						questcontainer.addElement(onequest);
@@ -971,6 +1121,24 @@
 					});
 				});				
 			}
+			
+			//统一修改备注
+			protected function blackpage(event:MouseEvent):void
+			{
+				blackPage.visible = true;
+			}
+			
+			protected function sureToSave(event:MouseEvent):void
+			{
+				Alert.show("保存成功！");
+				blackPage.visible = false;
+			}
+			
+			protected function nonono(event:MouseEvent):void
+			{
+				blackPage.visible = false;
+			}
+			
 		]]>
 	</fx:Script>
 	
@@ -1004,7 +1172,7 @@
 		</s:layout>
 		<s:SkinnableContainer width="100%">
 			<s:Button label=" " skinClass="skins.head"/>
-			<s:VGroup horizontalAlign="right" verticalAlign="middle" width="100%">
+			<s:VGroup horizontalAlign="right" right="36" verticalAlign="middle" width="100%">
 				<s:HGroup>
 					<s:Label text=" "/>
 				</s:HGroup>		
@@ -1017,42 +1185,44 @@
 					<s:Label visible="false" id="loginusernetusername" fontSize="25" color="white"/>	
 					<s:Button label=" " skinClass="skins.news"/>
 					<s:Label text=" 0 " id="unfinishedNews"/> 
-					<s:Label text="    "/>
+					<s:Label text="    "/><s:Label text="    "/><s:Label text="    "/><s:Label text="    "/>
 					<s:Button label=" " skinClass="skins.backToLogin"  click="backtologin(event)"/>
 				</s:HGroup>
 			</s:VGroup>
 		</s:SkinnableContainer>
 		
 		<s:SkinnableContainer skinClass="skins.middle" width="98%">
-			<s:VGroup right="100"  fontSize="20" horizontalAlign="right"  height="100%" width="100%" >				
+			<s:VGroup fontSize="22" right="100" horizontalAlign="right" width="100%" >				
 				<s:Label/>	 
 				<s:Label/>
 				<s:HGroup></s:HGroup>
 				<s:HGroup>
 					<s:Label id="updatestatus" visible="false"/>
-					<s:Button skinClass="skins.submitSQL" label="提交本地答案" id="tjbdda" visible="false" click="submitlocal(event)"/>
+					<s:Button skinClass="skins.submitSQL" label=" " id="tjbdda" visible="false" click="submitlocal(event)"/>
+					<s:Button visible="false" id="tijiao" label="提交本地答案" skinClass="skins.hanzitijiao" click="submitlocal(event)"/>
+					<s:Label text="       " /><s:Label text="       " /><s:Label text="       " />
 					<s:Button skinClass="skins.unpdateSQL" label=" " click="updateSQLite(event)" color="#333333"/>			
-					<s:Label text="更新本地数据库" color="#333333" fontSize="22"/>
+					<s:Button label="更新本地数据库"  skinClass="skins.hanzigengxin" click="updateSQLite(event)"/>
 				</s:HGroup>			
 			</s:VGroup>
-			<s:VGroup left="100"  fontSize="20" horizontalAlign="left"  height="100%" width="100%" >				
+			<s:VGroup left="100"  fontSize="22" horizontalAlign="left" width="100%" >				
 				<s:Label/>	
 				<s:Label/>
 				<s:HGroup></s:HGroup>
 				<s:HGroup>
-					<s:Button skinClass="skins.updateWork" label=" " click="updateWork(event)"/>
-					<s:Label text="更新待办任务" color="#333333" fontSize="22"/>
-					<s:Label text="       " />
+					<s:Button top="200" skinClass="skins.updateWork" label=" " click="updateWork(event)"/>
+					<s:Button label="更新待办任务" skinClass="skins.hanzidaiban" click="updateWork(event)"/>
+					<s:Label text="       " /><s:Label text="       " /><s:Label text="       " />
 					<s:Button skinClass="skins.submitWork" label=" " click="submitWork(event)"/>
-					<s:Label text="提交待办任务" color="#333333" fontSize="22"/>
+					<s:Button label="提交待办任务" skinClass="skins.hanzitijiaodaiban" click="submitWork(event)"/>
 				</s:HGroup>	
 			</s:VGroup>
 		</s:SkinnableContainer>
 	</s:SkinnableContainer>
 	
 	<!--从服务器端更新的列表-->
-	<s:SkinnableContainer horizontalCenter="1"  top="160 " id="serverlist" visible="false" width="98%" height="100%">
-		<s:VGroup  top="120 " height="100%" width="100%" horizontalAlign="left">
+	<s:SkinnableContainer horizontalCenter="1"  top="130 " id="serverlist" visible="false" width="98%" height="100%">
+		<s:VGroup  top="90 " height="100%" width="100%" horizontalAlign="left">
 			<s:HGroup></s:HGroup>
 			<s:Label/>
 			<mx:TabNavigator id="tabnavigator1" change="indexChangeFunc(event)" width="100%" height="30" fontSize="20">
@@ -1062,7 +1232,7 @@
 				</mx:Panel>
 			</mx:TabNavigator>	
 		</s:VGroup>
-		<s:VGroup  height="100%" width="100%" top="180" horizontalAlign="center">
+		<s:VGroup  height="100%" width="100%" top="146" horizontalAlign="center">
 			<s:DataGrid textAlign="left" id="titlesgrid2"  selectionChange="" editable="true" width="100%" height="100%" contentBackgroundColor="white" color="gray" borderColor="black">
 				<s:columns>
 					<s:ArrayList>
@@ -1088,11 +1258,11 @@
 												}
 											]]>
 										</fx:Script>
-										<s:HGroup>
-											<s:Button skinClass="skins.buttonSetLocal" click="chackserver(event)" left="30"/>										
+										<s:HGroup width="100%" horizontalAlign="center">
+											<s:Button skinClass="skins.buttonSetLocal" click="chackserver(event)"/>										
 											<mx:LinkButton label="查看" click="chackserver(event)" visible="true"/>
 											<s:Button skinClass="skins.buttonLookLocal" click="serveredit(event)"/>
-											<mx:LinkButton label="编辑" click="serveredit(event)" visible="true" width="50%"/>
+											<mx:LinkButton label="编辑" click="serveredit(event)" visible="true"/>
 										</s:HGroup>
 									</s:GridItemRenderer>							
 								</fx:Component>
@@ -1119,11 +1289,11 @@
 											<![CDATA[
 												protected function linkbutton1_clickHandler(event:MouseEvent):void
 												{
-													outerDocument.serverchack();
+													outerDocument.serverchacksh();
 												}
 											]]>
 										</fx:Script>
-										<s:HGroup>
+										<s:HGroup width="100%" horizontalAlign="center">
 											<s:Button skinClass="skins.buttonSetLocal" click="linkbutton1_clickHandler(event)" left="30"/>
 											<mx:LinkButton label="查看" click="linkbutton1_clickHandler(event)" visible="true"/>
 										</s:HGroup>
@@ -1138,8 +1308,8 @@
 	</s:SkinnableContainer>
 	
 	<!--从本地更新的列表-->
-	<s:Group id="locallist" top="160 " visible="false" width="98%" height="100%" horizontalCenter="1">
-		<s:VGroup  height="100%" width="100%" top="120" horizontalAlign="left">
+	<s:Group id="locallist" top="130 " visible="false" width="98%" height="100%" horizontalCenter="1">
+		<s:VGroup  height="100%" width="100%" top="90" horizontalAlign="left">
 			<s:HGroup></s:HGroup>
 			<s:Label/>
 			<mx:TabNavigator id="local3" change="indexChangelocal(event)" width="100%" height="30" fontSize="20">
@@ -1149,17 +1319,17 @@
 				</mx:Panel>
 			</mx:TabNavigator>	
 		</s:VGroup>
-		<s:VGroup  height="100%" width="100%" top="180" horizontalAlign="center">
-			<s:DataGrid skinClass="skins.statusBar" textAlign="center" id="local1"  selectionChange="" editable="true" width="100%" height="100%" contentBackgroundColor="white" color="0x000000" borderColor="black">
+		<s:VGroup  height="100%" width="100%" top="146" horizontalAlign="center">
+			<s:DataGrid horizontalCenter="1" skinClass="skins.statusBar" textAlign="center" id="local1"  selectionChange="" editable="true" width="100%" height="100%" contentBackgroundColor="white" color="0x000000" borderColor="black">
 				<s:columns>	
 					<s:ArrayList>
-						<s:GridColumn  editable="false" dataField="num" headerText="序号" />
+						<s:GridColumn editable="false" dataField="num" headerText="序号" />
 						<s:GridColumn editable="false" dataField="nairename" headerText="问卷"/>
 						<s:GridColumn editable="false" dataField="evalobjname" headerText="测评对象"/>
 						<s:GridColumn editable="false" dataField="levelonezb" headerText="任务"/>
 						<s:GridColumn editable="false" dataField="input_status" headerText="录入任务状态"/>
 						<s:GridColumn editable="false" dataField="audit_status" headerText="审核任务状态"/>
-						<s:GridColumn headerText="操作" editable="false" dataField="operation">
+						<s:GridColumn editable="false" dataField="operation" headerText="操作">
 							<s:itemRenderer>
 								<fx:Component>
 									<s:GridItemRenderer horizontalCenter="1">		
@@ -1176,11 +1346,11 @@
 												}
 											]]>
 										</fx:Script>
-										<s:HGroup horizontalAlign="center">
+										<s:HGroup width="100%" horizontalAlign="center">
 											<s:Button skinClass="skins.buttonSetLocal" click="justlook(event)" left="30"/>
-											<mx:LinkButton label="查看" visible="true" click="justlook(event)"/>										
+											<mx:LinkButton  label="查看" visible="true" click="justlook(event)"/>										
 											<s:Button skinClass="skins.buttonLookLocal" click="changepage(event)"/>											
-											<mx:LinkButton label="编辑" visible="true" width="50%" click="changepage(event)"/>
+											<mx:LinkButton label="编辑" visible="true" click="changepage(event)"/>
 										</s:HGroup>
 									</s:GridItemRenderer>							
 								</fx:Component>
@@ -1189,7 +1359,7 @@
 					</s:ArrayList>
 				</s:columns>
 			</s:DataGrid>
-			<s:DataGrid textAlign="left" id="local2" selectionChange="" editable="true" width="100%" height="-6" contentBackgroundColor="white" color="gray" borderColor="black">
+			<s:DataGrid skinClass="skins.shenhelocal" horizontalCenter="1" textAlign="center" id="local2" selectionChange="" editable="true" width="100%" height="-6" contentBackgroundColor="white" color="gray" borderColor="black">
 				<s:columns>
 					<s:ArrayList>
 						<s:GridColumn editable="false" dataField="num" headerText="序号"/>
@@ -1209,11 +1379,11 @@
 												
 												protected function justlook(event:MouseEvent):void
 												{
-													outerDocument.chackout();
+													outerDocument.chackoutsh();
 												}
 											]]>
 										</fx:Script>
-										<s:HGroup>																					
+										<s:HGroup width="100%" horizontalAlign="center">																					
 											<s:Button skinClass="skins.buttonSetLocal" click="justlook(event)" left="30"/>
 											<mx:LinkButton label="查看" visible="true" click="justlook(event)"/>
 										</s:HGroup>
@@ -1332,7 +1502,7 @@
 					<s:Button label=" " skinClass="skins.news"/>
 					<s:Label text=" 0 " id="unfinishedNew"/> 
 					<s:Label text="    "/>
-					<s:Button label=" " skinClass="skins.backToLogin"  click="backtologin(event)"/>
+					<s:Button label=" " skinClass="skins.backToLogin"  click="questbacktologin(event)"/>
 				</s:HGroup>
 			</s:VGroup>
 		</s:SkinnableContainer>
@@ -1367,14 +1537,17 @@
 			<s:HGroup>
 				<s:Label text=" "/>
 			</s:HGroup>
-			<s:HGroup verticalAlign="bottom" top="75" horizontalAlign="center" width="100%">
+			<s:HGroup horizontalAlign="center" width="100%" top="85">
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="统一修改备注" click="blackpage(event)"/>
+			</s:HGroup>
+			<s:HGroup verticalAlign="bottom" top="155" horizontalAlign="center" width="100%">
 				<s:Label text="共 "/>
 				<s:Label text=" " id="allquest" fontWeight="bold" color="red"/>
 				<s:Label text="道题"/>
 			</s:HGroup>			
-			<s:HGroup verticalAlign="middle" top="120" left="120" width="88%" horizontalAlign="center">
+			<s:HGroup horizontalAlign="center" top="190" width="100%">
 				<s:Label text="问卷备注："/>
-				<s:TextArea  width="1500" height="30"/>
+				<s:TextArea  width="1300" height="30"/>
 			</s:HGroup>
 			<s:HGroup>
 				<s:Label text=" "/>
@@ -1382,95 +1555,40 @@
 		</s:SkinnableContainer>
 	</s:SkinnableContainer>
 	
-	<!--服务器端答题首-->
-	<s:Group id="questionpageserver" visible="false" horizontalCenter="1" width="80%">
-		<s:VGroup horizontalAlign="left" width="100%">
-			<s:HGroup fontSize="50">	
-				<s:Label/>
-			</s:HGroup>
-			<s:HGroup horizontalAlign="left" fontSize="30">
-				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
-				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
-				<s:Button label="&lt; 返回列表  " click="backlistserver(event)"/>
-				<s:Label/><s:Label />
-				<s:Button label=" 暂存 " click="temporaryserver(event)"/>
-				<s:Label/><s:Label/>
-				<s:Button label=" 提交 " click="submitanswerserver(event)"/>
-				<s:Label/><s:Label/>
-				<s:Button label=" 取消 " click="cancelserver(event)"/>
-			</s:HGroup>	
-			<s:Button width="100%" height="1"/>
-		</s:VGroup>
-		<s:VGroup horizontalAlign="center" width="80%" fontSize="25" top="120">			
-			<s:HGroup  verticalAlign="middle">
-				<s:Label/>
-				<s:Label text="当前问卷：" fontWeight="bold"/>
-				<s:Label text=" " id="nairnameserver" color="red"/>
-				<s:Label/><s:Label/>
-				<s:Label text="当前测评对象: " fontWeight="bold"/>
-				<s:Label text=" " id="courtnameserver" color="red"/>
-				<s:Label/><s:Label/>
-				<s:Label text="当前任务：" fontWeight="bold"/>
-				<s:Label text=" " id="nainameserver" color="red"/>
-				<s:Label/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-			<s:HGroup verticalAlign="bottom">
-				<s:Label text="共 "/>
-				<s:Label text=" " id="allquestserver" fontWeight="bold" color="red"/>
-				<s:Label text="道题"/>
-			</s:HGroup>			
-		</s:VGroup>
-		<s:VGroup horizontalAlign="left" fontSize="25" top="230">
-			<s:HGroup verticalAlign="middle">
-				<s:Label text="问卷备注："/>
-				<s:TextArea  width="1500" height="30"/>
-			</s:HGroup>
-			<s:HGroup>
-				<s:Label text=" "/>
-			</s:HGroup>
-		</s:VGroup>
-	</s:Group>
-	
-	
-	<!--本地题目-->
-	<s:Group id="qpage" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="25" top="450">
-		<s:Scroller width="100%" height="100%">
-			<s:Group width="100%" height="100%">
-				<s:VGroup horizontalAlign="center">
-				</s:VGroup>
-				<s:VGroup id="questcontainer" width="100%">
-				</s:VGroup>
-			</s:Group>
-		</s:Scroller>
-	</s:Group>
-	
-	<!--服务器题目-->
-	<s:Group id="sqpage" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="25" top="300">
-		<s:Scroller width="100%" height="100%">
-			<s:Group width="100%" height="100%">
-				<s:VGroup horizontalAlign="center">			
-				</s:VGroup>
-				<s:VGroup id="serverquestion" width="100%">					
-				</s:VGroup>
-			</s:Group>
-		</s:Scroller>
-	</s:Group>
-	
 	<!--本地查看页面-->
-	<s:Group id="localchack" visible="false"  fontSize="25" horizontalCenter="0" width="100%">
-		<s:HGroup horizontalAlign="left" fontSize="30" top="30">
-			<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
-			<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
-			<s:Button label="&lt; 返回列表  " click="backagain(event)"/>
-		</s:HGroup>
-		<s:HGroup>
-			<s:Button width="100%" height="1"/>
-		</s:HGroup>
-		<s:VGroup horizontalAlign="center" width="80%" fontSize="25" top="120">			
-			<s:HGroup  verticalAlign="middle">
+	<s:SkinnableContainer skinClass="skins.questList" id="localchack" visible="false"  fontSize="25" horizontalCenter="0" width="100%">
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center"/>
+		</s:layout>
+		<s:SkinnableContainer width="100%">
+			<s:Button label=" " skinClass="skins.head"/>
+			<s:VGroup horizontalAlign="right" verticalAlign="middle" width="100%">
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>		
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>
+				<s:HGroup fontSize="20">
+					<s:Button label=" " skinClass="skins.serverUserName"/>	
+					<s:Label text=" " id="loginusera" fontSize="25"/>	
+					<s:Label visible="false" id="loginusernetusernamea" fontSize="25" color="white"/>	
+					<s:Button label=" " skinClass="skins.news"/>
+					<s:Label text=" 0 " id="unfinishedN"/> 
+					<s:Label text="    "/>
+					<s:Button label=" " skinClass="skins.backToLogin"  click="questbacktologinlook(event)"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer  width="100%" >
+			<s:HGroup horizontalAlign="left" fontSize="30" top="45">
+				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
+				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="&lt;&lt; 返回列表  " click="backagain(event)"/>
+			</s:HGroup>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer top="500" skinClass="skins.queatHead" width="96%" fontSize="25">			
+			<s:HGroup horizontalAlign="center" width="100%" verticalAlign="middle" top="40">
 				<s:Label/>
 				<s:Label text="当前问卷：" fontWeight="bold"/>
 				<s:Label text=" " id="namenair" color="red"/>
@@ -1485,41 +1603,124 @@
 			<s:HGroup>
 				<s:Label text=" "/>
 			</s:HGroup>
-			<s:HGroup verticalAlign="bottom">
+			<s:HGroup horizontalAlign="center" width="100%" top="75">
 				<s:Label text="共 "/>
 				<s:Label text=" " id="questall" fontWeight="bold" color="red"/>
 				<s:Label text="道题"/>
 			</s:HGroup>			
-		</s:VGroup>
-	</s:Group>
-
-	<!--本地查看题目-->
-	<s:Group id="chacklocal" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="25" top="230">
-		<s:Scroller width="100%" height="100%">
-			<s:Group width="100%" height="100%">
-				<s:VGroup horizontalAlign="center">
-				</s:VGroup>
-				<s:VGroup id="localchacklist" width="100%">					
-				</s:VGroup>
-			</s:Group>
-		</s:Scroller>
-	</s:Group>
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
 	
-	<!--服务器查看页面-->
-	<s:Group id="serverquestionpage" visible="false" horizontalCenter="1" width="80%">
-		<s:VGroup horizontalAlign="left" width="100%">
+	
+	<!--服务器端答题首-->
+	<s:SkinnableContainer skinClass="skins.questList" id="questionpageserver" visible="false" horizontalCenter="1" width="100%">
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center"/>
+		</s:layout>
+		<s:SkinnableContainer width="100%">
+			<s:Button label=" " skinClass="skins.head"/>
+			<s:VGroup horizontalAlign="right" verticalAlign="middle" width="100%">
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>		
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>
+				<s:HGroup fontSize="20">
+					<s:Button label=" " skinClass="skins.serverUserName"/>	
+					<s:Label text=" " id="loginuserss" fontSize="25"/>	
+					<s:Label visible="false" id="loginusernetusernamess" fontSize="25" color="white"/>	
+					<s:Button label=" " skinClass="skins.news"/>
+					<s:Label text=" 0 " id="unfinished"/> 
+					<s:Label text="    "/>
+					<s:Button label=" " skinClass="skins.backToLogin"  click="backtologin(event)"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer width="100%">
 			<s:HGroup fontSize="50">	
 				<s:Label/>
 			</s:HGroup>
-			<s:HGroup horizontalAlign="left" fontSize="30">
+			<s:HGroup horizontalAlign="left" fontSize="30" top="45">
 				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
 				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
-				<s:Button label="&lt; 返回列表  " click="backserverchack(event)"/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="&lt;&lt; 返回列表  " click="backlistserver(event)"/>
+				<s:Label/><s:Label />
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label=" 暂存 " click="temporaryserver(event)"/>
+				<s:Label/><s:Label/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label=" 提交 " click="submitanswerserver(event)"/>
+				<s:Label/><s:Label/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label=" 取消 " click="cancelserver(event)"/>
 			</s:HGroup>	
-			<s:Button width="100%" height="1"/>
-		</s:VGroup>
-		<s:VGroup horizontalAlign="center" width="80%" fontSize="25" top="120">			
-			<s:HGroup  verticalAlign="middle">
+		</s:SkinnableContainer>
+		<s:SkinnableContainer top="500" skinClass="skins.queatHead" horizontalCenter="1" width="96%" fontSize="25">			
+			<s:HGroup horizontalAlign="center" top="40" width="100%">
+				<s:Label/>
+				<s:Label text="当前问卷：" fontWeight="bold"/>
+				<s:Label text=" " id="nairnameserver" color="red"/>
+				<s:Label/><s:Label/>
+				<s:Label text="当前测评对象: " fontWeight="bold"/>
+				<s:Label text=" " id="courtnameserver" color="red"/>
+				<s:Label/><s:Label/>
+				<s:Label text="当前任务：" fontWeight="bold"/>
+				<s:Label text=" " id="nainameserver" color="red"/>
+				<s:Label/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+			<s:HGroup horizontalAlign="center" top="85" width="100%">
+				<s:Label text="共 "/>
+				<s:Label text=" " id="allquestserver" fontWeight="bold" color="red"/>
+				<s:Label text="道题"/>
+			</s:HGroup>			
+			<s:HGroup horizontalAlign="center" top="140" width="100%" >
+				<s:Label text="问卷备注："/>
+				<s:TextArea  width="1300" height="30"/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+	
+	<!--服务器查看页面-->
+	<s:SkinnableContainer skinClass="skins.questList" id="serverquestionpage" visible="false" horizontalCenter="1" width="100%">
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center"/>
+		</s:layout>
+		<s:SkinnableContainer width="100%">
+			<s:Button label=" " skinClass="skins.head"/>
+			<s:VGroup horizontalAlign="right" verticalAlign="middle" width="100%">
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>		
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>
+				<s:HGroup fontSize="20">
+					<s:Button label=" " skinClass="skins.serverUserName"/>	
+					<s:Label text=" " id="loginuserq" fontSize="25"/>	
+					<s:Label visible="false" id="loginusernetusernameq" fontSize="25" color="white"/>	
+					<s:Button label=" " skinClass="skins.news"/>
+					<s:Label text=" 0 " id="unfinishednew"/> 
+					<s:Label text="    "/>
+					<s:Button label=" " skinClass="skins.backToLogin"  click="backtologinser(event)"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer width="100%">
+			<s:HGroup fontSize="50">	
+				<s:Label/>
+			</s:HGroup>
+			<s:HGroup horizontalAlign="left" fontSize="30" top="35">
+				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
+				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="&lt;&lt; 返回列表  " click="backserverchack(event)"/>
+			</s:HGroup>	
+		</s:SkinnableContainer>
+		<s:SkinnableContainer width="96%" horizontalCenter="1" top="500" skinClass="skins.queatHead" fontSize="25">			
+			<s:HGroup top="40" horizontalAlign="center" width="100%">
 				<s:Label/>
 				<s:Label text="当前问卷：" fontWeight="bold"/>
 				<s:Label text=" " id="servernairname" color="red"/>
@@ -1534,13 +1735,55 @@
 			<s:HGroup>
 				<s:Label text=" "/>
 			</s:HGroup>
-			<s:HGroup verticalAlign="bottom">
+			<s:HGroup horizontalAlign="center" top="85" width="100%">
 				<s:Label text="共 "/>
 				<s:Label text=" " id="serverallquest" fontWeight="bold" color="red"/>
 				<s:Label text="道题"/>
 			</s:HGroup>			
-		</s:VGroup>
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+	
+	
+	
+	<!--本地题目-->
+	<s:Group id="qpage" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="25" top="480">
+		<s:Scroller width="100%" height="100%">
+			<s:Group width="100%" height="100%">
+				<s:VGroup horizontalAlign="center">
+				</s:VGroup>
+				<s:VGroup id="questcontainer" width="100%">
+				</s:VGroup>
+			</s:Group>
+		</s:Scroller>
 	</s:Group>
+	
+	<!--服务器题目-->
+	<s:Group id="sqpage" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="25" top="450">
+		<s:Scroller width="100%" height="100%">
+			<s:Group width="100%" height="100%">
+				<s:VGroup horizontalAlign="center">			
+				</s:VGroup>
+				<s:VGroup id="serverquestion" width="100%">					
+				</s:VGroup>
+			</s:Group>
+		</s:Scroller>
+	</s:Group>
+	
+	
+
+	<!--本地查看题目-->
+	<s:Group id="chacklocal" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="25" top="400">
+		<s:Scroller width="100%" height="100%">
+			<s:Group width="100%" height="100%">
+				<s:VGroup horizontalAlign="center">
+				</s:VGroup>
+				<s:VGroup id="localchacklist" width="100%">					
+				</s:VGroup>
+			</s:Group>
+		</s:Scroller>
+	</s:Group>
+	
+	
 	
 	<!--服务器查看题目-->
 	<s:Group id="pagesq" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="25" top="300">
@@ -1553,4 +1796,33 @@
 			</s:Group>
 		</s:Scroller>
 	</s:Group>
+	
+	<!--统一修改备注-->
+	<s:SkinnableContainer id="blackPage" skinClass="skins.toback" height="100%" width="100%" visible="false">
+		<s:VGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+			<s:HGroup width="100%" horizontalAlign="center">
+				<s:Label text=" "/>
+				<s:Label text=" "/>
+				<s:Label text=" "/>
+				<s:Label text=" "/>
+				
+				<s:Label text="统一修改备注" fontSize="30"/>
+				<s:TextArea width="1300" height="200" fontSize="25"/>
+			</s:HGroup>
+			<s:HGroup width="100%" horizontalAlign="center" fontSize="20">
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="确定" click="sureToSave(event)"/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="取消" click="nonono(event)"/>
+			</s:HGroup>
+		</s:VGroup>		
+	</s:SkinnableContainer>
+	
 </s:WindowedApplication>

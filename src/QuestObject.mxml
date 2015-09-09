@@ -124,4 +124,28 @@
 	<s:VGroup id="options">	
 	</s:VGroup>
 	
+	<s:HGroup>
+		<s:Label text=" "/>
+	</s:HGroup>
+	
+	<s:HGroup>
+		<s:Label text="录入员说明"/>
+		<s:TextArea width="1200" height="30"/>
+	</s:HGroup>
+	
+	<s:HGroup>
+		<s:Label text=" "/>
+	</s:HGroup>
+	
+	<s:HGroup>
+		<s:Label text="录入员附件:"/>
+	</s:HGroup>
+	
+	<s:HGroup>
+		<s:Label text=" "/>
+	</s:HGroup>
+	
+	<s:HGroup>
+		<s:Label text=" "/>
+	</s:HGroup>
 </s:VGroup>

@@ -43,7 +43,7 @@
         ]]>
     </fx:Metadata>
     
-
+    
         
     <!-- states -->
     <s:states>
@@ -170,8 +170,6 @@
 		</s:stroke>
 	</s:Rect>
     
-	<s:Image source="@Embed('assets/icon4.png')"/>
-	
     <!-- layer 8: text -->
     <!--- @copy spark.components.supportClasses.ButtonBase#labelDisplay  -->
     <s:Label id="labelDisplay"

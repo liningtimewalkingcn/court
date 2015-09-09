@@ -169,7 +169,7 @@
 		</s:stroke>
 	</s:Rect>
     
-	<s:Image source="Embed('assets/icon_22.png')"/>
+	<s:Image source="@Embed('assets/icon_22.png')"/>
 	
     <!-- layer 8: text -->
     <!--- @copy spark.components.supportClasses.ButtonBase#labelDisplay  -->
