@@ -1019,6 +1019,7 @@
 																					{
 																						if (status.committed) 
 																						{
+																							var ss: FlexEvent
 																							Alert.show("更新完毕");
 																							dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
 																							{					
@@ -1375,9 +1376,11 @@
 								</fx:Component>
 							</s:headerRenderer>							<s:itemRenderer>
 								<fx:Component>
-									<s:GridItemRenderer horizontalCenter="">
+									<s:GridItemRenderer horizontalCenter="" dataChange="griditemrenderer1_dataChangeHandler(event)">
 										<fx:Script>
 											<![CDATA[
+												import mx.controls.Alert;
+												import mx.events.FlexEvent;
 												protected function serveredit(event:MouseEvent):void
 												{
 													outerDocument.sedit();  
@@ -1386,11 +1389,17 @@
 												{
 													outerDocument.serverchack();
 												}
+												
+												protected function griditemrenderer1_dataChangeHandler(event:FlexEvent):void
+												{
+													Alert.show("dfsfds");												
+												}
+												
 											]]>
 										</fx:Script>
 										<s:HGroup width="100%" horizontalAlign="center">
 											<s:Button skinClass="skins.buttonSetLocal" click="chackserver(event)"/>										
-											<mx:LinkButton label="查看" click="chackserver(event)" visible="true"/>
+											<mx:LinkButton label="查看1" click="chackserver(event)" visible="true"/>
 											<s:Button skinClass="skins.buttonLookLocal" click="serveredit(event)"/>
 											<mx:LinkButton label="编辑" click="serveredit(event)" visible="true"/>
 										</s:HGroup>
@@ -1642,10 +1651,11 @@
 							</s:headerRenderer>
 							<s:itemRenderer>
 								<fx:Component>
-									<s:GridItemRenderer horizontalCenter="1">		
+									<s:GridItemRenderer horizontalCenter="1" dataChange="griditemrenderer2_dataChangeHandler(event)">		
 										<fx:Script>
 											<![CDATA[
 												import mx.controls.Alert;
+												import mx.events.FlexEvent;
 												protected function justlook(event:MouseEvent):void
 												{													
 													outerDocument.chackout();  
@@ -1654,11 +1664,18 @@
 												{
 													outerDocument.changepageOut();  
 												}
+												
+												protected function griditemrenderer2_dataChangeHandler(event:FlexEvent):void
+												{
+													viewbtn.visible = ((data.evalobjname + "").indexOf("丽水") == -1);
+													iconbtn.visible =  ((data.evalobjname + "").indexOf("丽水") == -1)
+												}
+												
 											]]>
 										</fx:Script>
-										<s:HGroup width="100%" horizontalAlign="center">
-											<s:Button skinClass="skins.buttonSetLocal" click="justlook(event)" left="30"/>
-											<mx:LinkButton  label="查看" visible="true" click="justlook(event)"/>										
+										<s:HGroup id="parentgroup" width="100%" horizontalAlign="center">
+											<s:Button id="iconbtn" skinClass="skins.buttonSetLocal" click="justlook(event)" left="30"/>
+											<mx:LinkButton id="viewbtn" label="查看" visible="true" click="justlook(event)"/>										
 											<s:Button skinClass="skins.buttonLookLocal" click="changepage(event)"/>											
 											<mx:LinkButton label="编辑" visible="true" click="changepage(event)"/>
 										</s:HGroup>
