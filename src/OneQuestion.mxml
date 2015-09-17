@@ -13,7 +13,9 @@
 			public static var sid2:String ;
 			public static var objs:Array = new Array();
 			public static var allAnswer:Object;
+			public static var enteringallAnswer:Object;
 			public  var bbb:int;
+			public  var ccc:int;
 			
 			//填写题目
 			public function set questdata(val:*):void
@@ -25,6 +27,17 @@
 
 			}
 			
+			public function set enteringanswer(val:*):void
+			{
+				enteringallAnswer = val.qaa;
+				var aaa:int = 1;
+				this.ccc = aaa;
+			}
+			
+			public function get enteringanswer():int
+			{
+				return ccc;
+			}
 			
 			public function set answer(val:*):void
 			{
@@ -60,6 +73,20 @@
 							}
 						}
 					}
+					
+					if( enteringallAnswer != null )
+					{
+						var len:int = enteringallAnswer.length;
+						
+						for(var o:int = 0 ; o<len ; o++)
+						{						
+							if( (opid == enteringallAnswer[o].answersid) && (questid == enteringallAnswer[o].questid) && (val.cname == enteringallAnswer[o].evalobjname)  )
+							{
+								option.foroption.selected = true;
+							}
+						}
+					}
+					
 					option.quest = quest;
 					option.optiondata = {evalobjname:val.evalobjname , all:n , n:z , opid:opid , nameid:nameid , questid:questid}
 					options.addElement(option);
@@ -87,10 +114,25 @@
 			
 			public function set removeall(val:*):void
 			{
-				var j:int = allAnswer.length;
-				for(var i:int = 0 ; i<j ; i++)
+				if(allAnswer != null)
 				{
-					allAnswer.pop();
+					var j:int = allAnswer.length;
+					for(var i:int = 0 ; i<j ; i++)
+					{
+						allAnswer.pop();
+					}
+				}
+			}
+			
+			public function set enteringremoveall(val:*):void
+			{
+				if(enteringallAnswer != null)
+				{
+					var j:int = enteringallAnswer.length;
+					for(var i:int = 0 ; i<j ; i++)
+					{
+						enteringallAnswer.pop();
+					}
 				}
 			}
 			
@@ -119,7 +161,9 @@
 	<s:HGroup>
 		<s:Label text="第  "/>
 		<s:Label text="  " id="qnum1"/>
-		<s:Label text="题 : "/>
+		<s:Label text="题  "/>
+		<s:Label text=" " />
+		<s:Label text="  :"/>
 		<s:Label text=" " id="question1"/>
 	</s:HGroup>
 	<s:HGroup>
@@ -141,12 +185,12 @@
 		<s:Label text="备选答案："/>
 	</s:HGroup>
 	
-	<s:VGroup id="options">	
+	<s:VGroup verticalAlign="middle" id="options">	
 	</s:VGroup>
 
 	<s:HGroup>
 		<s:Label text="录入员说明:"/>
-		<s:TextArea width="1000" height="30"/>
+		<s:TextArea width="900" height="30"/>
 	</s:HGroup>
 	
 	<s:HGroup>

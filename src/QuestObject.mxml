@@ -12,8 +12,23 @@
 			public static var num:String ;
 			public static var sid2:String ;
 			public static var objs:Array = new Array();
-			public var allOptions :Object ;
 			public static var allAnswer:Object;
+			public var arr:Array = [];
+			public var array:Array = [];
+			public  var bbb:int;
+			
+			public function set answer(val:*):void
+			{
+				allAnswer = val.qaa;
+				var aaa:int = 1;
+				this.bbb = aaa;
+			}
+			
+			public function get answer():int
+			{
+				return bbb;
+			}
+			
 			
 			public function set questdata(val:*):void
 			{
@@ -23,37 +38,32 @@
 				sid3.text = val.sid1;
 			}
 			
-			public function set optiondata(val:*):void
-			{			
-				allOptions = val;				
-			}
-			public function set everyOption(val:*):void
-			{
-				if(allOptions != null)
+			public function set everyoption(val:*):void
+			{				
+				if(val.array.obj != null)
 				{
-					var n:int = allOptions.num;
-					for(var z:int = 0 ; z<n　; z++)
+					var aaaa:int = val.array.obj.length;
+					for(var h:int = 0; h<aaaa ; h++)
 					{
-						var option :OneOption = new OneOption();
-						var opid:String = (allOptions.ar[z]);
-						var nameid:String = (allOptions.list[z]);
-						var questid:String = (allOptions.qstid);
+						var option:OneOption = new OneOption();
+						var opid:String = (val.array.obj[h].sid);
+						var nameid:String = (val.array.obj[h].name);
+						var questid:String = (val.array.obj[h].questsid);
 						if( allAnswer != null )
 						{
-							var zlen:int = allAnswer.length;
-							
+							var zlen:int = allAnswer.length;							
 							for(var r:int = 0 ; r<zlen ; r++)
 							{						
-								if( (opid == allAnswer[r].answersid) && (questid == allAnswer[r].questid) && (allOptions.cname == allAnswer[r].evalobjname)  )
+								if( (opid == allAnswer[r].answersid) && (questid == allAnswer[r].questid) && (val.cname == allAnswer[r].evalobjname)  )
 								{
 									option.foroption.selected = true;
 								}
 							}
-						}
+						}						
 						option.quest = quest;
-						option.optiondata = {evalobjname:allOptions.evalobjname , all:n , n:z , opid:opid , nameid:nameid , questid:questid}
+						option.optiondata = {evalobjname:val.cname , all:aaaa , n:h , opid:opid , nameid:nameid , questid:questid}						
 						options.addElement(option);
-						if(allOptions.bool == 0)
+						if(val.bool == 0)
 						{
 							option.foroption.visible = false;
 						}
@@ -64,6 +74,7 @@
 					}
 				}
 			}
+				
 			public function set optall(val1:*):void
 			{				
 				this._answer = objs;
@@ -89,6 +100,18 @@
 					}
 				}
 				return -1;
+			}
+			
+			public function set removeall(val:*):void
+			{
+				if(allAnswer != null)
+				{
+					var j:int = allAnswer.length;
+					for(var i:int = 0 ; i<j ; i++)
+					{
+						allAnswer.pop();
+					}
+				}
 			}
 		]]>
 	</fx:Script>
@@ -130,7 +153,7 @@
 	
 	<s:HGroup>
 		<s:Label text="录入员说明"/>
-		<s:TextArea width="1200" height="30"/>
+		<s:TextArea width="900" height="30"/>
 	</s:HGroup>
 	
 	<s:HGroup>

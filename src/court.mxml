@@ -7,19 +7,17 @@
 	skinClass="skins.appbgSkin"
 	>
 	
-	
 	<fx:Declarations>
 		<supportClasses:Dao id="dao" dbfilename="mydatabase"/>
 		<supportClasses:HTTPServicePool id="HttpRequest" />
 	</fx:Declarations>
-	
-	
 	
 	<fx:Script>
 		<![CDATA[
 			import mx.controls.Alert;
 			import mx.controls.List;
 			import mx.controls.listClasses.ListBaseContentHolder;
+			import mx.core.mx_internal;
 			import mx.events.FlexEvent;
 			import mx.events.FlexNativeMenuEvent;
 			import mx.events.IndexChangedEvent;
@@ -32,9 +30,11 @@
 			import spark.components.List;
 			import spark.events.GridItemEditorEvent;
 			import spark.events.GridSelectionEvent;
+			import spark.events.TextOperationEvent;
 			
 			import org.osmf.events.TimeEvent;
 			
+			import supportClasses.Entering;
 			import supportClasses.ListAnswer;
 			import supportClasses.ListAuditItem;
 			import supportClasses.ListOption;
@@ -42,35 +42,37 @@
 			import supportClasses.ListTodoItem;
 			import supportClasses.Option;
 			import supportClasses.ProjectItem;
-			import supportClasses.UserItem;			
+			import supportClasses.UserItem;		
+
 			
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
 			private var newuser:UserItem = new UserItem();
-			private var httpurl:String = "http://192.168.1.100:8081/court";
+			private var httpurl:String = "http://192.168.1.102:8081/court";
 			private var n:int = 0;
 			private var answer:String; 		//选项的内容
 			private var qsid:String;		//问题的
 			private static var userid:String;  	//网络用户名
 			private var cname:String;   	//法院的名字
 			public var answerandquest:Object;		//获取题目与答案
-			
+			public var datalen:int = 0;
 			
 			[Bindable]
 			public static var resX:int = Capabilities.screenResolutionX;   
 			[Bindable]
 			public static var resY:int = Capabilities.screenResolutionY; 
-
-			
 			
 			//登录判断用户名密码是否正确
 			protected function login(event:MouseEvent):void
-			{						
+			{	
+				
+				var inputPass:String = inputPassWord.text;
 				var namelist :ArrayList = new ArrayList();
-				dao.query("select * from SYS_USER where username = '"+inputUserName.text+"' and userpassword = '"+inputPassWord.text+"' ", function (data:*):void 
+				dao.query("select * from SYS_USER where username = '"+inputUserName.text+"' and userpassword = '"+inputPass+"' ", function (data:*):void 
 				{	
 					if( data != null && data.length > 0)
 					{
 						Alert.show("成功");
+						inputPassWord.text = null;
 						loginpage.visible = false;
 						listpage.visible = true;
 						locallist.visible = true;
@@ -95,8 +97,9 @@
 					}
 				});
 				
+				//录入
 				dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
-				{					
+				{							
 					local2.dataProvider = new ArrayList(data);
 					for (var i:int =0; i < dao.daoitems.length; ++i) 
 					{
@@ -104,6 +107,7 @@
 					}
 				});	
 				
+				//编辑
 				dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
 				{
 					local1.dataProvider = new ArrayList(date);
@@ -142,18 +146,19 @@
 			// 判断提交待办页面网络用户密码是否正确			
 			protected function submittask(event:MouseEvent):void
 			{
-				HttpRequest.post(httpurl+"/OffLineClientController/checkPasswordthird.vot",{"username":loginusernetusername.text,"netPassword":submitNetPassword.text},function(str)
+				var submitNetPass :String = submitNetPassword.text;
+				HttpRequest.post(httpurl+"/OffLineClientController/checkPasswordthird.vot",{"username":loginusernetusername.text,"netPassword":submitNetPass},function(str)
 				{
 					if(str == "yes")
 					{	
 						Alert.show("\t提示\n提交成功");
+						submitNetPassword.text = null;
 						//提交列表
 						//HttapRequest.post(httpurl+"/OffLineClientController/checkPasswordthird.vot",{"username":loginusernetusername.text,"netPassword":submitNetPassword.text},function(str)
 						submitpage.visible=false;
 						locallist.visible=false;
 						listpage.visible=true;						
-						serverlist.visible = true;
-						
+						serverlist.visible = true;						
 					}
 					else
 					{
@@ -204,7 +209,8 @@
 			// 判断更新待办页面网络用户密码是否正确
 			protected function updatetask(event:MouseEvent):void
 			{	
-				HttpRequest.post(httpurl+"/OffLineClientController/updateTask.vot",{"username":loginusernetusername.text,"netPassword":updetNetPassword.text},function(data)
+				var updetNetPass :String = updetNetPassword.text;
+				HttpRequest.post(httpurl+"/OffLineClientController/updateTask.vot",{"username":loginusernetusername.text,"netPassword":updetNetPass},function(data)
 				{
 					if(data == "no")
 					{	
@@ -214,6 +220,7 @@
 					else
 					{
 						Alert.show("\t提示\n更新成功");
+						updetNetPassword.text = null;
 						//列表更新						
 						var JsonObj:Object = JSON.parse(data);		
 						
@@ -249,6 +256,8 @@
 						serverlist.visible = true;
 						tjbdda.visible = true;
 						tijiao.visible = true;
+						gengxinbendi.visible = true;
+						gengxinshujuku.visible = true;
 					}
 				})
 			}
@@ -313,6 +322,24 @@
 				backpage.visible=true;
 				tjbdda.visible = false;
 				tijiao.visible = false;
+				gengxinbendi.visible = false;
+				gengxinshujuku.visible = false;
+			}
+			
+			//服务器录入页面退出登录			
+			protected function serverenteringbacklist(event:MouseEvent):void
+			{
+				enteringsqpage.visible = false;
+				enteringserver.visible = false;
+				backpage.visible=true;
+			}
+			
+			//本地录入页面退出登录
+			protected function enteringbacklogin(event:MouseEvent):void
+			{
+				entering.visible = false;
+				enteringpage.visible = false;
+				backpage.visible=true;
 			}
 			
 			//答题界面的退出当前用户页面（已登录）
@@ -324,6 +351,8 @@
 				backpage.visible=true;
 				tjbdda.visible = false;
 				tijiao.visible = false;
+				gengxinbendi.visible = false;
+				gengxinshujuku.visible = false;
 				questionpage.visible=false;
 				qpage.visible=false;
 			}
@@ -337,9 +366,13 @@
 				backpage.visible=true;
 				tjbdda.visible = false;
 				tijiao.visible = false;
+				gengxinbendi.visible = false;
+				gengxinshujuku.visible = false;
 				localchack.visible=false;
 				chacklocal.visible=false;
 			}
+			
+			
 			
 			//答题界面的退出当前用户页面（服务器已登录）
 			protected function backtologinser(event:MouseEvent):void
@@ -350,11 +383,15 @@
 				backpage.visible=true;
 				tjbdda.visible = false;
 				tijiao.visible = false;
+				gengxinbendi.visible = false;
+				gengxinshujuku.visible = false;
 				questionpage.visible=false;
 				qpage.visible=false;
 				questionpageserver.visible = false;
 				sqpage.visible=false;
 			}
+			
+			
 			
 			//返回登录页面（未登录）
 			protected function backlogin(event:MouseEvent):void
@@ -374,25 +411,44 @@
 				locallist.visible=true;
 			}
 			
+			//本地录入页面的返回列表
+			protected function enteringbacklist(event:MouseEvent):void
+			{
+				listpage.visible=true;
+				locallist.visible=true;
+				enteringpagequestcontainer.removeAllElements();
+				entering.visible = false;
+				enteringpage.visible = false;
+				enteringbz.text = null;
+			}
+			
 			//本地答题页面的返回到列表
 			protected function backlist(event:MouseEvent):void
 			{
 				questcontainer.removeAllElements();
-				/*serverquestion.removeAllElements();*/
 				questionpage.visible=false;
-				/*questionpageserver.visible = false;*/
 				qpage.visible=false;
-				/*sqpage.visible=false;*/
 				listpage.visible=true;
 				locallist.visible=true;
+				thebz.text = null;
+			}
+			
+			//服务录入返回列表
+			protected function enteringbacklistserver(event:MouseEvent):void
+			{
+				enteringserverquestion.removeAllElements();
+				enteringsqpage.visible = false;
+				enteringserver.visible = false;				
+				listpage.visible=true;
+				locallist.visible=false;
+				serverlist.visible = true;
+				
 			}
 			
 			//服务器答题页面的返回到列表
 			protected function backlistserver(event:MouseEvent):void
 			{
-				/*questcontainer.removeAllElements();*/
 				serverquestion.removeAllElements();
-				/*questionpage.visible=false;*/
 				questionpageserver.visible = false;
 				qpage.visible=false;
 				sqpage.visible=false;
@@ -401,17 +457,79 @@
 				serverlist.visible = true;
 			}
 			
+			//录入页面的提交
+			protected function enteringsubmit(event:MouseEvent):void
+			{
+				var alllen:int = int(enteringall.text);
+				var opt:OneOption = new OneOption();
+				opt.enteringoptall = "答案";			
+				var qaa:Object = new Object();
+				qaa = opt.entering_answer;		//从oneoption获得的objs
+				var evalobjname:String = local2.selectedItem.evalobjname;
+				
+				//把得到的数据存到数据库
+				if(alllen > qaa.length)
+				{
+					Alert.show("请答完所有题目再交卷！");
+				}
+				else
+				{
+					enteringpagequestcontainer.removeAllElements();
+					enteringpage.visible=false;
+					entering.visible=false;
+					listpage.visible=true;
+					locallist.visible=true;
+					
+					var answerArr:Array = [];
+					for(var h:int = 0 ; h<qaa.length ; h++)
+					{
+						var listoption:Entering = new Entering();
+						listoption.sid = UIDUtil.createUID();
+						listoption.questsid = qaa[h].questid;
+						listoption.answersid = qaa[h].answersid;
+						listoption.evsid = cname;
+						listoption.usersid = loginusernetusername.text;
+						answerArr.push(listoption);
+					}
+					dao.batchInsertWithHighSpeed(answerArr , function(status:*):void
+					{
+						if(status.committed)
+						{
+							//dao.query("select * from COURT_LIST_TODO where evalobjname = '"+evalobjname+"' ");
+							//dao.updateBySQL("delete from COURT_LIST_TODO where evalobjname = '"+evalobjname+"' ");
+							opt.clear = "清空";
+							Alert.show("提交成功！");
+							dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
+							{					
+								local2.dataProvider = new ArrayList(data);
+								for (var i:int =0; i < dao.daoitems.length; ++i) 
+								{
+									dao.daoitems[i].conn.close();
+								}
+							});	
+							
+							dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
+							{
+								local1.dataProvider = new ArrayList(date);
+								for (var i:int =0; i < dao.daoitems.length; ++i) 
+								{
+									dao.daoitems[i].conn.close();
+								}
+							});
+						}
+					});		
+				}
+				
+			}
+			
 			//本地答题页面的提交答案
 			protected function submitanswer(event:MouseEvent):void
 			{
 				var alllen:int = int(allquest.text);
-				//想要提交的话，得知道提交的内容
 				var opt:OneOption = new OneOption();
 				opt.optall = "答案";			
 				var qaa:Object = new Object();
 				qaa = opt._answer;		//从oneoption获得的objs
-				/*Alert.show(JSON.stringify(qaa));*/
-				
 				var evalobjname:String = local1.selectedItem.evalobjname;
 				
 				//把得到的数据存到数据库
@@ -422,11 +540,8 @@
 				else
 				{
 					questcontainer.removeAllElements();
-					/*serverquestion.removeAllElements();*/
 					questionpage.visible=false;
-					/*questionpageserver.visible = false;*/
 					qpage.visible=false;
-					/*sqpage.visible=false;*/
 					listpage.visible=true;
 					locallist.visible=true;
 					
@@ -445,7 +560,7 @@
 					{
 						if(status.committed)
 						{
-							dao.updateBySQL("delete from COURT_LIST_TODO where evalobjname = '"+evalobjname+"' ");
+							dao.updateBySQL("update COURT_LIST_TODO set input_status = '已完成' where evalobjname = '"+evalobjname+"' ");
 							opt.clear = "清空";
 							Alert.show("提交成功！");
 							dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
@@ -468,6 +583,28 @@
 						}
 					});		
 				}												
+			}
+			
+			
+			//录入页面的暂存
+			protected function enteringtemporary(event:MouseEvent):void
+			{
+				var opt:OneOption = new OneOption();
+				opt.enteringoptall = "答案";			
+				var qaa:Object = new Object();
+				qaa = opt.entering_answer;
+				var opp:OneQuestion = new OneQuestion();
+				opp.enteringanswer = {qaa:qaa};
+				var i:int = opp.ccc;
+				if(i == 1)
+				{
+					Alert.show("暂存成功");
+				}
+				else
+				{
+					Alert.show("暂存失败");
+				}
+				
 			}
 			
 			//本地答题页面的暂存
@@ -498,14 +635,31 @@
 				opt.optall = "答案";			
 				var qaa:Object = new Object();
 				qaa = opt._answer;
-				var opp:OneQuestion = new OneQuestion();
+				var opp:QuestObject = new QuestObject();
 				opp.answer = {qaa:qaa};
 				var i:int = opp.bbb;
 				if(i == 1)
 				{
 					Alert.show("暂存成功");
 				}
+				else
+				{
+					Alert.show("暂存失败");
+				}
 			}
+			
+			//提交本地数据库的答案
+			protected function submitlocal(event:MouseEvent):void
+			{	
+				dao.query("select * from COURT_OPTION",function(data:*) /*:void"all":JSON.stringify(data)*/
+				{		
+					HttpRequest.post(httpurl+"/court2/todotasks/todotasks/TodoTasksController/addOrUpdateOne.vot",{"tempsave":0},function(dete)
+					{
+						Alert.show(dete);
+					});
+				});				
+			}
+			
 			
 			//服务器答题页面的提交答案
 			protected function submitanswerserver(event:MouseEvent):void
@@ -526,13 +680,117 @@
 					listoption.answersid = qaa[h].num;
 					listoption.evsid = cname;
 					listoption.usersid = loginusernetusername.text;
-					HttpRequest.post(httpurl+"/OffLineClientController/submit.vot",{"sid":listoption.sid , "questsid":listoption.questsid , "answersid":listoption.answersid , "evsid":listoption.evsid , "usersid":listoption.usersid},function()
+					/*HttpRequest.post(httpurl+"/court2/todotasks/todotasks/TodoTasksController/addOrUpdateOne.vot",{"sid":listoption.sid , "questsid":listoption.questsid , "answersid":listoption.answersid , "evsid":listoption.evsid , "usersid":listoption.usersid},function()
 					{
 						Alert.show("已发送");
-					});
+					});*/
 				}
 				Alert.show("提交成功！");
 			}
+			
+			//录入页面的取消
+			protected function enteringreset(event:MouseEvent):void
+			{
+				enteringpagequestcontainer.removeAllElements();
+				entering.visible = false;
+				enteringpage.visible = false;
+				listpage.visible=true;
+				locallist.visible=true;
+				listpage.visible=false;
+				locallist.visible=false;
+				entering.visible = true;
+				enteringpage.visible = true;
+				
+				var zbsidnum:String = local2.selectedItem.zbsid;
+				var evalobjname:String = local2.selectedItem.evalobjname;
+				var renwu:String = local2.selectedItem.nairename;
+				var wenjuan:String = local2.selectedItem.levelonezb;			
+				var quest_sid:String;
+				
+				//从数据库取出来的相应的题目	
+				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
+				{	
+					enteringnairname.text = wenjuan;
+					enteringcourtname.text = evalobjname;
+					cname = evalobjname;
+					enteringname.text = renwu;
+					enteringall.text = data.length;
+					for (var d:int = 0; d < data.length; ++d) 
+					{
+						var onequest:OneQuestion = new OneQuestion();
+						onequest.questdata = {num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
+						quest_sid = data[d].sid;
+						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
+						{	
+							var arr:Array =new Array();
+							var list:Array = new Array();
+							var num:int = date.length;
+							var zzz:int = 1;
+							for(var q :int ; q<date.length ; q++)
+							{		
+								arr.push( date[q].sid );
+								list.push( date[q].name);
+							}	
+							onequest.enteringremoveall = "清空enteringallanswer";
+							onequest.optiondata={bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+						});
+						enteringpagequestcontainer.addElement(onequest);
+					}
+				});
+			}
+			
+			//本地答题页面的取消
+			public function reset(event:MouseEvent):void
+			{
+				questcontainer.removeAllElements();
+				questionpage.visible=false;
+				qpage.visible=false;
+				listpage.visible=true;
+				locallist.visible=true;
+				listpage.visible=false;
+				locallist.visible=false;
+				questionpage.visible=true;
+				qpage.visible=true;
+				
+				var zbsidnum:String = local1.selectedItem.zbsid;
+				var evalobjname:String = local1.selectedItem.evalobjname;
+				var renwu:String = local1.selectedItem.nairename;
+				var wenjuan:String = local1.selectedItem.levelonezb;			
+				var quest_sid:String;
+				
+				//从数据库取出来的相应的题目				
+				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
+				{	
+					nairname.text = wenjuan;
+					courtname.text = evalobjname;
+					cname = evalobjname;
+					nainame.text = renwu;
+					allquest.text = data.length;
+					for (var d:int = 0; d < data.length; ++d) 
+					{
+						var onequest:OneQuestion = new OneQuestion();
+						onequest.questdata = {num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
+						quest_sid = data[d].sid;
+						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
+						{	
+							var arr:Array =new Array();
+							var list:Array = new Array();
+							var num:int = date.length;
+							var zzz:int = 1;
+							for(var q :int ; q<date.length ; q++)
+							{		
+								arr.push( date[q].sid );
+								list.push( date[q].name);
+							}	
+							onequest.removeall = "清空allanswer";
+							onequest.optiondata={evalobjname:evalobjname , cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+						});
+						questcontainer.addElement(onequest);
+					}
+				});	
+			}
+			
+			
 			
 			//服务器答题页面的取消
 			protected function cancelserver(event:MouseEvent):void
@@ -567,26 +825,22 @@
 				//从服务器端获取数据
 				HttpRequest.post(httpurl+"/OffLineClientController/onelist.vot",{"sid":zbsidnum},function(data)
 				{					
+					
 					var date:Object = JSON.parse(data);	
 					allquestserver.text = date.length;
 					for (var d:int = 0; d < date.length; ++d) 
 					{
-						var questone:OneQuestion = new OneQuestion();
+						var array:Array = new Array();
+						var questone:QuestObject = new QuestObject();
 						questone.questdata = {num:d , tmsms:date[d].memo , quests:date[d].name , sid1:date[d].sid};
 						quest_sid = date[d].sid;
+						optiondatamap[quest_sid] = questone;
 						HttpRequest.post(httpurl+"/OffLineClientController/listoption.vot",{"questsid":quest_sid},function(all)
-						{		
-							var dete:Object = JSON.parse(all);
-							var arr:Array =new Array();
-							var list:Array = new Array();
-							var num:int = dete.length;
-							var zzz:int = 1;
-							for(var q :int ; q<dete.length ; q++)
-							{		
-								arr.push( dete[q].sid );
-								list.push( dete[q].name);
-							}
-							questone.optiondata = {qstid:dete[0].questsid , bool:zzz , ar:arr , num:num , list:list};
+						{							
+							var dete:Object = JSON.parse(all);														
+							var savedquestone:QuestObject = optiondatamap[dete[0]['questsid']];
+							savedquestone.removeall = "清空allanswer";
+							savedquestone.everyoption = {array:{obj:dete} , quest_sid:dete[0]['questsid'] , bool:1 , cname:cname };							
 						});
 						serverquestion.addElement(questone);
 					}
@@ -637,6 +891,53 @@
 					}
 				});	
 			}
+			
+			//本地列表的录入页面(审核任务)
+			public function aduiting():void  
+			{
+				listpage.visible=false;
+				locallist.visible=false;
+				entering.visible=true;
+				enteringpage.visible=true;
+				
+				var zbsidnum:String = local2.selectedItem.zbsid;
+				var evalobjname:String = local2.selectedItem.evalobjname;
+				var renwu:String = local2.selectedItem.nairename;
+				var wenjuan:String = local2.selectedItem.levelonezb;			
+				var quest_sid:String;
+				
+				//从数据库取出来的相应的题目	
+				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
+				{	
+					enteringnairname.text = wenjuan;
+					enteringcourtname.text = evalobjname;
+					cname = evalobjname;
+					enteringname.text = renwu;
+					enteringall.text = data.length;
+					for (var d:int = 0; d < data.length; ++d) 
+					{
+						var onequest:OneQuestion = new OneQuestion();
+						onequest.questdata = {num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
+						quest_sid = data[d].sid;
+						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
+						{	
+							var arr:Array =new Array();
+							var list:Array = new Array();
+							var num:int = date.length;
+							var zzz:int = 0;
+							for(var q :int ; q<date.length ; q++)
+							{		
+								arr.push( date[q].sid );
+								list.push( date[q].name);
+							}						
+							onequest.optiondata={ evalobjname : cname ,cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+						});
+						enteringpagequestcontainer.addElement(onequest);
+					}
+				});
+			}
+			
+			
 			
 			//本地列表的查看页面(审核任务)
 			public function chackoutsh():void  
@@ -728,6 +1029,9 @@
 				});	
 			}
 			
+			private var optiondatabmap:* = {};
+			
+			
 			//服务器端的查看(录入任务)
 			public function serverchack():void  
 			{				
@@ -751,41 +1055,76 @@
 				//从服务器端获取数据
 				HttpRequest.post(httpurl+"/OffLineClientController/onelist.vot",{"sid":zbsidnum},function(data)
 				{					
-					var date:Object = JSON.parse(data);
-					serverallquest.text = date.length;
 					
+					var date:Object = JSON.parse(data);	
+					serverallquest.text = date.length;
 					for (var d:int = 0; d < date.length; ++d) 
 					{
-						var questone:OneQuestion = new OneQuestion();						
-						questone.questdata = {num:d , tmsms:date[d].memo , quests:date[d].name };
-						quest_sid = date[d].sid;			
+						var array:Array = new Array();
+						var questone:QuestObject = new QuestObject();
+						questone.questdata = {num:d , tmsms:date[d].memo , quests:date[d].name , sid1:date[d].sid};
+						quest_sid = date[d].sid;
+						optiondatabmap[quest_sid] = questone;
 						HttpRequest.post(httpurl+"/OffLineClientController/listoption.vot",{"questsid":quest_sid},function(all)
-							
-						{	
-							var dete:Object = JSON.parse(all);
-							var arr:Array =new Array();
-							var list:Array = new Array();
-							var num:int = dete.length;
-							var zzz:int = 0;
-							for(var q :int ; q<dete.length ; q++)
-							{		
-								arr.push( dete[q].sid );
-								list.push( dete[q].name);
-							}
-							questone.optiondata = {qstid:dete[0].questsid , bool:zzz , ar:arr , num:num , list:list};
+						{							
+							var dete:Object = JSON.parse(all);														
+							var savedquestone:QuestObject = optiondatabmap[dete[0]['questsid']];
+							savedquestone.everyoption = {array:{obj:dete} , quest_sid:dete[0]['questsid'] , bool:0 , cname:cname };							
 						});
 						questionserver.addElement(questone);
 					}
 				});
 			}
 			
+			private var optiondatacmap:* = {};
+			//服务器的录入界面(审核任务)
+			public function serverenteringedit():void 
+			{
+				listpage.visible=false;
+				serverlist.visible=false;
+				enteringserver.visible = true;
+				enteringsqpage.visible=true;
+				
+				var zbsidnum:String = titlesgrid3.selectedItem.zbsid;
+				var evalobjname:String = titlesgrid3.selectedItem.evalobjname;
+				var renwu:String = titlesgrid3.selectedItem.nairename;
+				var wenjuan:String = titlesgrid3.selectedItem.levelonezb;			
+				var quest_sid:String;
+				
+				enteringnairnameserver.text = wenjuan;
+				enteringcourtnameserver.text = evalobjname;
+				enteringnainameserver.text = renwu;
+				
+				//从服务器端获取数据
+				HttpRequest.post(httpurl+"/OffLineClientController/onelist.vot",{"sid":zbsidnum},function(data)
+				{					
+					
+					var date:Object = JSON.parse(data);	
+					enteringallquestserver.text = date.length;
+					for (var d:int = 0; d < date.length; ++d) 
+					{
+						var array:Array = new Array();
+						var questone:QuestObject = new QuestObject();
+						questone.questdata = {num:d , tmsms:date[d].memo , quests:date[d].name , sid1:date[d].sid};
+						quest_sid = date[d].sid;
+						optiondatacmap[quest_sid] = questone;
+						HttpRequest.post(httpurl+"/OffLineClientController/listoption.vot",{"questsid":quest_sid},function(all)
+						{							
+							var dete:Object = JSON.parse(all);														
+							var savedquestone:QuestObject = optiondatacmap[dete[0]['questsid']];
+							savedquestone.everyoption = {array:{obj:dete} , quest_sid:dete[0]['questsid'] , bool:0 , cname:cname };							
+						});
+						enteringserverquestion.addElement(questone);
+					}
+				});
+			}
+						
+			private var optiondataamap:* = {};
 			//服务器端的查看(审核任务)
 			public function serverchacksh():void  
 			{				
 				listpage.visible=false;
 				serverlist.visible=false;
-				/*questcontainer.visible = false;*/
-				/*questionpage.visible=false;*/
 				serverquestionpage.visible = true;
 				pagesq.visible=true;
 				
@@ -802,33 +1141,28 @@
 				//从服务器端获取数据
 				HttpRequest.post(httpurl+"/OffLineClientController/onelist.vot",{"sid":zbsidnum},function(data)
 				{					
-					var date:Object = JSON.parse(data);
-					serverallquest.text = date.length;
 					
+					var date:Object = JSON.parse(data);	
+					serverallquest.text = date.length;
 					for (var d:int = 0; d < date.length; ++d) 
 					{
-						var questone:OneQuestion = new OneQuestion();						
-						questone.questdata = {num:d , tmsms:date[d].memo , quests:date[d].name };
-						quest_sid = date[d].sid;			
+						var array:Array = new Array();
+						var questone:QuestObject = new QuestObject();
+						questone.questdata = {num:d , tmsms:date[d].memo , quests:date[d].name , sid1:date[d].sid};
+						quest_sid = date[d].sid;
+						optiondataamap[quest_sid] = questone;
 						HttpRequest.post(httpurl+"/OffLineClientController/listoption.vot",{"questsid":quest_sid},function(all)
-							
-						{	
-							var dete:Object = JSON.parse(all);
-							var arr:Array =new Array();
-							var list:Array = new Array();
-							var num:int = dete.length;
-							var zzz:int = 0;
-							for(var q :int ; q<dete.length ; q++)
-							{		
-								arr.push( dete[q].sid );
-								list.push( dete[q].name);
-							}
-							questone.optiondata = {qstid:dete[0].questsid , bool:zzz , ar:arr , num:num , list:list};
+						{							
+							var dete:Object = JSON.parse(all);														
+							var savedquestone:QuestObject = optiondataamap[dete[0]['questsid']];
+							savedquestone.everyoption = {array:{obj:dete} , quest_sid:dete[0]['questsid'] , bool:0 , cname:cname };							
 						});
 						questionserver.addElement(questone);
 					}
 				});
 			}
+			
+			private var optiondatamap:* = {};
 			
 			
 			//服务器端的编辑
@@ -836,8 +1170,6 @@
 			{
 				listpage.visible=false;
 				serverlist.visible=false;
-				/*questcontainer.visible = false;*/
-				/*questionpage.visible=false;*/
 				questionpageserver.visible = true;
 				sqpage.visible=true;
 				
@@ -846,7 +1178,7 @@
 				var renwu:String = titlesgrid2.selectedItem.nairename;
 				var wenjuan:String = titlesgrid2.selectedItem.levelonezb;			
 				var quest_sid:String;
-				
+				cname = evalobjname;
 				nairnameserver.text = wenjuan;
 				courtnameserver.text = evalobjname;
 				nainameserver.text = renwu;
@@ -854,30 +1186,22 @@
 				//从服务器端获取数据
 				HttpRequest.post(httpurl+"/OffLineClientController/onelist.vot",{"sid":zbsidnum},function(data)
 				{					
+					
 					var date:Object = JSON.parse(data);	
 					allquestserver.text = date.length;
 					for (var d:int = 0; d < date.length; ++d) 
 					{
+						var array:Array = new Array();
 						var questone:QuestObject = new QuestObject();
 						questone.questdata = {num:d , tmsms:date[d].memo , quests:date[d].name , sid1:date[d].sid};
 						quest_sid = date[d].sid;
+						optiondatamap[quest_sid] = questone;
 						HttpRequest.post(httpurl+"/OffLineClientController/listoption.vot",{"questsid":quest_sid},function(all)
-						{	
-							var dete:Object = JSON.parse(all);
-							var arr:Array =new Array();
-							var list:Array = new Array();
-							var qlist:Array = new Array();
-							var num:int = dete.length;
-							var zzz:int = 1;
-							for(var q :int ; q<dete.length ; q++)
-							{		
-								arr.push( dete[q].sid );
-								list.push( dete[q].name);
-								qlist.push(dete[q].questsid);
-							}
-							questone.optiondata = {qlist:qlist , bool:zzz , ar:arr , num:num , list:list};
+						{							
+							var dete:Object = JSON.parse(all);														
+							var savedquestone:QuestObject = optiondatamap[dete[0]['questsid']];
+							savedquestone.everyoption = {array:{obj:dete} , quest_sid:dete[0]['questsid'] , bool:1 , cname:cname };							
 						});
-						
 						serverquestion.addElement(questone);
 					}
 				});
@@ -887,6 +1211,20 @@
 			//更新本地数据库
 			protected function updateSQLite(event:MouseEvent):void
 			{
+				
+				/*var arr:Array =new Array();
+				var list:Array = new Array();
+				var qlist:Array = new Array();
+				var num:int = dete.length;
+				var zzz:int = 1;
+				for(var q :int ; q<dete.length ; q++)
+				{		
+				arr.push( dete[q].sid );
+				list.push( dete[q].name);
+				qlist.push(dete[q].questsid);
+				}*/
+				//questone.optiondata = {qlist:qlist , bool:zzz , ar:arr , num:num , list:list};
+				
 				//更新court_list_todo和court_list_audit两个列表的数据库
 				HttpRequest.post(httpurl+"/OffLineClientController/updateLocal.vot",{"username":loginusernetusername.text},function(data)
 				{
@@ -960,13 +1298,13 @@
 														list_question.questcode = (quest.list_question[i].questcode);
 														list_question.questzbname = (quest.list_question[i].questzbname);
 														questArr.push(list_question);
+														
 													}
 													dao.batchInsertWithHighSpeed(questArr, function(status:*):void 
 													{
 														if (status.committed) 
 														{
-															//Alert.show("court_question数据库表更新完毕");
-															//把答案更新到本地数据库court_answer
+															/*
 															HttpRequest.post(httpurl+"/OffLineClientController/answer.vot",{"username":loginusernetusername.text},function(data)
 															{					
 																var answer:Object = JSON.parse(data);				
@@ -981,20 +1319,22 @@
 																		list_answer.questsid = (answer.list_answer[i].questsid);
 																		list_answer.answeroptionsid = (answer.list_answer[i].answeroptionsid);
 																		list_answer.evalobjpapersid = (answer.list_answer[i].evalobjpapersid);
-																		list_answer.sore = (answer.list_answer[i].sore);
+																		list_answer.score = (answer.list_answer[i].score);
 																		list_answer.inputor_memo = (answer.list_answer[i].inputor_memo);
 																		list_answer.filegroupsid = (answer.list_answer[i].filegroupsid);
 																		list_answer.auditor_memo = (answer.list_answer[i].auditor_memo);
 																		list_answer.haserror = (answer.list_answer[i].haserror);
-																		list_answer.errortype = (answer.list_answer[i].errortype);
-																		list_answer.iddisabled = (answer.list_answer[i].iddisabled);
+																		
+																		list_answer.isdisabled = (answer.list_answer[i].isdisabled);
 																		list_answer.auditfilegroupsid = (answer.list_answer[i].auditfilegroupsid);
 																		answerArr.push(list_answer);
 																	}
 																	dao.batchInsertWithHighSpeed(answerArr, function(status:*):void 
 																	{
 																		if (status.committed) 
+																		
 																		{
+																			*/				
 																			//Alert.show("court_answer数据库表更新完毕");
 																			//把选项更新到本地数据库court_question_option
 																			HttpRequest.post(httpurl+"/OffLineClientController/option.vot",{"username":loginusernetusername.text},function(data)
@@ -1019,7 +1359,6 @@
 																					{
 																						if (status.committed) 
 																						{
-																							var ss: FlexEvent
 																							Alert.show("更新完毕");
 																							dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
 																							{					
@@ -1042,11 +1381,15 @@
 																					});
 																				}
 																			});
+																		/*
 																		}
+																		
 																	});
 																}
 															});
+															*/
 														}
+														
 													});
 												}
 											});
@@ -1091,75 +1434,9 @@
 				listpage.visible=true;
 			}
 			
-			//本地答题页面的取消
-			public function reset(event:MouseEvent):void
-			{
-				questcontainer.removeAllElements();
-				/*serverquestion.removeAllElements();*/
-				questionpage.visible=false;
-				/*questionpageserver.visible = false;*/
-				qpage.visible=false;
-				/*sqpage.visible=false;*/
-				listpage.visible=true;
-				locallist.visible=true;
-				
-				
-				listpage.visible=false;
-				locallist.visible=false;
-				/*serverquestion.visible = false;*/
-				questionpage.visible=true;
-				/*questionpageserver.visible = false;*/
-				qpage.visible=true;
-				
-				var zbsidnum:String = local1.selectedItem.zbsid;
-				var evalobjname:String = local1.selectedItem.evalobjname;
-				var renwu:String = local1.selectedItem.nairename;
-				var wenjuan:String = local1.selectedItem.levelonezb;			
-				var quest_sid:String;
-				
-				//从数据库取出来的相应的题目				
-				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
-				{	
-					nairname.text = wenjuan;
-					courtname.text = evalobjname;
-					cname = evalobjname;
-					nainame.text = renwu;
-					allquest.text = data.length;
-					for (var d:int = 0; d < data.length; ++d) 
-					{
-						var onequest:OneQuestion = new OneQuestion();
-						onequest.questdata = {num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
-						quest_sid = data[d].sid;
-						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
-						{	
-							var arr:Array =new Array();
-							var list:Array = new Array();
-							var num:int = date.length;
-							var zzz:int = 1;
-							for(var q :int ; q<date.length ; q++)
-							{		
-								arr.push( date[q].sid );
-								list.push( date[q].name);
-							}	
-							onequest.removeall = "清空allanswer";
-							onequest.optiondata={evalobjname:evalobjname , cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
-						});
-						questcontainer.addElement(onequest);
-					}
-				});	
-			}
 			
-			//提交本地的答案
-			protected function submitlocal(event:MouseEvent):void
-			{	
-				dao.query("select * from COURT_OPTION",function(data:*):void
-				{		
-					HttpRequest.post(httpurl+"/OffLineClientController/submit.vot",{"all":JSON.stringify(data)},function(dete)
-					{
-						Alert.show(dete);
-					});
-				});				
-			}
+			
+			
 			
 			//统一修改备注
 			protected function blackpage(event:MouseEvent):void
@@ -1169,6 +1446,7 @@
 			
 			protected function sureToSave(event:MouseEvent):void
 			{
+				thebz.text = textthebz.text;
 				Alert.show("保存成功！");
 				blackPage.visible = false;
 			}
@@ -1178,30 +1456,90 @@
 				blackPage.visible = false;
 			}
 			
+			//本地录入页面的统一修改备注
+			protected function enteringxiugai(event:MouseEvent):void
+			{
+				blackPage.visible = true;
+			}
+			
+			protected function enteringsureToSave(event:MouseEvent):void
+			{
+				enteringbz.text = enteringtybz.text;
+				Alert.show("保存成功！");
+				blackPage.visible = false;
+			}
+			
+			protected function enteringnonono(event:MouseEvent):void
+			{
+				blackPage.visible = false;
+			}
+						
+			//服务统一修改备注
+			protected function enteringblackpage(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			//服务录入暂存
+			protected function enteringtemporaryserver(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			//服务录入提交
+			protected function enteringsubmitanswerserver(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			//服务录入取消
+			protected function enteringcancelserver(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			
+			
 		]]>
 	</fx:Script>
 	
 	<!--进入系统后显示的页面-->
-	<s:SkinnableContainer skinClass="skins.loginBackground" id="loginpage" fontSize="20" visible="true" height="100%" width="100%">
-		<s:Label/>
-		<s:Label/>
-		<s:Label text=" " fontWeight="bold" fontSize="30"  lineHeight="50"/>
-		<s:Label/>
-		<s:Label/>
-		<s:HGroup top="resY:450" left="resX:960">
-			<s:Label text="用户名   " fontWeight="bold" color="blue" />
-			<s:TextInput id="inputUserName"/>
-		</s:HGroup>
-		<s:Label/>
-		<s:HGroup top="resY:510" left="resX:960">
-			<s:Label text=" 密  码     "  fontWeight="bold" color="blue"/>
-			<s:TextInput id="inputPassWord" displayAsPassword="true"/>
-		</s:HGroup>
-		<s:Label/>
-		<s:HGroup  top="resY:580" left="resX:975" fontSize="50">
-			<s:Button skinClass="skins.makeUserButton" label=" " click="makeUser(event)"/>
-			<s:Button skinClass="skins.login" label=" " click="login(event)"/>
-		</s:HGroup>
+	<s:SkinnableContainer skinClass="skins.loginBackground" horizontalCenter="0" verticalCenter="0" id="loginpage" fontSize="20" visible="true" height="100%" width="100%">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+		</s:layout>
+		<s:VGroup paddingTop="50" >
+			<s:HGroup>
+				<s:Label text=" "  paddingRight="350" />
+				<s:Label text="用户名   "  fontWeight="bold" color="blue"/>
+				<s:TextInput id="inputUserName" width="150"/>
+			</s:HGroup>
+			<s:Label/>
+			<s:HGroup>
+				<s:Label text=" "  paddingRight="350" />
+				<s:Label text=" 密  码     "  fontWeight="bold" color="blue"/>
+				<s:TextInput id="inputPassWord" width="150" displayAsPassword="true"/>
+			</s:HGroup>
+			<s:Label/>
+			<s:HGroup fontSize="30">
+				<s:Label text=" "  paddingRight="340" />
+				<s:Button skinClass="skins.makeUserButton" label=" " click="makeUser(event)"/>
+				<s:Button skinClass="skins.login" label=" " click="login(event)"/>
+			</s:HGroup>
+		</s:VGroup>
 	</s:SkinnableContainer>
 	
 	<!--成功登录后的页面-->	
@@ -1241,8 +1579,8 @@
 					<s:Button skinClass="skins.submitSQL" label=" " id="tjbdda" visible="false" click="submitlocal(event)"/>
 					<s:Button visible="false" id="tijiao" label="提交本地答案" skinClass="skins.hanzitijiao" click="submitlocal(event)"/>
 					<s:Label text="       " /><s:Label text="       " /><s:Label text="       " />
-					<s:Button skinClass="skins.unpdateSQL" label=" " click="updateSQLite(event)" color="#333333"/>			
-					<s:Button label="更新本地数据库"  skinClass="skins.hanzigengxin" click="updateSQLite(event)"/>
+					<s:Button id="gengxinshujuku" skinClass="skins.unpdateSQL" label=" " visible="false" click="updateSQLite(event)" color="#333333"/>			
+					<s:Button id="gengxinbendi" label="更新本地数据库"  skinClass="skins.hanzigengxin" click="updateSQLite(event)" visible="false"/>
 				</s:HGroup>			
 			</s:VGroup>
 			<s:VGroup left="100"  fontSize="22" horizontalAlign="left" width="100%" >				
@@ -1277,7 +1615,7 @@
 			<s:DataGrid skinClass="skins.statusBar" textAlign="center" id="titlesgrid2"  selectionChange="" editable="true" width="100%" height="100%" contentBackgroundColor="white" color="gray" borderColor="black">
 				<s:columns>
 					<s:ArrayList>
-						<s:GridColumn editable="false" dataField="order" headerText="序号" >
+						<s:GridColumn editable="false" dataField="n" headerText="序号" >
 							<s:headerRenderer>
 								<fx:Component>
 									<s:DefaultGridHeaderRenderer >
@@ -1374,13 +1712,14 @@
 										<s:Label id="titlelabel" text="操作" fontWeight="bold" color="#ffffff" verticalCenter="1" horizontalCenter="1" fontSize="20"/>
 									</s:DefaultGridHeaderRenderer>
 								</fx:Component>
-							</s:headerRenderer>							<s:itemRenderer>
+							</s:headerRenderer>							
+							<s:itemRenderer>
 								<fx:Component>
-									<s:GridItemRenderer horizontalCenter="" dataChange="griditemrenderer1_dataChangeHandler(event)">
+									<s:GridItemRenderer dataChange="griditemrenderer2_dataChangeHandler(event)" horizontalCenter="">
 										<fx:Script>
 											<![CDATA[
-												import mx.controls.Alert;
 												import mx.events.FlexEvent;
+												
 												protected function serveredit(event:MouseEvent):void
 												{
 													outerDocument.sedit();  
@@ -1389,19 +1728,18 @@
 												{
 													outerDocument.serverchack();
 												}
-												
-												protected function griditemrenderer1_dataChangeHandler(event:FlexEvent):void
+												protected function griditemrenderer2_dataChangeHandler(event:FlexEvent):void
 												{
-													Alert.show("dfsfds");												
+													viewbtn.visible = (data.input_status != "已完成");
+													iconbtn.visible =  (data.input_status != "已完成")
 												}
-												
 											]]>
 										</fx:Script>
 										<s:HGroup width="100%" horizontalAlign="center">
 											<s:Button skinClass="skins.buttonSetLocal" click="chackserver(event)"/>										
-											<mx:LinkButton label="查看1" click="chackserver(event)" visible="true"/>
-											<s:Button skinClass="skins.buttonLookLocal" click="serveredit(event)"/>
-											<mx:LinkButton label="编辑" click="serveredit(event)" visible="true"/>
+											<mx:LinkButton label="查看" click="chackserver(event)" visible="true"/>
+											<s:Button id="viewbtn" skinClass="skins.buttonLookLocal" click="serveredit(event)"/>
+											<mx:LinkButton id="iconbtn" label="编辑" click="serveredit(event)" visible="true"/>
 										</s:HGroup>
 									</s:GridItemRenderer>							
 								</fx:Component>
@@ -1512,19 +1850,34 @@
 							</s:headerRenderer>
 							<s:itemRenderer>
 								<fx:Component>
-									<s:GridItemRenderer horizontalCenter="">											
+									<s:GridItemRenderer dataChange="griditemrenderer2_dataChangeHandler(event)" horizontalCenter="">											
 										
 										<fx:Script>
 											<![CDATA[
+												import mx.events.FlexEvent;
+												
 												protected function linkbutton1_clickHandler(event:MouseEvent):void
 												{
 													outerDocument.serverchacksh();
+												}
+												
+												protected function serverentering(event:MouseEvent):void
+												{
+													outerDocument.serverenteringedit();
+												}
+												
+												protected function griditemrenderer2_dataChangeHandler(event:FlexEvent):void
+												{
+													luru.visible = (data.input_status == "已完成");
+													iconbtn.visible =  (data.input_status == "已完成")
 												}
 											]]>
 										</fx:Script>
 										<s:HGroup width="100%" horizontalAlign="center">
 											<s:Button skinClass="skins.buttonSetLocal" click="linkbutton1_clickHandler(event)" left="30"/>
 											<mx:LinkButton label="查看" click="linkbutton1_clickHandler(event)" visible="true"/>
+											<s:Button id="iconbtn" skinClass="skins.buttonLookLocal" click="serverentering(event)"/>											
+											<mx:LinkButton label="录入" id="luru" click="serverentering(event)"/>
 										</s:HGroup>
 									</s:GridItemRenderer>							
 								</fx:Component>
@@ -1542,17 +1895,17 @@
 			<s:HGroup></s:HGroup>
 			<s:Label/>
 			<mx:TabNavigator id="local3" change="indexChangelocal(event)" width="100%" height="30" fontSize="20">
-				<mx:Panel horizontalAlign="center" id="localwritein" label="录入任务" headerHeight="0">
+				<mx:Panel horizontalAlign="center" label="录入任务" headerHeight="0">
 				</mx:Panel>
-				<mx:Panel horizontalAlign="center"  id="localcheck" label="审核任务" headerHeight="0">
+				<mx:Panel horizontalAlign="center" label="审核任务" headerHeight="0">
 				</mx:Panel>
 			</mx:TabNavigator>	
 		</s:VGroup>
 		<s:VGroup  height="100%" width="100%" top="140" horizontalAlign="center">
-			<s:DataGrid horizontalCenter="1" skinClass="skins.statusBar" textAlign="center" id="local1"  selectionChange="" editable="true" width="100%" height="100%" contentBackgroundColor="white" color="0x000000" borderColor="black">
+			<s:DataGrid skinClass="skins.statusBar" textAlign="center" id="local1"  selectionChange="" editable="true" width="100%" height="100%" contentBackgroundColor="white" color="0x000000" borderColor="black">
 				<s:columns>	
 					<s:ArrayList>
-						<s:GridColumn editable="false" dataField="num" headerText="序号" >
+						<s:GridColumn editable="false" dataField="num" headerText="序号">
 							<s:headerRenderer>
 								<fx:Component>
 									<s:DefaultGridHeaderRenderer >
@@ -1564,7 +1917,7 @@
 										<s:Label id="titlelabel" text="序号" fontWeight="bold" color="#ffffff" verticalCenter="1" horizontalCenter="1" fontSize="20"/>
 									</s:DefaultGridHeaderRenderer>
 								</fx:Component>
-							</s:headerRenderer>
+							</s:headerRenderer>													
 						</s:GridColumn>
 						<s:GridColumn editable="false" dataField="nairename" headerText="问卷">
 							<s:headerRenderer>
@@ -1635,7 +1988,7 @@
 									</s:DefaultGridHeaderRenderer>
 								</fx:Component>
 							</s:headerRenderer>
-						</s:GridColumn>
+						</s:GridColumn> <!--itemRenderer="localentering"-->
 						<s:GridColumn editable="false" dataField="operation" headerText="操作">
 							<s:headerRenderer>
 								<fx:Component>
@@ -1651,11 +2004,12 @@
 							</s:headerRenderer>
 							<s:itemRenderer>
 								<fx:Component>
-									<s:GridItemRenderer horizontalCenter="1" dataChange="griditemrenderer2_dataChangeHandler(event)">		
+									<s:GridItemRenderer horizontalCenter="1"  dataChange="griditemrenderer2_dataChangeHandler(event)">		
 										<fx:Script>
 											<![CDATA[
 												import mx.controls.Alert;
 												import mx.events.FlexEvent;
+												
 												protected function justlook(event:MouseEvent):void
 												{													
 													outerDocument.chackout();  
@@ -1664,20 +2018,18 @@
 												{
 													outerDocument.changepageOut();  
 												}
-												
 												protected function griditemrenderer2_dataChangeHandler(event:FlexEvent):void
 												{
-													viewbtn.visible = ((data.evalobjname + "").indexOf("丽水") == -1);
-													iconbtn.visible =  ((data.evalobjname + "").indexOf("丽水") == -1)
+													viewbtn.visible = (data.input_status != "已完成");
+													iconbtn.visible =  (data.input_status != "已完成")
 												}
-												
 											]]>
 										</fx:Script>
-										<s:HGroup id="parentgroup" width="100%" horizontalAlign="center">
-											<s:Button id="iconbtn" skinClass="skins.buttonSetLocal" click="justlook(event)" left="30"/>
-											<mx:LinkButton id="viewbtn" label="查看" visible="true" click="justlook(event)"/>										
-											<s:Button skinClass="skins.buttonLookLocal" click="changepage(event)"/>											
-											<mx:LinkButton label="编辑" visible="true" click="changepage(event)"/>
+										<s:HGroup width="100%" horizontalAlign="center">
+											<s:Button skinClass="skins.buttonSetLocal" click="justlook(event)" left="30"/>
+											<mx:LinkButton  label="查看" visible="true" click="justlook(event)"/>										
+											<s:Button id="viewbtn" skinClass="skins.buttonLookLocal" click="changepage(event)"/>											
+											<mx:LinkButton id="iconbtn" label="编辑" visible="true" click="changepage(event)"/>
 										</s:HGroup>
 									</s:GridItemRenderer>							
 								</fx:Component>
@@ -1772,8 +2124,8 @@
 									</s:DefaultGridHeaderRenderer>
 								</fx:Component>
 							</s:headerRenderer>
-						</s:GridColumn>
-						<s:GridColumn editable="false" dataField="operation" headerText="操作">
+						</s:GridColumn><!--itemRenderer="localaudit"-->
+						<s:GridColumn  editable="false" dataField="operation" headerText="操作">
 							<s:headerRenderer>
 								<fx:Component>
 									<s:DefaultGridHeaderRenderer>
@@ -1788,21 +2140,34 @@
 							</s:headerRenderer>
 							<s:itemRenderer>
 								<fx:Component>
-									<s:GridItemRenderer horizontalCenter="">		
+									<s:GridItemRenderer horizontalCenter=""  dataChange="griditemrenderer2_dataChangeHandler(event)">		
 										<fx:Script>
 											<![CDATA[
-												
-												import mx.controls.Alert;
+												import mx.events.FlexEvent;
+												import mx.controls.Alert;		
 												
 												protected function justlook(event:MouseEvent):void
 												{
 													outerDocument.chackoutsh();
+												}
+												
+												protected function entering(event:MouseEvent):void
+												{
+													outerDocument.aduiting();
+												}
+												
+												protected function griditemrenderer2_dataChangeHandler(event:FlexEvent):void
+												{
+													rupianluru.visible = (data.input_status == "已完成");
+													luru.visible =  (data.input_status == "已完成")
 												}
 											]]>
 										</fx:Script>
 										<s:HGroup width="100%" horizontalAlign="center">																					
 											<s:Button skinClass="skins.buttonSetLocal" click="justlook(event)" left="30"/>
 											<mx:LinkButton label="查看" visible="true" click="justlook(event)"/>
+											<s:Button id="rupianluru" skinClass="skins.buttonLookLocal" click="entering(event)" visible="true"/>											
+											<mx:LinkButton label="录入" id="luru" click="entering(event)" visible="true"/>
 										</s:HGroup>
 									</s:GridItemRenderer>							
 								</fx:Component>
@@ -1811,12 +2176,12 @@
 					</s:ArrayList>
 				</s:columns>
 			</s:DataGrid>
+			
 		</s:VGroup>
 	</s:Group>
 	
 	<!--创建本地用户页面-->
 	<s:SkinnableContainer skinClass="skins.makeUserPage" id="makepage" visible="false" fontSize="15" width="100%" height="100%">
-		
 			<s:Label/>
 			<s:Label/>
 			<s:HGroup top="400" left="980">
@@ -1854,16 +2219,19 @@
 		<s:layout>
 			<s:HorizontalLayout horizontalAlign="center"/>
 		</s:layout>
-		<s:VGroup fontSize="15" horizontalCenter="0">
+		<s:VGroup fontSize="15"  horizontalAlign="center">
 			<s:Label/>
 			<s:Label/>
 			<s:Label text="请输入网络用户密码" fontWeight="bold" fontSize="30"  lineHeight="50"/>			
 			<s:Label/>
 			<s:Label/>
+			<s:Label/>
 			<s:HGroup>
-				<s:Label text="密码 : "/>
+				<s:Label text="密码 : " fontSize="20"/>
 				<s:TextInput id="updetNetPassword" displayAsPassword="true"/>
 			</s:HGroup>
+			<s:Label/>
+			<s:Label/>
 			<s:Label/>
 			<s:Button label=" " skinClass="skins.makeSureUpdate" click="updatetask(event)"/>			
 		</s:VGroup>		
@@ -1881,9 +2249,11 @@
 			<s:Label/>
 			<s:Label/>
 			<s:HGroup>
-				<s:Label text="密码 : "/>
+				<s:Label text="密码 : " fontSize="20"/>
 				<s:TextInput id="submitNetPassword" displayAsPassword="true"/>
 			</s:HGroup>
+			<s:Label/>
+			<s:Label/>
 			<s:Label/>
 			<s:Button label=" " skinClass="skins.makeSureSubmit" click="submittask(event)"/>			
 		</s:VGroup>		
@@ -1897,12 +2267,101 @@
 			<s:Label top="50" text="返回登录页面" fontSize="30" fontWeight="bold" lineHeight="50"/>
 			<s:Label/>
 			<s:Label/>
+			<s:Label/>
+			<s:Label/>
+			<s:Label/>
 			<s:HGroup>
-				<s:Button label="是" click="backlogin(event)"/>
-				<s:Button label="否" click="stophere(event)"/>
+				<s:Button top="600" label=" " skinClass="skins.yes" click="backlogin(event)"/>
+				<s:Button label=" " skinClass="skins.no" click="stophere(event)"/>
 			</s:HGroup>
 		</s:VGroup>		
 	</s:SkinnableContainer>	
+	
+	<!--本地录入页面答题首-->
+	<s:SkinnableContainer skinClass="skins.questList" id="entering" visible="false" horizontalCenter="1" width="100%">
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center"/>
+		</s:layout>
+		<s:SkinnableContainer width="100%">
+			<s:Button label=" " skinClass="skins.head"/>
+			<s:VGroup right="36" horizontalAlign="right" verticalAlign="middle" width="100%">
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>		
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>
+				<s:HGroup fontSize="20">
+					<s:Button label=" " skinClass="skins.serverUserName"/>	
+					<s:Label text=" " id="enteringuser" fontSize="25"/>	
+					<s:Label visible="false" id="enteringusername" fontSize="25" color="white"/>	
+					<s:Button label=" " skinClass="skins.news"/>
+					<s:Label text=" 0 " id="enteringunfinish"/> 
+					<s:Label text="    "/>
+					<s:Button label=" " skinClass="skins.backToLogin" click="enteringbacklogin(event)"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:SkinnableContainer>
+		
+		<s:SkinnableContainer  width="100%" >
+			<s:HGroup horizontalAlign="left" top="10" left="30" fontSize="25">
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="&lt;&lt; 返回列表  " click="enteringbacklist(event)"/>
+				<s:Label/><s:Label />
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label=" 暂存 " click="enteringtemporary(event)"/>
+				<s:Label/><s:Label/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label=" 提交 " click="enteringsubmit(event)"/>
+				<s:Label/><s:Label/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label=" 取消 " click="enteringreset(event)"/>
+			</s:HGroup>	
+		</s:SkinnableContainer>
+		
+		<s:SkinnableContainer skinClass="skins.queatHead" width="100%" fontSize="20">
+			<s:HGroup horizontalAlign="center" top="30" width="100%">
+				<s:Label/>
+				<s:Label text="当前问卷：" fontWeight="bold"/>
+				<s:Label text=" " id="enteringnairname" color="red"/>
+				<s:Label/>
+				<s:Label/>
+				<s:Label text="当前测评对象: " fontWeight="bold"/>
+				<s:Label text=" " id="enteringcourtname" color="red"/>
+				<s:Label/>
+				<s:Label/>
+				<s:Label text="当前任务：" fontWeight="bold"/>
+				<s:Label text=" " id="enteringname" color="red"/>
+				<s:Label/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+			<s:HGroup horizontalAlign="center" width="100%" top="75">
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="统一修改备注" click="enteringxiugai(event)"/>
+			</s:HGroup>
+			<s:HGroup verticalAlign="bottom" top="135" horizontalAlign="center" width="100%">
+				<s:Label text="共 "/>
+				<s:Label text=" " id="enteringall" fontWeight="bold" color="red"/>
+				<s:Label text="道题"/>
+			</s:HGroup>			
+			<s:HGroup horizontalCenter="0" top="160" width="85%">
+				<s:Label text="问卷备注："/>
+				<s:TextArea id="enteringbz"  width="900" height="30"/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+	
+	<!--本地录入题目-->
+	<s:Group id="enteringpage" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="400">
+		<s:Scroller  width="100%" height="100%">
+			<s:Group width="100%" height="100%">
+				<s:VGroup horizontalAlign="center">
+				</s:VGroup>
+				<s:VGroup id="enteringpagequestcontainer" width="100%">
+				</s:VGroup>
+			</s:Group>
+		</s:Scroller>
+	</s:Group>
 	
 	<!--本地答题首-->
 	<s:SkinnableContainer skinClass="skins.questList" id="questionpage" visible="false" horizontalCenter="1" width="100%">
@@ -1911,7 +2370,7 @@
 		</s:layout>
 		<s:SkinnableContainer width="100%">
 			<s:Button label=" " skinClass="skins.head"/>
-			<s:VGroup horizontalAlign="right" verticalAlign="middle" width="100%">
+			<s:VGroup right="36" horizontalAlign="right" verticalAlign="middle" width="100%">
 				<s:HGroup>
 					<s:Label text=" "/>
 				</s:HGroup>		
@@ -1942,7 +2401,7 @@
 			</s:HGroup>	
 		</s:SkinnableContainer>
 		
-		<s:SkinnableContainer skinClass="skins.queatHead" width="96%" fontSize="20">
+		<s:SkinnableContainer skinClass="skins.queatHead" width="100%" fontSize="20">
 			<s:HGroup horizontalAlign="center" top="30" width="100%">
 				<s:Label/>
 				<s:Label text="当前问卷：" fontWeight="bold"/>
@@ -1966,15 +2425,27 @@
 				<s:Label text=" " id="allquest" fontWeight="bold" color="red"/>
 				<s:Label text="道题"/>
 			</s:HGroup>			
-			<s:HGroup horizontalAlign="center" top="160" width="100%">
+			<s:HGroup horizontalCenter="0" top="160" width="85%">
 				<s:Label text="问卷备注："/>
-				<s:TextArea  width="1000" height="30"/>
+				<s:TextArea id="thebz"  width="900" height="30"/>
 			</s:HGroup>
 			<s:HGroup>
 				<s:Label text=" "/>
 			</s:HGroup>
 		</s:SkinnableContainer>
 	</s:SkinnableContainer>
+	
+	<!--本地题目-->
+	<s:Group id="qpage" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="400">
+		<s:Scroller  width="100%" height="100%">
+			<s:Group width="100%" height="100%">
+				<s:VGroup horizontalAlign="center">
+				</s:VGroup>
+				<s:VGroup id="questcontainer" width="100%">
+				</s:VGroup>
+			</s:Group>
+		</s:Scroller>
+	</s:Group>
 	
 	<!--本地查看页面-->
 	<s:SkinnableContainer skinClass="skins.questList" id="localchack" visible="false"  fontSize="25" horizontalCenter="0" width="100%">
@@ -1983,7 +2454,7 @@
 		</s:layout>
 		<s:SkinnableContainer width="100%">
 			<s:Button label=" " skinClass="skins.head"/>
-			<s:VGroup horizontalAlign="right" verticalAlign="middle" width="100%">
+			<s:VGroup right="36" horizontalAlign="right" verticalAlign="middle" width="100%">
 				<s:HGroup>
 					<s:Label text=" "/>
 				</s:HGroup>		
@@ -2032,6 +2503,92 @@
 		</s:SkinnableContainer>
 	</s:SkinnableContainer>
 	
+	<!--服务器端录入答题首-->
+	<s:SkinnableContainer skinClass="skins.questList" id="enteringserver" visible="false" horizontalCenter="1" width="100%">
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center"/>
+		</s:layout>
+		<s:SkinnableContainer width="100%">
+			<s:Button label=" " skinClass="skins.head"/>
+			<s:VGroup right="36" horizontalAlign="right" verticalAlign="middle" width="100%">
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>		
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>
+				<s:HGroup fontSize="20">
+					<s:Button label=" " skinClass="skins.serverUserName"/>	
+					<s:Label text=" " id="enteringloginuserss" fontSize="25"/>	
+					<s:Label visible="false" id="enteringloginusernet" fontSize="25" color="white"/>	
+					<s:Button label=" " skinClass="skins.news"/>
+					<s:Label text=" 0 " id="enteringunfinished"/> 
+					<s:Label text="    "/>
+					<s:Button label=" " skinClass="skins.backToLogin" click="serverenteringbacklist(event)"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer width="100%">
+			<s:HGroup fontSize="50">	
+				<s:Label/>
+			</s:HGroup>
+			<s:HGroup horizontalAlign="left" fontSize="25" top="10">
+				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
+				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="&lt;&lt; 返回列表  " click="enteringbacklistserver(event)"/>
+				<s:Label/><s:Label />
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label=" 暂存 " click="enteringtemporaryserver(event)"/>
+				<s:Label/><s:Label/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label=" 提交 " click="enteringsubmitanswerserver(event)"/>
+				<s:Label/><s:Label/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label=" 取消 " click="enteringcancelserver(event)"/>
+			</s:HGroup>	
+		</s:SkinnableContainer>
+		<s:SkinnableContainer skinClass="skins.queatHead" horizontalCenter="1" width="96%" fontSize="20">			
+			<s:HGroup horizontalAlign="center" top="30" width="100%">
+				<s:Label/>
+				<s:Label text="当前问卷：" fontWeight="bold"/>
+				<s:Label text=" " id="enteringnairnameserver" color="red"/>
+				<s:Label/><s:Label/>
+				<s:Label text="当前测评对象: " fontWeight="bold"/>
+				<s:Label text=" " id="enteringcourtnameserver" color="red"/>
+				<s:Label/><s:Label/>
+				<s:Label text="当前任务：" fontWeight="bold"/>
+				<s:Label text=" " id="enteringnainameserver" color="red"/>
+				<s:Label/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+			<s:HGroup horizontalAlign="center" width="100%" top="75">
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="统一修改备注" click="enteringblackpage(event)"/>
+			</s:HGroup>
+			<s:HGroup horizontalAlign="center" top="135" width="100%">
+				<s:Label text="共 "/>
+				<s:Label text=" " id="enteringallquestserver" fontWeight="bold" color="red"/>
+				<s:Label text="道题"/>
+			</s:HGroup>			
+			<s:HGroup top="160" width="85%" horizontalCenter="0">
+				<s:Label text="问卷备注："/>
+				<s:TextArea  width="900" height="30"/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+	
+	<!--服务器录入题目-->
+	<s:Group id="enteringsqpage" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="400">
+		<s:Scroller width="100%" height="100%">
+			<s:Group width="100%" height="100%">
+				<s:VGroup horizontalAlign="center">			
+				</s:VGroup>
+				<s:VGroup id="enteringserverquestion" width="100%">					
+				</s:VGroup>
+			</s:Group>
+		</s:Scroller>
+	</s:Group>
 	
 	<!--服务器端答题首-->
 	<s:SkinnableContainer skinClass="skins.questList" id="questionpageserver" visible="false" horizontalCenter="1" width="100%">
@@ -2040,7 +2597,7 @@
 		</s:layout>
 		<s:SkinnableContainer width="100%">
 			<s:Button label=" " skinClass="skins.head"/>
-			<s:VGroup horizontalAlign="right" verticalAlign="middle" width="100%">
+			<s:VGroup right="36" horizontalAlign="right" verticalAlign="middle" width="100%">
 				<s:HGroup>
 					<s:Label text=" "/>
 				</s:HGroup>		
@@ -2098,15 +2655,27 @@
 				<s:Label text=" " id="allquestserver" fontWeight="bold" color="red"/>
 				<s:Label text="道题"/>
 			</s:HGroup>			
-			<s:HGroup horizontalAlign="center" top="160" width="100%" >
+			<s:HGroup top="160" width="85%" horizontalCenter="0">
 				<s:Label text="问卷备注："/>
-				<s:TextArea  width="1300" height="30"/>
+				<s:TextArea  width="900" height="30"/>
 			</s:HGroup>
 			<s:HGroup>
 				<s:Label text=" "/>
 			</s:HGroup>
 		</s:SkinnableContainer>
 	</s:SkinnableContainer>
+	
+	<!--服务器题目-->
+	<s:Group id="sqpage" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="400">
+		<s:Scroller width="100%" height="100%">
+			<s:Group width="100%" height="100%">
+				<s:VGroup horizontalAlign="center">			
+				</s:VGroup>
+				<s:VGroup id="serverquestion" width="100%">					
+				</s:VGroup>
+			</s:Group>
+		</s:Scroller>
+	</s:Group>
 	
 	<!--服务器查看页面-->
 	<s:SkinnableContainer skinClass="skins.questList" id="serverquestionpage" visible="false" horizontalCenter="1" width="100%">
@@ -2115,7 +2684,7 @@
 		</s:layout>
 		<s:SkinnableContainer width="100%">
 			<s:Button label=" " skinClass="skins.head"/>
-			<s:VGroup horizontalAlign="right" verticalAlign="middle" width="100%">
+			<s:VGroup right="36" horizontalAlign="right" verticalAlign="middle" width="100%">
 				<s:HGroup>
 					<s:Label text=" "/>
 				</s:HGroup>		
@@ -2166,34 +2735,6 @@
 			</s:HGroup>			
 		</s:SkinnableContainer>
 	</s:SkinnableContainer>
-	
-	
-	
-	<!--本地题目-->
-	<s:Group id="qpage" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="400">
-		<s:Scroller width="100%" height="100%">
-			<s:Group width="100%" height="100%">
-				<s:VGroup horizontalAlign="center">
-				</s:VGroup>
-				<s:VGroup id="questcontainer" width="100%">
-				</s:VGroup>
-			</s:Group>
-		</s:Scroller>
-	</s:Group>
-	
-	<!--服务器题目-->
-	<s:Group id="sqpage" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="400">
-		<s:Scroller width="100%" height="100%">
-			<s:Group width="100%" height="100%">
-				<s:VGroup horizontalAlign="center">			
-				</s:VGroup>
-				<s:VGroup id="serverquestion" width="100%">					
-				</s:VGroup>
-			</s:Group>
-		</s:Scroller>
-	</s:Group>
-	
-	
 
 	<!--本地查看题目-->
 	<s:Group id="chacklocal" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="280">
@@ -2206,8 +2747,6 @@
 			</s:Group>
 		</s:Scroller>
 	</s:Group>
-	
-	
 	
 	<!--服务器查看题目-->
 	<s:Group id="pagesq" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="280">
@@ -2240,11 +2779,39 @@
 				<s:Label text=" "/>
 				
 				<s:Label text="统一修改备注" fontSize="30"/>
-				<s:TextArea width="1300" height="200" fontSize="25"/>
+				<s:TextArea id="textthebz" width="1300" height="200" fontSize="25"/>
 			</s:HGroup>
 			<s:HGroup width="100%" horizontalAlign="center" fontSize="20">
 				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="确定" click="sureToSave(event)"/>
 				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="取消" click="nonono(event)"/>
+			</s:HGroup>
+		</s:VGroup>		
+	</s:SkinnableContainer>
+	
+	<!--录入页面统一修改备注-->
+	<s:SkinnableContainer id="enteringblackPage" skinClass="skins.toback" height="100%" width="100%" visible="false">
+		<s:VGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+			<s:HGroup width="100%" horizontalAlign="center">
+				<s:Label text=" "/>
+				<s:Label text=" "/>
+				<s:Label text=" "/>
+				<s:Label text=" "/>
+				
+				<s:Label text="统一修改备注" fontSize="30"/>
+				<s:TextArea id="enteringtybz" width="1300" height="200" fontSize="25"/>
+			</s:HGroup>
+			<s:HGroup width="100%" horizontalAlign="center" fontSize="20">
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="确定" click="enteringsureToSave(event)"/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="取消" click="enteringnonono(event)"/>
 			</s:HGroup>
 		</s:VGroup>		
 	</s:SkinnableContainer>

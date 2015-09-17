@@ -17,6 +17,7 @@
 			public var questid:String;
 			public static var objs:Array = new Array();
 			public var _answer:Object ;
+			public var entering_answer:Object ;
 			public var evalobjname:String;
 
 			
@@ -82,6 +83,11 @@
 				this._answer = objs
 			}
 			
+			public function set enteringoptall(val1:*):void
+			{		
+				this.entering_answer = objs
+			}
+			
 			public function set clear (val:*):void
 			{
 				var len:int = objs.length;
@@ -95,6 +101,13 @@
 				
 				return _answer;
 			}
+			
+			public function get enteringoptall():Object
+			{			
+				
+				return entering_answer;
+			}
+			
 			public function findThis( sid:String):int
 			{
 				for(var i:int =0 ; i < objs.length ; i++)

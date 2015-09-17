@@ -217,9 +217,9 @@
             </s:LinearGradientStroke>
         </s:stroke>
     </s:Rect>
-    
-	<s:Image source="@Embed('assets/a.png')"/>
 	
+	<s:Image source="@Embed('assets/button1122.png')"/>
+    
     <!-- layer 8: text -->
     <!--- @copy spark.components.supportClasses.ButtonBase#labelDisplay  -->
     <s:Label id="labelDisplay"
