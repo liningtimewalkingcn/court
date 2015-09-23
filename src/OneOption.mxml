@@ -19,7 +19,7 @@
 			public var _answer:Object ;
 			public var entering_answer:Object ;
 			public var evalobjname:String;
-
+			public var evalobjsid:String;
 			
 			public function set optiondata (val:*):void
 			{
@@ -27,6 +27,7 @@
 				var num:int = val.n;				
 				var s:String ;
 				evalobjname = val.evalobjname;
+				evalobjsid = val.evalobjsid;
 				s = change(num);
 				if( num < all)
 				{
@@ -54,10 +55,13 @@
 				var cnam:String;
 				answerId = sid.text;
 				questId = bid.text;
+				
 				cnam = evalobjname;
 				obj['evalobjname'] = evalobjname;
 				obj['questid'] = questId;
 				obj['answersid'] = answerId;
+				obj['evalobjsid'] = evalobjsid;
+				
 
 				var len:int = objs.length;
 				if(len == 0)
@@ -123,14 +127,16 @@
 		]]>
 	</fx:Script>
 	
-	<s:HGroup>
+	<s:HGroup height="100%" verticalAlign="bottom">
 		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
 		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
 		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
 		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
 		<s:Label text=" "/><s:Label text=" "/>
-		<s:Label text=" " id="word"/>
-		<s:RadioButton id="foroption"  click="clickradiobutton(event)" group="{g}"/>
+		<s:Label text=" " id="word" height="100%" verticalAlign="bottom" fontSize="23" fontWeight="normal"/>
+		<s:Label text=" "/>
+		<s:RadioButton id="foroption" click="clickradiobutton(event)" group="{g}"/>
+		<s:Label text=" "/>
 		<s:Label text=" " id="option"/>
 		<s:Label text=" " id="sid" visible="false"/>			<!--选项的id-->
 		<s:Label text=" " id="bid" visible="false"/>			<!--题目的id-->

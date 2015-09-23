@@ -9,9 +9,11 @@
 			import mx.core.UIComponent;
 			import mx.events.ItemClickEvent;
 			public var _answer:Object ;
+			public var asdfasdf:Object ;
 			public static var num:String ;
 			public static var sid2:String ;
 			public static var objs:Array = new Array();
+			public static var answers:Array = new Array();
 			public static var allAnswer:Object;
 			public static var enteringallAnswer:Object;
 			public  var bbb:int;
@@ -24,7 +26,23 @@
 				qnum1.text = String(val.num+1);
 				question1.text = val.quests;
 				sid3.text = val.sid1;
-
+			}
+			
+			public function set foranswer(val:*):void
+			{
+				var obj:Object =  new Object();
+				
+				obj['ans_memo'] = tmsm1.text;
+				obj['ans_inputor_memo'] = lrysm.text;
+				
+				answers.push(obj);
+				
+				this.asdfasdf = answers;
+			}
+			
+			public function get foranswer():Object
+			{
+				return asdfasdf;
 			}
 			
 			public function set enteringanswer(val:*):void
@@ -88,7 +106,7 @@
 					}
 					
 					option.quest = quest;
-					option.optiondata = {evalobjname:val.evalobjname , all:n , n:z , opid:opid , nameid:nameid , questid:questid}
+					option.optiondata = {evalobjsid:val.evalobjsid , evalobjname:val.evalobjname , all:n , n:z , opid:opid , nameid:nameid , questid:questid}
 					options.addElement(option);
 					if(val.bool == 0)
 					{
@@ -156,21 +174,20 @@
 			}		
 		]]>
 	</fx:Script>
-
 	
 	<s:HGroup>
-		<s:Label text="第  "/>
-		<s:Label text="  " id="qnum1"/>
-		<s:Label text="题  "/>
-		<s:Label text=" " />
-		<s:Label text="  :"/>
+		<s:Label text=" 第  "/>
+		<s:Label text=" " id="qnum1" width="22"/>
+		<s:Label text="题"/>
+		<!--<s:Label text=" " />-->
+		<s:Label text="   :"/>
 		<s:Label text=" " id="question1"/>
 	</s:HGroup>
 	<s:HGroup>
 		<s:Label text=" " visible="false" id="sid3"/>
 	</s:HGroup>
 	<s:HGroup>
-		<s:Label text="题目说明："/>
+		<s:Label text="题目说明   ："/>
 		<s:Label text=" " id="tmsm1"/>
 	</s:HGroup>
 	<s:HGroup>
@@ -182,15 +199,16 @@
 	</fx:Declarations>
 	
 	<s:HGroup>
-		<s:Label text="备选答案："/>
+		<s:Label text="备选答案   ："/>
 	</s:HGroup>
 	
 	<s:VGroup verticalAlign="middle" id="options">	
 	</s:VGroup>
 
 	<s:HGroup>
-		<s:Label text="录入员说明:"/>
-		<s:TextArea width="900" height="30"/>
+		<s:Label text="录入员说明 :"/>
+		<s:Label text=" "/>
+		<s:TextArea id="lrysm" width="900" height="30"/>
 	</s:HGroup>
 	
 	<s:HGroup>
@@ -198,7 +216,7 @@
 	</s:HGroup>
 	
 	<s:HGroup>
-		<s:Label text="录入员附件:"/>
+		<s:Label text="录入员附件 :"/>
 	</s:HGroup>
 	
 	<s:HGroup>

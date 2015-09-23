@@ -24,7 +24,7 @@
   <flashCatalyst validateFlashCatalystCompatibility="false"/>
   <buildTargets>
     <buildTarget buildTargetName="default" platformId="default">
-      <airSettings airCertificatePath="C:/Users/admin/Desktop/登录/adsf.p12" airTimestamp="false" anePathSet="true" version="1">
+      <airSettings airCertificatePath="C:/Users/admin/Desktop/court/a.p12" airTimestamp="false" anePathSet="true" version="1">
         <airExcludes/>
         <anePaths/>
         <newLaunchParams/>

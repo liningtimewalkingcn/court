@@ -13,7 +13,6 @@
 			}
 		]]>
 	</fx:Script>
-	
 	<s:Label id="lblData" top="9" left="7"/>
 	<s:HGroup width="100%" horizontalAlign="center">																					
 		<s:Button skinClass="skins.buttonSetLocal" left="30"/>

@@ -8,5 +8,10 @@ package supportClasses
 		public var answersid:String;
 		public var evsid:String;
 		public var usersid:String;
+		public var evalobjsid:String;
+		public var papercode:String;
+		public var ans_memo:String;
+		public var ans_inputor_memo:String;
+		public var zbsid:String;
 	}
 }
