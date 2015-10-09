@@ -4,9 +4,9 @@
 		  xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" horizontalAlign="left"
 		  >
 	
-	<fx:Declarations>
+	<!--<fx:Declarations>
 		<s:RadioButtonGroup id="g"/>		
-	</fx:Declarations>
+	</fx:Declarations>-->
 	
 	<fx:Script>
 		<![CDATA[
@@ -135,7 +135,7 @@
 		<s:Label text=" "/><s:Label text=" "/>
 		<s:Label text=" " id="word" height="100%" verticalAlign="bottom" fontSize="23" fontWeight="normal"/>
 		<s:Label text=" "/>
-		<s:RadioButton id="foroption" click="clickradiobutton(event)" group="{g}"/>
+		<s:RadioButton id="foroption" click="clickradiobutton(event)" />
 		<s:Label text=" "/>
 		<s:Label text=" " id="option"/>
 		<s:Label text=" " id="sid" visible="false"/>			<!--选项的id-->

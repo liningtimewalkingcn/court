@@ -19,6 +19,18 @@
 			public  var bbb:int;
 			public  var ccc:int;
 			
+			//录入附件
+			private var file:File = new File();
+			protected function selectVideoclickHandler():void {
+				file.addEventListener(Event.SELECT, fileSelectHandler);
+				file.browseForOpen("原始数据文件", [new FileFilter("*.xls","*.xls")]);
+
+			}
+			protected function fileSelectHandler(event:Event):void {
+				origindatafile.text = file.nativePath;
+				file.removeEventListener(Event.SELECT, fileSelectHandler);
+			}
+			
 			//填写题目
 			public function set questdata(val:*):void
 			{
@@ -110,7 +122,8 @@
 					options.addElement(option);
 					if(val.bool == 0)
 					{
-						option.foroption.visible = false;
+						option.foroption.enabled = false;
+						option.foroption.selected = true;
 					}
 					else
 					{
@@ -217,6 +230,9 @@
 	
 	<s:HGroup>
 		<s:Label text="录入员附件 :"/>
+		<s:Label text=" "/>	
+		<s:TextInput id="origindatafile" enabled="false" width="900"/>
+		<s:Button label="附件" click="selectVideoclickHandler()"/>
 	</s:HGroup>
 	
 	<s:HGroup>

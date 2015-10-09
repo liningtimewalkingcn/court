@@ -14,6 +14,8 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import supportClasses.ListTaskInfo;
+			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
 			import mx.controls.List;
 			import mx.controls.listClasses.ListBaseContentHolder;
@@ -26,11 +28,15 @@
 			import mx.rpc.http.mxml.HTTPService;
 			import mx.utils.UIDUtil;
 			import mx.utils.object_proxy;
+			import mx.managers.CursorManager;
 			
 			import spark.components.List;
+			import spark.events.DropDownEvent;
 			import spark.events.GridItemEditorEvent;
 			import spark.events.GridSelectionEvent;
+			import spark.events.IndexChangeEvent;
 			import spark.events.TextOperationEvent;
+			
 			
 			import org.osmf.events.TimeEvent;
 			
@@ -42,8 +48,9 @@
 			import supportClasses.ListTodoItem;
 			import supportClasses.Option;
 			import supportClasses.ProjectItem;
-			import supportClasses.UserItem;		
-
+			import supportClasses.UserItem;
+			import supportClasses.ListTaskInfo;
+			
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
 			private var newuser:UserItem = new UserItem();
 			private var _httpurl:String = "http://192.168.1.106:8081/court";
@@ -59,7 +66,6 @@
 			public static var resX:int = Capabilities.screenResolutionX;   
 			[Bindable]
 			public static var resY:int = Capabilities.screenResolutionY; 
-			
 			
 			private function get httpurl():String {
 				var file:File = new File("D:/fxworkspace/courtgit2");
@@ -158,10 +164,10 @@
 						{		
 							for(var asdf:int=0 ; asdf<data.length ; asdf++)
 							{
-								HttpRequest.post(httpurl+"/court2/todotasks/todotasks/TodoTasksController/addOrUpdateOne.vot?sid = '1'",{"a":2 , "stopcache":3 , "ans_evalobjpapersid":4 , "ans_sid":5 , "ans_filegroupsid":6 , "papersid2":1 , "ans_questsid":data[asdf].questsid , "ans_answeroptionsid":data[asdf].answersid , "zbsid":data[asdf].zbsid , "sid":data[asdf].sid , "ans_inputor_memo":data[asdf].ans_inputor_memo , "currpapersid2":1 , "ans_answeroptionsidrad":data[asdf].answersid , "tempsave":data[asdf].tempsave , "evalobjsid": data[asdf].evalobjsid , "currpapersid" : 1 , "papercode" : enteringbz.text ,  "papersid":data[asdf].sid , "ans_name":data[asdf].evsid , "ans_memo":data[asdf].ans_memo },function(dete)
+								/*HttpRequest.post(httpurl+"/court2/todotasks/todotasks/TodoTasksController/addOrUpdateOne.vot?sid = '1'",{"a":2 , "stopcache":3 , "ans_evalobjpapersid":4 , "ans_sid":5 , "ans_filegroupsid":6 , "papersid2":1 , "ans_questsid":data[asdf].questsid , "ans_answeroptionsid":data[asdf].answersid , "zbsid":data[asdf].zbsid , "sid":data[asdf].sid , "ans_inputor_memo":data[asdf].ans_inputor_memo , "currpapersid2":1 , "ans_answeroptionsidrad":data[asdf].answersid , "tempsave":data[asdf].tempsave , "evalobjsid": data[asdf].evalobjsid , "currpapersid" : 1 , "papercode" : enteringbz.text ,  "papersid":data[asdf].sid , "ans_name":data[asdf].evsid , "ans_memo":data[asdf].ans_memo },function(dete)
 								{
 									Alert.show(dete);
-								});
+								});*/
 							}
 						});						
 						
@@ -175,7 +181,7 @@
 						Alert.show("\t提示\n密码错误");
 						submitpage.visible=true;
 					}
-					})
+				})
 			}			
 			
 			//本地列表的审核与提交的切换
@@ -290,38 +296,6 @@
 															{
 																if (status.committed) 
 																{
-																	/*
-																	HttpRequest.post(httpurl+"/OffLineClientController/answer.vot",{"username":loginusernetusername.text},function(data)
-																	{					
-																	var answer:Object = JSON.parse(data);				
-																	if (answer.list_answer.length>0)
-																	{						
-																	dao.updateBySQL("delete from COURT_ANSWER");	
-																	var answerArr:Array = [];
-																	for(var i:int = 0; i< answer.list_answer.length; ++i)
-																	{
-																	var list_answer:ListAnswer = new ListAnswer();
-																	list_answer.sid = (answer.list_answer[i].sid);
-																	list_answer.questsid = (answer.list_answer[i].questsid);
-																	list_answer.answeroptionsid = (answer.list_answer[i].answeroptionsid);
-																	list_answer.evalobjpapersid = (answer.list_answer[i].evalobjpapersid);
-																	list_answer.score = (answer.list_answer[i].score);
-																	list_answer.inputor_memo = (answer.list_answer[i].inputor_memo);
-																	list_answer.filegroupsid = (answer.list_answer[i].filegroupsid);
-																	list_answer.auditor_memo = (answer.list_answer[i].auditor_memo);
-																	list_answer.haserror = (answer.list_answer[i].haserror);
-																	
-																	list_answer.isdisabled = (answer.list_answer[i].isdisabled);
-																	list_answer.auditfilegroupsid = (answer.list_answer[i].auditfilegroupsid);
-																	answerArr.push(list_answer);
-																	}
-																	dao.batchInsertWithHighSpeed(answerArr, function(status:*):void 
-																	{
-																	if (status.committed) 
-																	
-																	{
-																	*/				
-																	//Alert.show("court_answer数据库表更新完毕");
 																	//把选项更新到本地数据库court_question_option
 																	HttpRequest.post(httpurl+"/OffLineClientController/option.vot",{"username":loginusernetusername.text},function(data)
 																	{					
@@ -345,35 +319,61 @@
 																			{
 																				if (status.committed) 
 																				{
-																					//Alert.show("更新完毕");
-																					dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
-																					{					
-																						local2.dataProvider = new ArrayList(data);
-																						for (var i:int =0; i < dao.daoitems.length; ++i) 
+																					//把选项更新到本地数据库court_question_option
+																					HttpRequest.post(httpurl+"/OffLineClientController/taskinfo.vot",{"zbsid":loginusernetusername.text},function(data)
+																					{																																										
+																						var taskinfoitem:Object = JSON.parse(data);				
+																						
+																						if (taskinfoitem.list_taskinfo.length>0)
 																						{
-																							dao.daoitems[i].conn.close();
-																						}
-																					});	
-																					
-																					dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
-																					{
-																						local1.dataProvider = new ArrayList(date);
-																						for (var i:int =0; i < dao.daoitems.length; ++i) 
-																						{
-																							dao.daoitems[i].conn.close();
+																							dao.updateBySQL("delete from COURT_TASKINFOITEM");	
+																							var taskinfoArr:Array = [];
+																							for(var i:int = 0; i< taskinfoitem.list_taskinfo.length; ++i)
+																							{
+																								var list_taskinfo:ListTaskInfo = new ListTaskInfo();																								
+																								list_taskinfo.sid = (taskinfoitem.list_taskinfo[i].sid);
+																								list_taskinfo.evalobjsid = (taskinfoitem.list_taskinfo[i].evalobjsid);
+																								list_taskinfo.zbsid = (taskinfoitem.list_taskinfo[i].zbsid);
+																								list_taskinfo.inputorsid = (taskinfoitem.list_taskinfo[i].inputorsid);
+																								list_taskinfo.auditorsid = (taskinfoitem.list_taskinfo[i].auditorsid);
+																								list_taskinfo.input_status = (taskinfoitem.list_taskinfo[i].input_status);
+																								list_taskinfo.audit_status = (taskinfoitem.list_taskinfo[i].audit_status);
+																								taskinfoArr.push(list_taskinfo);
+																							}
+																							dao.batchInsertWithHighSpeed(taskinfoArr, function(status:*):void 
+																							{
+																								if (status.committed) 
+																								{																											
+																									updatepage.visible=false;						
+																									locallist.visible=true;
+																									listpage.visible=true;
+																									Alert.show("\t提示\n更新成功");
+																									
+																									dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
+																									{					
+																										local2.dataProvider = new ArrayList(data);
+																										for (var i:int =0; i < dao.daoitems.length; ++i) 
+																										{
+																											dao.daoitems[i].conn.close();
+																										}
+																									});	
+																									
+																									dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
+																									{
+																										local1.dataProvider = new ArrayList(date);
+																										for (var i:int =0; i < dao.daoitems.length; ++i) 
+																										{
+																											dao.daoitems[i].conn.close();
+																										}
+																									});
+																								}
+																							});
 																						}
 																					});
 																				}
 																			});
 																		}
 																	});
-																	/*
-																	}
-																	
-																	});
-																	}
-																	});
-																	*/
 																}
 																
 															});
@@ -387,22 +387,7 @@
 							}
 						});
 						
-						//列表更新						
-						/*var JsonObj:Object = JSON.parse(data);		
-						
-						if (JsonObj.list_audit.length >0)
-						{
-							titlesgrid3.dataProvider = new ArrayList(JsonObj.list_audit);							
-						}
-						if (JsonObj.list_todo.length >0)
-						{							
-							titlesgrid2.dataProvider = new ArrayList(JsonObj.list_todo);
-						}*/	
-												
-						updatepage.visible=false;						
-						locallist.visible=true;
-						listpage.visible=true;
-						Alert.show("\t提示\n更新成功");
+					
 					}
 				})
 			}
@@ -464,12 +449,8 @@
 				listpage.visible=false;
 				locallist.visible=false;
 				backpage.visible=true;
-				/*tjbdda.visible = false;
-				tijiao.visible = false;
-				gengxinbendi.visible = false;
-				gengxinshujuku.visible = false;*/
 			}
-						
+			
 			//本地录入页面退出登录
 			protected function enteringbacklogin(event:MouseEvent):void
 			{
@@ -484,10 +465,6 @@
 				listpage.visible=false;
 				locallist.visible=false;
 				backpage.visible=true;
-				/*tjbdda.visible = false;
-				tijiao.visible = false;
-				gengxinbendi.visible = false;
-				gengxinshujuku.visible = false;*/
 				questionpage.visible=false;
 				qpage.visible=false;
 			}
@@ -498,14 +475,10 @@
 				listpage.visible=false;
 				locallist.visible=false;
 				backpage.visible=true;
-				/*tjbdda.visible = false;
-				tijiao.visible = false;
-				gengxinbendi.visible = false;
-				gengxinshujuku.visible = false;*/
 				localchack.visible=false;
 				chacklocal.visible=false;
 			}
-									
+			
 			//答题界面的退出当前用户页面（服务器已登录）
 			protected function backtologinser(event:MouseEvent):void
 			{
@@ -558,7 +531,8 @@
 			//录入页面的提交
 			protected function enteringsubmit(event:MouseEvent):void
 			{
-				var alllen:int = int(enteringall.text);
+				
+				/*var alllen:int = int(enteringall.text);
 				var opt:OneOption = new OneOption();
 				opt.enteringoptall = "答案";			
 				var qaa:Object = new Object();
@@ -593,8 +567,6 @@
 					{
 						if(status.committed)
 						{
-							//dao.query("select * from COURT_LIST_TODO where evalobjname = '"+evalobjname+"' ");
-							//dao.updateBySQL("delete from COURT_LIST_TODO where evalobjname = '"+evalobjname+"' ");
 							opt.clear = "清空";
 							Alert.show("提交成功！");
 							dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
@@ -617,12 +589,17 @@
 						}
 					});		
 				}
-				
+				*/
 			}
 			
 			//本地答题页面的提交答案
 			protected function submitanswer(event:MouseEvent):void
 			{
+				//我还需要把暂存的也提交了
+				
+				//getpapers的data是一行的数据，用local1.selecteditem得到
+				//initTodeTask的data是getpapers的返回值
+			
 				var alllen:int = int(allquest.text);
 				var opt:OneOption = new OneOption();
 				opt.optall = "答案";			
@@ -658,8 +635,8 @@
 						listoption.evsid = cname;
 						listoption.evalobjsid = qaa[h].evalobjsid;
 						listoption.usersid = loginusernetusername.text;
-						listoption.ans_memo = aaq[h].ans_memo;
-						listoption.ans_inputor_memo = aaq[h].ans_inputor_memo;
+						listoption.ans_memo = qaa[h].ans_memo;
+						listoption.ans_inputor_memo = qaa[h].ans_inputor_memo;
 						listoption.zbsid = zbsid;
 						answerArr.push(listoption);
 					}
@@ -670,6 +647,8 @@
 							dao.updateBySQL("update COURT_LIST_TODO set input_status = '已完成' where evalobjname = '"+evalobjname+"' ");
 							opt.clear = "清空";
 							Alert.show("提交成功！");
+							
+							//刷新页面
 							dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
 							{					
 								local2.dataProvider = new ArrayList(data);
@@ -691,7 +670,7 @@
 					});		
 				}												
 			}
-						
+			
 			//录入页面的暂存
 			protected function enteringtemporary(event:MouseEvent):void
 			{
@@ -731,21 +710,6 @@
 				{
 					Alert.show("暂存失败");
 				}
-			}
-			
-			//提交本地数据库的答案
-			protected function submitlocal(event:MouseEvent):void
-			{	
-				/*dao.query("select * from COURT_OPTION",function(data:*)
-				{		
-					for(var asdf:int=0 ; asdf<data.length ; asdf++)
-					{
-						HttpRequest.post(httpurl+"/court2/todotasks/todotasks/TodoTasksController/addOrUpdateOne.vot",{"a":2 , "stopcache":3 , "ans_evalobjpapersid":4 , "ans_sid":5 , "ans_filegroupsid":6 , "papersid2":1 , "ans_questsid":data[asdf].questsid , "ans_answeroptionsid":data[asdf].answersid , "zbsid":data[asdf].zbsid , "sid":data[asdf].sid , "ans_inputor_memo":data[asdf].ans_inputor_memo , "currpapersid2":1 , "ans_answeroptionsidrad":data[asdf].answersid , "tempsave":data[asdf].tempsave , "evalobjsid": data[asdf].evalobjsid , "currpapersid" : 1 , "papercode" : enteringbz.text ,  "papersid":data[asdf].sid , "ans_name":data[asdf].evsid , "ans_memo":data[asdf].ans_memo },function(dete)
-						{
-							Alert.show(dete);
-						});
-					}
-				});*/				
 			}
 			
 			//录入页面的取消
@@ -845,7 +809,7 @@
 							onequest.removeall = "清空allanswer";
 							onequest.optiondata={evalobjname:evalobjname , cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
 						});
-						questcontainer.addElement(onequest);
+						//questcontainer.addElement(onequest);
 					}
 				});	
 			}
@@ -894,7 +858,7 @@
 					}
 				});	
 			}
-			
+						
 			//本地列表的录入页面(审核任务)
 			public function aduiting():void  
 			{
@@ -909,8 +873,14 @@
 				var wenjuan:String = local2.selectedItem.levelonezb;			
 				var quest_sid:String;
 				
+				//第几张
+				HttpRequest.post(httpurl+"/court2/todotasks/todotasks/TodoTasksController/initTodoTask.vot",{"zbsidnum":zbsidnum},function(data)
+				{
+					//Alert.show(data);
+				});
+					
 				//从数据库取出来的相应的题目	
-				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
+				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*)
 				{	
 					enteringnairname.text = wenjuan;
 					enteringcourtname.text = evalobjname;
@@ -939,7 +909,7 @@
 					}
 				});
 			}
-									
+			
 			//本地列表的查看页面(审核任务)
 			public function chackoutsh():void  
 			{
@@ -999,7 +969,7 @@
 				var renwu:String = local1.selectedItem.nairename;
 				var wenjuan:String = local1.selectedItem.levelonezb;			
 				var quest_sid:String;
-				
+					
 				//从数据库取出来的相应的题目				
 				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
 				{	
@@ -1026,25 +996,22 @@
 							}			
 							onequest.optiondata={evalobjsid:evalobjsid , evalobjname:evalobjname , cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
 						});
-						questcontainer.addElement(onequest);
+						questcontainer.addElement(onequest);						
 					}
 				});	
 			}
-
+			
 			//更新本地数据库
 			protected function updateSQLite(event:MouseEvent):void
 			{
-								
+				
 			}
 			
 			//本地的查看的返回列表
 			protected function backagain(event:MouseEvent):void
 			{
 				localchacklist.removeAllElements();
-				/*questionpage.visible=false;*/
-				/*questionpageserver.visible = false;*/
 				qpage.visible=false;
-				/*sqpage.visible=false;*/
 				localchack.visible=false;
 				chacklocal.visible=false;
 				listpage.visible=true;
@@ -1088,11 +1055,49 @@
 			{
 				blackPage.visible = false;
 			}
-						
+			
 			protected function init(event:FlexEvent):void 
 			{
-		
+				
 			}
+			
+			
+			public var selectedItem:Object;
+			protected function combobox1_closeHandler(event:DropDownEvent):void
+			{
+				selectedItem = event.target.selectedItem;
+			}
+			
+			
+			//第几张的处理函数
+			protected function dropdownlist1_changeHandler(event:IndexChangeEvent):void
+			{
+				selectedItem = event.target.selectedItem;
+				//先用httprequest获取一共有几页
+				
+				/*HttpRequest.post(*/
+				
+				
+				//同时也需要获取每一页的sid，即papersid
+				//写方法，每点击一次var一个问卷
+				//每次切换页面时候，都要记录现在已经答了的题目并保存
+			}
+			
+			public var nn:int = 5;
+			
+			
+			
+			[Bindable]
+			public var number:ArrayCollection = new ArrayCollection(
+				[
+					{tnumber:"1"+" / "+ nn , data:"第一张"},
+					{tnumber:"2" , data:"第二张"},
+					{tnumber:"3" , data:"第三张"},
+					{tnumber:"4" , data:"第四张"},
+					{tnumber:"5" , data:"第五张"},
+					{tnumber:"6" , data:"第六张"}
+				]);
+			
 			
 		]]>
 	</fx:Script>
@@ -1435,8 +1440,8 @@
 									<s:GridItemRenderer horizontalCenter=""  dataChange="griditemrenderer2_dataChangeHandler(event)">		
 										<fx:Script>
 											<![CDATA[
-												import mx.events.FlexEvent;
-												import mx.controls.Alert;		
+												import mx.controls.Alert;
+												import mx.events.FlexEvent;		
 												
 												protected function justlook(event:MouseEvent):void
 												{
@@ -1474,33 +1479,33 @@
 	
 	<!--创建本地用户页面-->
 	<s:SkinnableContainer skinClass="skins.makeUserPage" id="makepage" visible="false" fontSize="15" width="100%" height="100%">
-			<s:Label/>
-			<s:Label/>
-			<s:HGroup top="400" left="980">
-				<s:Label text="用户名 : " fontWeight="bold" color="blue"/>
-				<s:TextInput id="inputLoginName" prompt="请输入真实姓名" restrict="0-9\a-z\^{'[\一-\龥]'}"/>
-			</s:HGroup>
-			<s:Label/>
-			<s:HGroup top="450" left="981">
-				<s:Label text=" 密 码  : " fontWeight="bold" color="blue"/>
-				<s:TextInput id="inputFirstPassWord" prompt="请输入6~16位字符" displayAsPassword="true" restrict="a-zA-Z0-9"/>
-			</s:HGroup>
-			<s:Label/>
-			<s:HGroup top="500" left="964">
-				<s:Label text="重复密码 : " fontWeight="bold" color="blue"/>
-				<s:TextInput id="inputSecondPassWord" prompt="只许使用字母与数字" displayAsPassword="true"/>
-			</s:HGroup>
-			<s:Label/>
-			<s:HGroup top="550" left="920">
-				<s:Label text="关联网络用户名 : " fontWeight="bold" color="blue"/>
-				<s:TextInput id="inputNetName"/>
-			</s:HGroup>
-			<s:Label/>
-			<s:HGroup top="600" left="960">
-				<s:Button skinClass="skins.backLogin" label="返回登陆" click="backlogin(event)"/>
-				<s:Label/><s:Label/><s:Label/><s:Label/>
-				<s:Button skinClass="skins.makeUserSure" label="确定创建" click="makeSure(event)"/>				
-			</s:HGroup>	
+		<s:Label/>
+		<s:Label/>
+		<s:HGroup top="400" left="980">
+			<s:Label text="用户名 : " fontWeight="bold" color="blue"/>
+			<s:TextInput id="inputLoginName" prompt="请输入真实姓名" restrict="0-9\a-z\^{'[\一-\龥]'}"/>
+		</s:HGroup>
+		<s:Label/>
+		<s:HGroup top="450" left="981">
+			<s:Label text=" 密 码  : " fontWeight="bold" color="blue"/>
+			<s:TextInput id="inputFirstPassWord" prompt="请输入6~16位字符" displayAsPassword="true" restrict="a-zA-Z0-9"/>
+		</s:HGroup>
+		<s:Label/>
+		<s:HGroup top="500" left="964">
+			<s:Label text="重复密码 : " fontWeight="bold" color="blue"/>
+			<s:TextInput id="inputSecondPassWord" prompt="只许使用字母与数字" displayAsPassword="true"/>
+		</s:HGroup>
+		<s:Label/>
+		<s:HGroup top="550" left="920">
+			<s:Label text="关联网络用户名 : " fontWeight="bold" color="blue"/>
+			<s:TextInput id="inputNetName"/>
+		</s:HGroup>
+		<s:Label/>
+		<s:HGroup top="600" left="960">
+			<s:Button skinClass="skins.backLogin" label="返回登陆" click="backlogin(event)"/>
+			<s:Label/><s:Label/><s:Label/><s:Label/>
+			<s:Button skinClass="skins.makeUserSure" label="确定创建" click="makeSure(event)"/>				
+		</s:HGroup>	
 		<s:VGroup horizontalAlign="center" top="300" >
 			<s:Label/>	
 		</s:VGroup>
@@ -1680,7 +1685,7 @@
 				</s:HGroup>
 			</s:VGroup>
 		</s:SkinnableContainer>
-
+		
 		<s:SkinnableContainer  width="100%" >
 			<s:HGroup horizontalAlign="left" top="10" left="30" fontSize="25">
 				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="&lt;&lt; 返回列表  " click="backlist(event)"/>
@@ -1709,13 +1714,18 @@
 			<s:HGroup>
 				<s:Label text=" "/>
 			</s:HGroup>
-			<s:HGroup horizontalAlign="center" width="100%" top="75">
+			<s:HGroup horizontalAlign="center" width="100%" top="70">
 				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="统一修改备注" click="blackpage(event)"/>
 			</s:HGroup>
-			<s:HGroup verticalAlign="bottom" top="135" horizontalAlign="center" width="100%">
-				<s:Label text="共 "/>
-				<s:Label text=" " id="allquest" fontWeight="bold" color="red"/>
-				<s:Label text="道题"/>
+			<s:HGroup horizontalAlign="center" width="100%" top="120">
+				<s:FormItem label="第   "  top="120" left="850">					
+				</s:FormItem>
+				<s:FormItem  top="120" left="900">
+					<s:DropDownList dataProvider="{number}" labelField="tnumber" prompt="1" change="dropdownlist1_changeHandler(event)" width="100%"/>										
+				</s:FormItem>
+				<s:FormItem label="张"  top="120" left="1050">
+				</s:FormItem>
+				<s:Label text=" " id="allquest" visible="false"/>
 			</s:HGroup>			
 			<s:HGroup horizontalCenter="0" top="160" width="85%">
 				<s:Label text="问卷备注   ："/>
@@ -1724,6 +1734,7 @@
 			<s:HGroup>
 				<s:Label text=" "/>
 			</s:HGroup>
+			
 		</s:SkinnableContainer>
 	</s:SkinnableContainer>
 	
@@ -1732,6 +1743,8 @@
 		<supportClasses:MyScroller skinClass="ffdf" id="scroller" width="100%" height="100%">
 			<s:Group width="100%" height="100%">
 				<s:VGroup horizontalAlign="center">
+				</s:VGroup>
+				<s:VGroup id="otherquestion" width="100%" visible="false">
 				</s:VGroup>
 				<s:VGroup id="questcontainer" width="100%">
 				</s:VGroup>
@@ -1805,8 +1818,6 @@
 				</s:VGroup>
 			</s:Group>
 		</supportClasses:MyScroller>
-		<!--<s:Scroller id="scroller" width="100%" height="100%">
-		</s:Scroller>-->
 	</s:Group>
 	
 	<!--统一修改备注-->

@@ -54,7 +54,7 @@
 		</s:fill> 
 
     </s:Rect>-->
-	<s:Image source="@Embed('assets/111(1).png')" horizontalCenter="0" verticalCenter="0"/>
+	<s:Image source="@Embed('assets/111(1)(1).png')" horizontalCenter="0" verticalCenter="0"/>
     <!--
         Note: setting the minimum size to 0 here so that changes to the host component's
         size will not be thwarted by this skin part's minimum size.   This is a compromise,
