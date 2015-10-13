@@ -14,7 +14,6 @@
 	
 	<fx:Script>
 		<![CDATA[
-			import supportClasses.ListTaskInfo;
 			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
 			import mx.controls.List;
@@ -23,12 +22,12 @@
 			import mx.events.FlexEvent;
 			import mx.events.FlexNativeMenuEvent;
 			import mx.events.IndexChangedEvent;
+			import mx.managers.CursorManager;
 			import mx.managers.PopUpManager;
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.http.mxml.HTTPService;
 			import mx.utils.UIDUtil;
 			import mx.utils.object_proxy;
-			import mx.managers.CursorManager;
 			
 			import spark.components.List;
 			import spark.events.DropDownEvent;
@@ -37,23 +36,22 @@
 			import spark.events.IndexChangeEvent;
 			import spark.events.TextOperationEvent;
 			
-			
 			import org.osmf.events.TimeEvent;
 			
-			import supportClasses.Entering;
+			import supportClasses.Court2Zb;
+			import supportClasses.CourtEvaluate;
 			import supportClasses.ListAnswer;
 			import supportClasses.ListAuditItem;
 			import supportClasses.ListOption;
 			import supportClasses.ListQuestion;
+			import supportClasses.ListTaskInfo;
 			import supportClasses.ListTodoItem;
 			import supportClasses.Option;
-			import supportClasses.ProjectItem;
 			import supportClasses.UserItem;
-			import supportClasses.ListTaskInfo;
 			
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
 			private var newuser:UserItem = new UserItem();
-			private var _httpurl:String = "http://192.168.1.106:8081/court";
+			private var _httpurl:String = "http://192.168.1.237:8081/court";
 			private var n:int = 0;
 			private var answer:String; 		//选项的内容
 			private var qsid:String;		//问题的
@@ -343,29 +341,90 @@
 																							dao.batchInsertWithHighSpeed(taskinfoArr, function(status:*):void 
 																							{
 																								if (status.committed) 
-																								{																											
-																									updatepage.visible=false;						
-																									locallist.visible=true;
-																									listpage.visible=true;
-																									Alert.show("\t提示\n更新成功");
-																									
-																									dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
-																									{					
-																										local2.dataProvider = new ArrayList(data);
-																										for (var i:int =0; i < dao.daoitems.length; ++i) 
+																								{																																																		
+																									//把court2_zb更新到本地数据库court2_zb
+																									HttpRequest.post(httpurl+"/offLineClientController/courtzb.vot",{"username":loginusernetusername.text},function(data)
+																									{																											
+																										Alert.show(JSON.stringify(data));
+																										/*var listzb:Object = JSON.parse(data);			
+																										
+																										if (listzb.list_zb.length>0)
 																										{
-																											dao.daoitems[i].conn.close();
-																										}
-																									});	
-																									
-																									dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
-																									{
-																										local1.dataProvider = new ArrayList(date);
-																										for (var i:int =0; i < dao.daoitems.length; ++i) 
-																										{
-																											dao.daoitems[i].conn.close();
-																										}
-																									});
+																											dao.updateBySQL("delete from COURT2_ZB");	
+																											var listzbArr:Array = [];
+																											for(var i:int = 0; i< listzb.list_taskinfo.length; ++i)
+																											{
+																												var list_zb:Court2Zb = new Court2Zb;																					
+																												list_zb.sid = (listzb.list_zb[i].sid);
+																												list_zb.name = (listzb.list_zb[i].name);
+																												list_zb.projsid = (listzb.list_zb[i].projsid);
+																												list_zb.parentsid = (listzb.list_zb[i].parentsid);
+																												list_zb.yearbelong = (listzb.list_zb[i].yearbelong);
+																												list_zb.answercount = (listzb.list_zb[i].answercount);
+																												list_zb.islevelonezb = (listzb.list_zb[i].islevelonezb);
+																												list_zb.zbweight = (listzb.list_zb[i].zbweight);
+																												list_zb.zbsidpath = (listzb.list_zb[i].zbsidpath);
+																												list_zb.sortfield = (listzb.list_zb[i].sortfield);
+																												list_zb.targetscore = (listzb.list_zb[i].targetscore);
+																												listzbArr.push(list_zb);
+																											}
+																											dao.batchInsertWithHighSpeed(listzbArr, function(status:*):void 
+																											{
+																												if (status.committed) 
+																												{
+																													//把court2_zb更新到本地数据库court2_zb
+																													HttpRequest.post(httpurl+"/OffLineClientController/courtevaluate.vot",{"username":loginusernetusername.text},function(data)
+																													{																																										
+																														var listevaluate:Object = JSON.parse(data);				
+																														
+																														if (listevaluate.list_evaluate.length>0)
+																														{
+																															dao.updateBySQL("delete from COURT2_ZB");	
+																															var listevaluateArr:Array = [];
+																															for(var i:int = 0; i< listzb.list_taskinfo.length; ++i)
+																															{
+																																var list_evaluate:CourtEvaluate = new CourtEvaluate;																			
+																																list_evaluate.sid = (listevaluate.list_evaluate[i].sid);
+																																list_evaluate.name = (listevaluate.list_evaluate[i].name);
+																																list_evaluate.projsid = (listevaluate.list_evaluate[i].projsid);																															
+																																list_evaluate.yearbelong = (listevaluate.list_evaluate[i].yearbelong);																											
+																																list_evaluate.sortfield = (listevaluate.list_evaluate[i].sortfield);																																
+																																listevaluateArr.push(list_evaluate);
+																															}
+																															dao.batchInsertWithHighSpeed(listevaluateArr, function(status:*):void 
+																															{
+																																if (status.committed) 
+																																{
+																																	updatepage.visible=false;						
+																																	locallist.visible=true;
+																																	listpage.visible=true;
+																																	Alert.show("\t提示\n更新成功");
+																																	
+																																	dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
+																																	{					
+																																		local2.dataProvider = new ArrayList(data);
+																																		for (var i:int =0; i < dao.daoitems.length; ++i) 
+																																		{
+																																			dao.daoitems[i].conn.close();
+																																		}
+																																	});	
+																																	
+																																	dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
+																																	{
+																																		local1.dataProvider = new ArrayList(date);
+																																		for (var i:int =0; i < dao.daoitems.length; ++i) 
+																																		{
+																																			dao.daoitems[i].conn.close();
+																																		}
+																																	});																																	
+																																}
+																															});
+																														}
+																													});																													
+																												}
+																											});
+																										}*/
+																									});				
 																								}
 																							});
 																						}
@@ -1074,12 +1133,18 @@
 			{
 				selectedItem = event.target.selectedItem;
 				//先用httprequest获取一共有几页
-				
-				/*HttpRequest.post(*/
-				
+				//先不会得到张数，就先按五张处理
+				//HttpRequest.post(
+								
 				
 				//同时也需要获取每一页的sid，即papersid
+				
+				
 				//写方法，每点击一次var一个问卷
+				
+				var questionair :OneQuestionnair = new OneQuestionnair();
+				//可是我需要Papersid
+				
 				//每次切换页面时候，都要记录现在已经答了的题目并保存
 			}
 			
@@ -1091,11 +1156,10 @@
 			public var number:ArrayCollection = new ArrayCollection(
 				[
 					{tnumber:"1"+" / "+ nn , data:"第一张"},
-					{tnumber:"2" , data:"第二张"},
-					{tnumber:"3" , data:"第三张"},
-					{tnumber:"4" , data:"第四张"},
-					{tnumber:"5" , data:"第五张"},
-					{tnumber:"6" , data:"第六张"}
+					{tnumber:"2"+" / "+ nn , data:"第二张"},
+					{tnumber:"3"+" / "+ nn , data:"第三张"},
+					{tnumber:"4"+" / "+ nn , data:"第四张"},
+					{tnumber:"5"+" / "+ nn , data:"第五张"}
 				]);
 			
 			
