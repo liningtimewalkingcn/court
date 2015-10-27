@@ -2,7 +2,7 @@ package supportClasses
 {
 	public class Court2Zb
 	{
-		public const CourtZb:String = "COURT2_ZB";
+		public const _tablename_:String = "COURT2_ZB";
 		public var sid:String;
 		public var name:String;
 		public var projsid:String;

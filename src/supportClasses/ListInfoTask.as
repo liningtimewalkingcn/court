@@ -1,14 +1,14 @@
 package supportClasses
 {
-	public class ListTaskInfo
+	public class ListInfoTask
 	{
-		public const _tablename_:String = "COURT_INFOTASK";
-		public var sid:String; 
-		public var evalobjsid:String; 
-		public var zbsid:String; 
-		public var inputorsid:String; 
-		public var auditorsid:String; 
-		public var input_status:String; 
-		public var audit_status:String; 	
+		public const _tablename_:String = "COURT_CURRENTANSWER";
+		public var evalobjsid:String;
+		public var zbsid:String;
+		public var evalobjname:String;
+		public var papersid:String;
+		public var questid:String;
+		public var answersid:String;
+		public var sid:String;
 	}
 }

@@ -8,12 +8,12 @@ package supportClasses {
 	
 	public class Dao {
 		
-		public var daoitems: Vector.<DaoItem> = new <DaoItem>[];
-		
+		public var daoitems: Vector.<DaoItem> = new <DaoItem>[];		
 		public var dbfilename:String;
 		
 		
-		public function insertOrUpdate(a:*):void {
+		public function insertOrUpdate(a:*):void 
+		{
 			var daoitem:DaoItem = new DaoItem();
 			daoitem.a = a;
 			daoitem.dbfilename = dbfilename;

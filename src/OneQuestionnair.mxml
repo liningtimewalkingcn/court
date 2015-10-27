@@ -6,94 +6,16 @@
 	<fx:Script>
 		<![CDATA[
 			import mx.controls.Alert;
-			
-			//从court.mxml中拿取张数的数据
-			public function set pages(val:*):void
-			{
-				if(val != null)
-				{
-					for(var len:int =0 ; len<val.data.length ; len++)
-					{
-						var onequest:OneQuestion = new OneQuestion();
-						onequest.questdata = {num:len , tmsms:val.data[len].memo , quests:val.data[len].name , sid1:val.data[len].sid};
-						onequestnair.addElement(onequest);
-					}
-				}
-				
-			}
-			
-			public function set options(val:*):void
-			{
-				var n:int = val.num;
-				for(var z:int = 0 ; z<n　; z++)
-				{
-					var option :OneOption = new OneOption();
-					var opid:String = (val.ar[z]);
-					var nameid:String = (val.list[z]);
-					var questid:String = (val.qstid);
-					/*if( allAnswer != null )
-					{
-						var zlen:int = allAnswer.length;
-						
-						for(var r:int = 0 ; r<zlen ; r++)
-						{						
-							if( (opid == allAnswer[r].answersid) && (questid == allAnswer[r].questid) && (val.cname == allAnswer[r].evalobjname)  )
-							{
-								option.foroption.selected = true;
-							}
-						}
-					}*/
-					
-					/*if( enteringallAnswer != null )
-					{
-						var len:int = enteringallAnswer.length;
-						
-						for(var o:int = 0 ; o<len ; o++)
-						{						
-							if( (opid == enteringallAnswer[o].answersid) && (questid == enteringallAnswer[o].questid) && (val.cname == enteringallAnswer[o].evalobjname)  )
-							{
-								option.foroption.selected = true;
-							}
-						}
-					}*/
-					
-					/*option.quest = quest;
-					option.optiondata = {evalobjsid:val.evalobjsid , evalobjname:val.evalobjname , all:n , n:z , opid:opid , nameid:nameid , questid:questid}
-					options.addElement(option);*/
-					if(val.bool == 0)
-					{
-						option.foroption.visible = false;
-					}
-					else
-					{
-						option.foroption.visible = true;
-					}
-				}
-			}
-			
-			protected function button1_clickHandler(event:MouseEvent):void
+		
+			public function set forquest (val:*):void
 			{
 				
 			}
 		]]>
 	</fx:Script>
 	
-	<s:HGroup width="100%" horizontalAlign="center">
-		<s:Label text="第" fontWeight="bold"/>
-		<s:Label text=" " id="papwesid" />
-		<s:Label text="/" />
-		<s:Label text=" " id="papers" />
-		<s:Label text="张" fontWeight="bold"/>
-	</s:HGroup>
-	
-	<s:HGroup width="95%" horizontalAlign="left">
-		<s:Label text="问卷备注：" />
-		<s:TextArea width="900" id="papercode"/>
-	</s:HGroup>
-	
-	<s:VGroup id="onequestnair" width="85%" horizontalAlign="center">			
+	<s:Label text=" " id="papersid" visible="false"/>
+	<s:VGroup id="forquestion" >
+		
 	</s:VGroup>
-	
-	
-	
 </s:Group>

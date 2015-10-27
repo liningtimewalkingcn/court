@@ -28,6 +28,9 @@
 				var s:String ;
 				evalobjname = val.evalobjname;
 				evalobjsid = val.evalobjsid;
+				zbsid.text = val.zbsid ; 
+				papersid.text = val.papersid;
+				
 				s = change(num);
 				if( num < all)
 				{
@@ -61,6 +64,8 @@
 				obj['questid'] = questId;
 				obj['answersid'] = answerId;
 				obj['evalobjsid'] = evalobjsid;
+				obj['zbsid'] = zbsid.text;
+				obj['papersid'] = papersid.text;
 				
 
 				var len:int = objs.length;
@@ -142,7 +147,8 @@
 		<s:Label text=" " id="bid" visible="false"/>			<!--题目的id-->
 	</s:HGroup>
 	<s:HGroup> 
-		<s:Label text=" "/>
+		<s:Label text=" " id="zbsid" visible="false"/>
+		<s:Label text=" " id="papersid" visible="false"/>
 	</s:HGroup>	
 </s:VGroup>
 

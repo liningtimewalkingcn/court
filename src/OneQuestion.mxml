@@ -18,6 +18,7 @@
 			public static var enteringallAnswer:Object;
 			public  var bbb:int;
 			public  var ccc:int;
+			public var questzbsid:String ;
 			
 			//录入附件
 			private var file:File = new File();
@@ -34,10 +35,12 @@
 			//填写题目
 			public function set questdata(val:*):void
 			{
+				questzbsid = val.zbsid;
 				tmsm1.text = val.tmsms;
 				qnum1.text = String(val.num+1);
 				question1.text = val.quests;
 				sid3.text = val.sid1;
+				papersid.text = val.papersid;
 			}
 			
 			public function set foranswer(val:*):void
@@ -82,6 +85,7 @@
 			}
 						
 			//填写选项
+			public var option :OneOption = new OneOption();
 			public function set optiondata(val:*):void
 			{	
 				var n:int = val.num;
@@ -97,28 +101,35 @@
 						
 						for(var r:int = 0 ; r<zlen ; r++)
 						{						
-							if( (opid == allAnswer[r].answersid) && (questid == allAnswer[r].questid) && (val.cname == allAnswer[r].evalobjname)  )
+							if( (val.ppsid == allAnswer[r].papersid) && (opid == allAnswer[r].answersid) && (questid == allAnswer[r].questid) && (val.cname == allAnswer[r].evalobjname)  )
 							{
 								option.foroption.selected = true;
 							}
 						}
 					}
+
+					if(val.zhang == 1)
+					{
+						//if(把三个id引用进来)
+						if( (opid == val.sendanswersid) && (questid == val.sendquestid) && (val.cname == val.sendevalobjname)  )
+						{
+							option.foroption.selected = true;
+						}						
+					}
 					
 					if( enteringallAnswer != null )
 					{
 						var len:int = enteringallAnswer.length;
-						
 						for(var o:int = 0 ; o<len ; o++)
-						{						
+						{
 							if( (opid == enteringallAnswer[o].answersid) && (questid == enteringallAnswer[o].questid) && (val.cname == enteringallAnswer[o].evalobjname)  )
 							{
 								option.foroption.selected = true;
 							}
 						}
 					}
-					
 					option.quest = quest;
-					option.optiondata = {evalobjsid:val.evalobjsid , evalobjname:val.evalobjname , all:n , n:z , opid:opid , nameid:nameid , questid:questid}
+					option.optiondata = {papersid:papersid.text , zbsid:questzbsid , evalobjsid:val.evalobjsid , evalobjname:val.evalobjname , all:n , n:z , opid:opid , nameid:nameid , questid:questid}
 					options.addElement(option);
 					if(val.bool == 0)
 					{
@@ -131,7 +142,13 @@
 					}
 				}
 			}
-				
+
+			//设置所有选项为没有选中
+			public function set none(val:*):void
+			{
+				option.foroption.visible = false;
+			}
+						
 			//发送答案
 			public function set optall(val1:*):void
 			{				
@@ -170,8 +187,7 @@
 			public function findThis( sid:String):int
 			{
 				for(var i:int =0 ; i < objs.length ; i++)
-				{
-				
+				{				
 					if(objs[i].sid==sid)
 					{
 						return i;
@@ -191,11 +207,11 @@
 	<s:HGroup>
 		<s:Label text=" 第  "/>
 		<s:Label text=" " id="qnum1" width="22"/>
-		<s:Label text="题"/>
-		<!--<s:Label text=" " />-->
+		<s:Label text="题"/>		
 		<s:Label text="   :"/>
 		<s:Label text=" " id="question1"/>
 	</s:HGroup>
+	<s:Label text=" " id="papersid" visible="false"/>
 	<s:HGroup>
 		<s:Label text=" " visible="false" id="sid3"/>
 	</s:HGroup>
