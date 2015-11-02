@@ -52,7 +52,7 @@
         <s:State name="disabled" />
     </s:states>
     
-    <s:Image source="@Embed('assets/button_15.png')"/>
+    <s:Image source="@Embed('assets/buttonIcon.png')"/>
     
     <!-- layer 8: text -->
     <!--- @copy spark.components.supportClasses.ButtonBase#labelDisplay  -->

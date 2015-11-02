@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
-		 xmlns:s="library://ns.adobe.com/flex/spark" 
-		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" horizontalAlign="left">
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" horizontalAlign="left">
 	
 	<fx:Script>
 		<![CDATA[
@@ -25,10 +25,10 @@
 			protected function selectVideoclickHandler():void {
 				file.addEventListener(Event.SELECT, fileSelectHandler);
 				file.browseForOpen("原始数据文件", [new FileFilter("*.xls","*.xls")]);
-
+				
 			}
 			protected function fileSelectHandler(event:Event):void {
-				origindatafile.text = file.nativePath;
+			//	origindatafile.text = file.nativePath;
 				file.removeEventListener(Event.SELECT, fileSelectHandler);
 			}
 			
@@ -44,6 +44,8 @@
 				if(val.selet == 1)
 				{
 					lrysm.enabled = false;
+					shysm.enabled = false;
+					isSubmit.enabled = false;
 				}
 			}
 			
@@ -87,7 +89,7 @@
 			{
 				return bbb;
 			}
-						
+			
 			//填写选项
 			public var option :OneOption = new OneOption();
 			public function set optiondata(val:*):void
@@ -111,7 +113,7 @@
 							}
 						}
 					}
-
+					
 					if(val.zhang == 1)
 					{
 						//if(把三个id引用进来)
@@ -146,13 +148,13 @@
 					}
 				}
 			}
-
+			
 			//设置所有选项为没有选中
 			public function set none(val:*):void
 			{
 				option.foroption.visible = false;
 			}
-						
+			
 			//发送答案
 			public function set optall(val1:*):void
 			{				
@@ -205,21 +207,60 @@
 			{
 				quest.selection=null;
 			}		
+			
+			protected function checkbox1_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				if(isSubmit.selected == true)
+				{
+					radio1.enabled = true;
+					radio2.enabled = true;
+					quest.enabled = true;
+				}
+				else
+				{
+					radio1.enabled = false;
+					radio2.enabled = false;
+					quest.enabled = false;
+				}
+			}
+			
+			protected function radiobutton1_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			protected function radiobutton2_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+
+			
 		]]>
 	</fx:Script>
 	
 	<s:HGroup>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
 		<s:Label text=" 第  "/>
 		<s:Label text=" " id="qnum1" width="22"/>
 		<s:Label text="题"/>		
 		<s:Label text="   :"/>
 		<s:Label text=" " id="question1"/>
-	</s:HGroup>	
+	</s:HGroup>
+	
 	<s:HGroup fontSize="8">
 		<s:Label text=" " id="papersid" visible="false"/>
 		<s:Label text=" " visible="false" id="sid3"/>
 	</s:HGroup>
 	<s:HGroup>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
 		<s:Label text="题目说明   ："/>
 		<s:Label text=" " id="tmsm1"/>
 	</s:HGroup>
@@ -232,13 +273,19 @@
 	</fx:Declarations>
 	
 	<s:HGroup>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
 		<s:Label text="备选答案   ："/>
 	</s:HGroup>
 	
-	<s:VGroup verticalAlign="middle" id="options" fontStyle="normal">	
+	<s:VGroup verticalAlign="middle" id="options">	
 	</s:VGroup>
-
+	
 	<s:HGroup>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
 		<s:Label text="录入员说明 :"/>
 		<s:Label text=" "/>
 		<s:TextArea id="lrysm" width="900" height="30"/>
@@ -249,9 +296,88 @@
 	</s:HGroup>
 	
 	<s:HGroup>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
 		<s:Label text="录入员附件 :"/>
 		<s:Label text=" "/>	
 		<s:TextInput id="origindatafile" enabled="false" width="900"/>
+		<s:Button label="附件" click="selectVideoclickHandler()"/>
+	</s:HGroup>
+	
+	<s:HGroup fontSize="8">
+		<s:Label text=" "/>
+	</s:HGroup>
+	
+	<s:HGroup>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="是否出错 :" />
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:CheckBox label=" " click="checkbox1_clickHandler(event)" id="isSubmit"/>
+	</s:HGroup>
+	
+	<s:HGroup fontSize="8">
+		<s:Label text=" "/>
+	</s:HGroup>
+	
+	<s:HGroup>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="人工错误 :"/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:RadioButton id="radio2" enabled="false"  click="radiobutton1_clickHandler(event)" />
+	</s:HGroup>
+	
+	<s:HGroup fontSize="8">
+		<s:Label text=" "/>
+	</s:HGroup>
+	
+	<s:HGroup>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="非人工错误 :"/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:RadioButton id="radio1" enabled="false" click="radiobutton2_clickHandler(event)"/>
+	</s:HGroup>
+	
+	<s:HGroup fontSize="8">
+		<s:Label text=" "/>
+	</s:HGroup>
+	
+	<s:HGroup>
+		<s:Label text="审核人员说明 :"/>
+		<s:TextArea id="shysm" width="900" height="30"/>		
+	</s:HGroup>
+	
+	<s:HGroup fontSize="8">
+		<s:Label text=" "/>
+	</s:HGroup>
+	
+	<s:HGroup>
+		<s:Label text="审核人员附件 :"/>
+		<s:TextInput id="shorigindatafile" enabled="false" width="900"/>
 		<s:Button label="附件" click="selectVideoclickHandler()"/>
 	</s:HGroup>
 	

@@ -27,17 +27,14 @@
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.http.mxml.HTTPService;
 			import mx.utils.UIDUtil;
-			import mx.utils.object_proxy;
-			
+			import mx.utils.object_proxy;			
 			import spark.components.List;
 			import spark.events.DropDownEvent;
 			import spark.events.GridItemEditorEvent;
 			import spark.events.GridSelectionEvent;
 			import spark.events.IndexChangeEvent;
-			import spark.events.TextOperationEvent;
-			
-			import org.osmf.events.TimeEvent;
-			
+			import spark.events.TextOperationEvent;			
+			import org.osmf.events.TimeEvent;			
 			import supportClasses.Court2Zb;
 			import supportClasses.CourtEvaluate;
 			import supportClasses.ListAnswer;
@@ -52,7 +49,7 @@
 			
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
 			private var newuser:UserItem = new UserItem();
-			private var _httpurl:String = "http://192.168.1.237:8081/court";
+			private var _httpurl:String = "http://192.168.1.237:8080/court";
 			private var n:int = 0;
 			private var answer:String; 		//选项的内容
 			private var qsid:String;		//问题的
@@ -94,10 +91,12 @@
 						locallist.visible = true;
 						loginuser.text = " "+inputUserName.text+"";
 						loginusera.text = " "+inputUserName.text+"";
+						shloginusera.text = " "+inputUserName.text+"";
 						loginusers.text = " "+inputUserName.text+"";
 						loginusernetusername.text = data[0].server_username;
 						loginusernetusernames.text = data[0].server_username;
 						loginusernetusernamea.text = data[0].server_username;
+						shloginusernetusernamea.text = data[0].server_username;
 					}
 					else
 					{
@@ -539,7 +538,9 @@
 				locallist.visible=false;
 				backpage.visible=true;
 				localchack.visible=false;
+				shlocalchack.visible=false;
 				chacklocal.visible=false;
+				shchacklocal.visible=false;				
 			}
 			
 			//答题界面的退出当前用户页面（服务器已登录）
@@ -800,7 +801,7 @@
 					enteringall.text = data.length;
 					for (var d:int = 0; d < data.length; ++d) 
 					{
-						var onequest:OneQuestion = new OneQuestion();
+						var onequest:SoneQuestion = new SoneQuestion();
 						onequest.questdata = {num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
 						quest_sid = data[d].sid;
 						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
@@ -879,7 +880,9 @@
 				listpage.visible=false;
 				locallist.visible=false;
 				localchack.visible=true;
+				//shlocalchack.visible=true;
 				chacklocal.visible=true;
+				//shchacklocal.visible=true;
 				
 				var zbsidnum:String = local1.selectedItem.zbsid;
 				var evalobjname:String = local1.selectedItem.evalobjname;
@@ -888,7 +891,6 @@
 				var tasksid:String = local1.selectedItem.sid;
 				var quest_sid:String;
 				var papersobj:Object;
-				
 				//先用httprequest获取一共有几张   此处只用显示第一张
 				HttpRequest.post(httpurl+"/court2/todotasks/todotasks/TodoTasksController/initTodoTask.vot",{"tasksid":tasksid},function(data)
 				{
@@ -900,7 +902,7 @@
 							
 						]);
 					for(var x:int=0;x<papers;x++)
-					{
+					 {
 						number2.addItem((x+1)+"/"+papers);
 						arr.push(papersobj[x].sid);						
 					}					
@@ -915,14 +917,18 @@
 				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
 				{
 					namenair.text = wenjuan;
+					shnamenair.text = wenjuan;
 					namecourt.text = evalobjname;
+					shnamecourt.text = evalobjname;
 					cname = evalobjname;
 					namenai.text = renwu;
+					shnamenai.text = renwu;
 					questall.text = data.length;
+					shquestall.text = data.length;
 					for (var d:int = 0; d < data.length; ++d) 
 					{
 						var onequest:OneQuestion = new OneQuestion();
-						onequest.questdata = {num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
+						onequest.questdata = {selet:1 , num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
 						quest_sid = data[d].sid;
 						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
 						{	
@@ -992,8 +998,8 @@
 					enteringall.text = data.length;
 					for (var d:int = 0; d < data.length; ++d) 
 					{
-						var onequest:OneQuestion = new OneQuestion();
-						onequest.questdata = {num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
+						var onequest:SoneQuestion = new SoneQuestion();
+						onequest.questdata = {selet:0 , num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
 						quest_sid = data[d].sid;
 						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
 						{	
@@ -1019,7 +1025,9 @@
 				listpage.visible=false;
 				locallist.visible=false;
 				localchack.visible=true;
-				chacklocal.visible=true;
+				shlocalchack.visible=true;
+				//chacklocal.visible=true;
+				shchacklocal.visible=true;
 				
 				var zbsidnum:String = local2.selectedItem.zbsid;
 				var evalobjname:String = local2.selectedItem.evalobjname;
@@ -1045,9 +1053,9 @@
 						arr.push(papersobj[x].sid);						
 					}					
 					
-					allThisDropDownListLook.dataProvider = number3;
-					allThisDropDownListLook.validateNow();
-					allThisDropDownListLook.selectedIndex = 0;//可以设置默认
+					shallThisDropDownListLook.dataProvider = number3;
+					shallThisDropDownListLook.validateNow();
+					shallThisDropDownListLook.selectedIndex = 0;//可以设置默认
 					
 				});	
 				
@@ -1055,14 +1063,18 @@
 				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
 				{	
 					namenair.text = wenjuan;
+					shnamenair.text = wenjuan;
 					namecourt.text = evalobjname;
+					shnamecourt.text = evalobjname;
 					cname = evalobjname;
 					namenai.text = renwu;
+					shnamenai.text = renwu;
 					questall.text = data.length;
+					shquestall.text = data.length;
 					for (var d:int = 0; d < data.length; ++d) 
 					{
-						var onequest:OneQuestion = new OneQuestion();
-						onequest.questdata = {num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
+						var onequest:SoneQuestion = new SoneQuestion();
+						onequest.questdata = {selet:1 , num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
 						quest_sid = data[d].sid;
 						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
 						{	
@@ -1077,7 +1089,7 @@
 							}
 							onequest.optiondata={zhang:0 , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
 						});
-						localchacklist.addElement(onequest);
+						shlocalchacklist.addElement(onequest);
 					}
 				});	
 			}
@@ -1132,7 +1144,7 @@
 					for (var d:int = 0; d < data.length; ++d) 
 					{
 						var onequest:OneQuestion = new OneQuestion();
-						onequest.questdata = {zbsid:foranswerzbsid , num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
+						onequest.questdata = {selet:0 , zbsid:foranswerzbsid , num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
 						quest_sid = data[d].sid;
 						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
 						{	
@@ -1169,9 +1181,12 @@
 			protected function backagain(event:MouseEvent):void
 			{
 				localchacklist.removeAllElements();
+				shlocalchacklist.removeAllElements();
 				qpage.visible=false;
 				localchack.visible=false;
+				shlocalchack.visible=false;
 				chacklocal.visible=false;
+				shchacklocal.visible=false;
 				listpage.visible=true;
 				locallist.visible=true;				
 			}
@@ -1295,7 +1310,7 @@
 						//每次点击完之后，再次把papersid.text的值换为arr[event.newIndex]
 						papersid.text = arr[event.newIndex];
 //*******************************************************************************************************************			
-						
+						Alert.show("dsaf");
 						onequest.questdata = {zbsid:foranswerzbsid , num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
 						quest_sid = data[d].sid;
 						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
@@ -1419,6 +1434,16 @@
 						enteringpagequestcontainer.addElement(onequest);
 					}
 				});
+			}
+			
+			//提交待办和更新待办的返回
+			protected function turnBack(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				submitpage.visible = false;
+				updatepage.visible = false;
+				listpage.visible=true;
+				locallist.visible=true;
 			}
 			
 			[Bindable]
@@ -1861,7 +1886,11 @@
 			<s:Label/>
 			<s:Label/>
 			<s:Label/>
-			<s:Button label=" " skinClass="skins.makeSureUpdate" click="updatetask(event)"/>			
+			<s:HGroup>
+				<s:Button label=" " skinClass="skins.makeSureUpdate" click="updatetask(event)"/>
+				<s:Label/><s:Label/><s:Label/>
+				<s:Button label=" " skinClass="skins.turnBack" click="turnBack(event)"/>
+			</s:HGroup>		
 		</s:VGroup>		
 	</s:SkinnableContainer>
 	
@@ -1883,7 +1912,12 @@
 			<s:Label/>
 			<s:Label/>
 			<s:Label/>
-			<s:Button label=" " skinClass="skins.makeSureSubmit" click="submittask(event)"/>			
+			<s:HGroup>
+				<s:Button label=" " skinClass="skins.makeSureSubmit" click="submittask(event)"/>	
+				<s:Label/>
+				<s:Label/><s:Label/>
+				<s:Button label=" " skinClass="skins.turnBack" click="turnBack(event)"/>
+			</s:HGroup>			
 		</s:VGroup>		
 	</s:SkinnableContainer>
 	
@@ -1969,7 +2003,7 @@
 				<s:FormItem label="第   "  top="120" left="850">					
 				</s:FormItem>
 				<s:FormItem  top="120" left="900">
-					<s:DropDownList dataProvider="{number2}" labelField="tnumber" prompt="1" change="ShenThisDropDownList_changeHandler(event)" width="100%" id="ShenThisDropDownList"/>										
+					<s:DropDownList dataProvider="{number2}" labelField="tnumber" prompt="1"  change="ShenThisDropDownList_changeHandler(event)" width="70%" id="ShenThisDropDownList"/>										
 				</s:FormItem>
 				<s:FormItem label="张"  top="120" left="1050">
 				</s:FormItem>
@@ -1981,6 +2015,9 @@
 				<s:Label text="道题"/>
 			</s:HGroup>			
 			<s:HGroup horizontalCenter="0" top="160" width="85%">
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>
 				<s:Label text="问卷备注   ："/>
 				<s:TextArea id="enteringbz"  width="900" height="30"/>
 			</s:HGroup>
@@ -2064,7 +2101,7 @@
 				<s:FormItem label="第   "  top="120" left="850">					
 				</s:FormItem>
 				<s:FormItem  top="120" left="900">
-					<s:DropDownList dataProvider="{number}" labelField="tnumber" prompt="1" change="dropdownlist1_changeHandler(event)" width="100%" id="ThisDropDownList"/>										
+					<s:DropDownList dataProvider="{number}" labelField="tnumber" prompt="1" change="dropdownlist1_changeHandler(event)" width="70%" id="ThisDropDownList"/>										
 				</s:FormItem>
 				<s:FormItem label="张"  top="120" left="1050">
 				</s:FormItem>
@@ -2093,12 +2130,12 @@
 		</supportClasses:MyScroller>
 	</s:Group>
 	
-	<!--本地查看页面-->
+	<!--本地查看页面--><!--录入任务-->
 	<s:SkinnableContainer skinClass="skins.questList" id="localchack" visible="false"  fontSize="25" horizontalCenter="0" width="100%">
 		<s:layout>
 			<s:VerticalLayout horizontalAlign="center"/>
 		</s:layout>
-		<s:SkinnableContainer width="100%">
+		<s:SkinnableContainer width="100%" fontStyle="normal">
 			<s:Button label=" " skinClass="skins.head"/>
 			<s:VGroup right="36" horizontalAlign="right" verticalAlign="middle" width="100%">
 				<s:HGroup>
@@ -2145,7 +2182,7 @@
 				<s:FormItem label="第   "  top="80" left="850">					
 				</s:FormItem>
 				<s:FormItem  top="120" left="900">
-					<s:DropDownList dataProvider="{number2}" labelField="tnumber" prompt="1" change="dropdownlist1_changeHandler(event)" width="100%" id="allThisDropDownListLook"/>										
+					<s:DropDownList dataProvider="{number2}" labelField="tnumber" prompt="1" change="dropdownlist1_changeHandler(event)" width="70%" id="allThisDropDownListLook"/>										
 				</s:FormItem>
 				<s:FormItem label="张"  top="120" left="1050">
 				</s:FormItem>
@@ -2158,15 +2195,94 @@
 			</s:HGroup>			
 		</s:SkinnableContainer>
 	</s:SkinnableContainer>
-	
-	
-	<!--本地查看题目--><!--录入和审核任务的查看用同一个方法-->
-	<s:Group id="chacklocal" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="320">
+		
+	<!--本地查看题目--><!--录入任务-->
+	<s:Group fontStyle="normal" id="chacklocal" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="320">
 		<supportClasses:MyScroller skinClass="ffdf" width="100%" height="100%">
 			<s:Group width="100%" height="100%">
 				<s:VGroup horizontalAlign="center" height="100%">
 				</s:VGroup>
 				<s:VGroup id="localchacklist" width="100%">					
+				</s:VGroup>
+			</s:Group>
+		</supportClasses:MyScroller>
+	</s:Group>
+	
+	
+	<!--本地查看页面--><!--审核任务-->
+	<s:SkinnableContainer skinClass="skins.questList" id="shlocalchack" visible="false"  fontSize="25" horizontalCenter="0" width="100%">
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center"/>
+		</s:layout>
+		<s:SkinnableContainer width="100%">
+			<s:Button label=" " skinClass="skins.head"/>
+			<s:VGroup right="36" horizontalAlign="right" verticalAlign="middle" width="100%">
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>		
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>
+				<s:HGroup fontSize="20">
+					<s:Button label=" " skinClass="skins.serverUserName"/>	
+					<s:Label text=" " id="shloginusera" fontSize="25"/>	
+					<s:Label visible="false" id="shloginusernetusernamea" fontSize="25" color="white"/>	
+					<s:Button label=" " skinClass="skins.news"/>
+					<s:Label text=" 0 " id="shunfinishedN"/> 
+					<s:Label text="    "/>
+					<s:Button label=" " skinClass="skins.backToLogin"  click="questbacktologinlook(event)"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer  width="100%" >
+			<s:HGroup horizontalAlign="left" fontSize="25" top="10">
+				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
+				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="&lt;&lt; 返回列表  " click="backagain(event)"/>
+			</s:HGroup>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer skinClass="skins.queatHead" width="96%" fontSize="20">			
+			<s:HGroup horizontalAlign="center" width="100%" verticalAlign="middle" top="30">
+				<s:Label/>
+				<s:Label text="当前问卷：" fontWeight="bold"/>
+				<s:Label text=" " id="shnamenair" color="red"/>
+				<s:Label/><s:Label/>
+				<s:Label text="当前测评对象: " fontWeight="bold"/>
+				<s:Label text=" " id="shnamecourt" color="red"/>
+				<s:Label/><s:Label/>
+				<s:Label text="当前任务：" fontWeight="bold"/>
+				<s:Label text=" " id="shnamenai" color="red"/>
+				<s:Label/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+			<s:HGroup horizontalAlign="center" width="100%" top="80">
+				<s:FormItem label="第   "  top="80" left="850">					
+				</s:FormItem>
+				<s:FormItem  top="120" left="900">
+					<s:DropDownList dataProvider="{number2}" labelField="tnumber" prompt="1" change="dropdownlist1_changeHandler(event)" width="70%" id="shallThisDropDownListLook"/>										
+				</s:FormItem>
+				<s:FormItem label="张"  top="120" left="1050">
+				</s:FormItem>
+				<s:Label text=" " id="shallquestlook" visible="false"/>
+			</s:HGroup>
+			<s:HGroup horizontalAlign="center" width="100%" top="60">
+				<s:Label text="共 "/>
+				<s:Label text=" " id="shquestall" fontWeight="bold" color="red"/>
+				<s:Label text="道题"/>
+			</s:HGroup>			
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+	
+	
+	<!--本地查看题目--><!--审核任务-->
+	<s:Group id="shchacklocal" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="320">
+		<supportClasses:MyScroller skinClass="ffdf" width="100%" height="100%">
+			<s:Group width="100%" height="100%">
+				<s:VGroup horizontalAlign="center" height="100%">
+				</s:VGroup>
+				<s:VGroup id="shlocalchacklist" width="100%">					
 				</s:VGroup>
 			</s:Group>
 		</supportClasses:MyScroller>
