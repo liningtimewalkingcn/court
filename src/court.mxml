@@ -11,6 +11,15 @@
 		<supportClasses:Dao id="dao" dbfilename="mydatabase"/>
 		<supportClasses:HTTPServicePool id="HttpRequest" />
 	</fx:Declarations>
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+		@namespace supportClasses "supportClasses.*";
+		s|Label{fontFamily:'Microsoft YaHei Light',微软雅黑,宋体}
+		s|Button{fontFamily:'Microsoft YaHei Light',微软雅黑,宋体}
+		mx|Label{fontFamily:'Microsoft YaHei Light',微软雅黑,宋体}
+		s|DataGrid{fontFamily:'Microsoft YaHei Light',微软雅黑,宋体}
+	</fx:Style>
 	
 	<fx:Script>
 		<![CDATA[
