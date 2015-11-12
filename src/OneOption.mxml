@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" horizontalAlign="left"
+		  >
+	
+	<!--<fx:Declarations>
+		<s:RadioButtonGroup id="g"/>		
+	</fx:Declarations>-->
+	
+	<fx:Script>
+		<![CDATA[
+			
+			import mx.controls.Alert;
+			
+			public var quest:*;
+			public var questid:String;
+			public static var objs:Array = new Array();
+			public var _answer:Object ;
+			public var entering_answer:Object ;
+			public var evalobjname:String;
+			public var evalobjsid:String;
+			
+			public function set optiondata (val:*):void
+			{
+				var all:int = val.all;
+				var num:int = val.n;				
+				var s:String ;
+				evalobjname = val.evalobjname;
+				evalobjsid = val.evalobjsid;
+				zbsid.text = val.zbsid ; 
+				papersid.text = val.papersid;
+				
+				s = change(num);
+				if( num < all)
+				{
+					foroption.group = quest;
+				}
+				sid.text = val.opid;
+				option.text = val.nameid;
+				bid.text = val.questid;
+				word.text = s;
+				function change (val:int):String
+				{
+					var l:int = val;
+					var res:String = String.fromCharCode(65+l);
+					return res;
+				}
+			}
+
+			
+			
+			protected function clickradiobutton(event:MouseEvent):void
+			{		
+				var obj:Object =  new Object();
+				var answerId:String;
+				var questId:String;
+				var cnam:String;
+				answerId = sid.text;
+				questId = bid.text;
+				
+				cnam = evalobjname;
+				obj['evalobjname'] = evalobjname;
+				obj['questid'] = questId;
+				obj['answersid'] = answerId;
+				obj['evalobjsid'] = evalobjsid;
+				obj['zbsid'] = zbsid.text;
+				obj['papersid'] = papersid.text;
+				
+
+				var len:int = objs.length;
+				if(len == 0)
+				{
+					objs.push(obj);
+				}
+				else
+				{
+					for(var a:int = 0 ; a<len ; a++)
+					{
+						if(objs[a].questid == obj.questid)
+						{							
+							objs[a] = obj;
+							return ;
+						}						
+					}
+					objs.push(obj);
+				}
+			}
+			
+			public function set optall(val1:*):void
+			{		
+				this._answer = objs
+			}
+			
+			public function set enteringoptall(val1:*):void
+			{		
+				this.entering_answer = objs
+			}
+			
+			public function set clear (val:*):void
+			{
+				var len:int = objs.length;
+				for(var i:int = 0 ; i<len ; i++)
+				{
+					objs.pop();
+				}
+			}
+			public function get optall():Object
+			{			
+				
+				return _answer;
+			}
+			
+			public function get enteringoptall():Object
+			{			
+				
+				return entering_answer;
+			}
+			
+			public function findThis( sid:String):int
+			{
+				for(var i:int =0 ; i < objs.length ; i++)
+				{
+					
+					if(objs[i].sid==sid)
+					{
+						return i;
+					}
+				}
+				return -1;
+			}
+		]]>
+	</fx:Script>
+	
+	<s:HGroup height="100%" verticalAlign="bottom" fontFamily="宋体">
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
+
+		<s:Label text=" " id="word" height="100%" verticalAlign="bottom" fontSize="23" fontWeight="normal"/>
+		<s:Label text=" "/>
+		<s:RadioButton id="foroption" click="clickradiobutton(event)"/>
+		<s:Label text=" " id="option"/>
+		<s:Label text=" " id="sid" visible="false"/>			<!--选项的id-->
+		<s:Label text=" " id="bid" visible="false"/>			<!--题目的id-->
+	</s:HGroup>
+	<s:HGroup fontSize="8">
+		<s:Label text=" " id="zbsid" visible="false"/>
+		<s:Label text=" " id="papersid" visible="false"/>
+	</s:HGroup>	
+</s:VGroup>
+

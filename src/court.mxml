@@ -3,79 +3,135 @@
 	xmlns:fx="http://ns.adobe.com/mxml/2009" 
 	xmlns:s="library://ns.adobe.com/flex/spark" 
 	xmlns:mx="library://ns.adobe.com/flex/mx"
-	xmlns:supportClasses="supportClasses.*"
+	xmlns:supportClasses="supportClasses.*" 
+	skinClass="skins.appbgSkin" applicationComplete="init(event)"
+	
 	>
 	
 	<fx:Declarations>
 		<supportClasses:Dao id="dao" dbfilename="mydatabase"/>
 		<supportClasses:HTTPServicePool id="HttpRequest" />
-	</fx:Declarations>	
+	</fx:Declarations>
 	
 	<fx:Script>
 		<![CDATA[
+			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
 			import mx.controls.List;
 			import mx.controls.listClasses.ListBaseContentHolder;
+			import mx.core.mx_internal;
 			import mx.events.FlexEvent;
 			import mx.events.FlexNativeMenuEvent;
 			import mx.events.IndexChangedEvent;
+			import mx.managers.CursorManager;
 			import mx.managers.PopUpManager;
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.http.mxml.HTTPService;
 			import mx.utils.UIDUtil;
-			import mx.utils.object_proxy;			
+			import mx.utils.object_proxy;
+			
+			import spark.components.List;
+			import spark.events.DropDownEvent;
 			import spark.events.GridItemEditorEvent;
-			import spark.events.GridSelectionEvent;			
-			import org.osmf.events.TimeEvent;			
+			import spark.events.GridSelectionEvent;
+			import spark.events.IndexChangeEvent;
+			import spark.events.TextOperationEvent;
+			
+			import org.osmf.events.TimeEvent;
+			
+			import supportClasses.Court2Zb;
+			import supportClasses.CourtEvaluate;
+			import supportClasses.Court_auditanswer;
+			import supportClasses.Court_inputanswer;
+			import supportClasses.ListAnswer;
 			import supportClasses.ListAuditItem;
+			import supportClasses.ListInfoTask;
+			import supportClasses.ListOption;
+			import supportClasses.ListQuestion;
+			import supportClasses.ListTaskInfo;
 			import supportClasses.ListTodoItem;
-			import supportClasses.ProjectItem;			
-			import supportClasses.UserItem; 
-
+			import supportClasses.UserItem;
+			
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
-			private var userself:UserItem = new UserItem();
 			private var newuser:UserItem = new UserItem();
-			//private var httpurl:String = "http://192.168.1.107:8081/court";
-			private var httpurl:String = "http://192.168.1.158:8289/court";
-				
+			private var _httpurl:String = "http://192.168.1.237:8080/court";
+			private var n:int = 0;
+			private var answer:String; 		//选项的内容
+			private var qsid:String;		//问题的
+			private static var userid:String;  	//网络用户名
+			private var cname:String;   	//法院的名字
+			public var answerandquest:Object;		//获取题目与答案
+			public var datalen:int = 0;
+			public  static var papers:int=0;
+			public var pa:int = 0;
+			public var arr:Array = [];
+			
+			[Bindable]
+			public static var resX:int = Capabilities.screenResolutionX;   
+			[Bindable]
+			public static var resY:int = Capabilities.screenResolutionY; 
+			
+			private function get httpurl():String 
+			{
+				var file:File = new File("D:/fxworkspace/courtgit2");
+				if (file.exists) {
+					return "http://localhost:8081/court";
+				}
+				return _httpurl;
+			}
+			
 			//登录判断用户名密码是否正确
 			protected function login(event:MouseEvent):void
-			{								
+			{					
+				var inputPass:String = inputPassWord.text;
 				var namelist :ArrayList = new ArrayList();
-				dao.query("select * from SYS_USER where username = '"+inputUserName.text+"' and userpassword = '"+inputPassWord.text+"' ", function (data:*):void 
+				dao.query("select * from SYS_USER where username = '"+inputUserName.text+"' and userpassword = '"+inputPass+"' ", function (data:*):void 
 				{	
 					if( data != null && data.length > 0)
 					{
 						Alert.show("成功");
+						inputPassWord.text = null;
 						loginpage.visible = false;
 						listpage.visible = true;
 						locallist.visible = true;
-						loginuser.text = "当前登陆者："+inputUserName.text+"";
+						loginuser.text = " "+inputUserName.text+"";
+						loginusera.text = " "+inputUserName.text+"";
+						shloginusera.text = " "+inputUserName.text+"";
+						loginusers.text = " "+inputUserName.text+"";
 						loginusernetusername.text = data[0].server_username;
+						loginusernetusernames.text = data[0].server_username;
+						loginusernetusernamea.text = data[0].server_username;
+						shloginusernetusernamea.text = data[0].server_username;
 					}
 					else
 					{
 						Alert.show("用户名或密码错误");
 					}
-					for (var i:int =0; i < dao.daoitems.length; ++i) {
+					for (var i:int =0; i < dao.daoitems.length; ++i) 
+					{
 						dao.daoitems[i].conn.close();
 					}
 				});
 				
+				//录入
 				dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
-				{					
+				{							
 					local2.dataProvider = new ArrayList(data);
-					for (var i:int =0; i < dao.daoitems.length; ++i) {
+					for (var i:int =0; i < dao.daoitems.length; ++i) 
+					{
 						dao.daoitems[i].conn.close();
 					}
-				});			
+				});	
+				
+				//编辑
 				dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
 				{
 					local1.dataProvider = new ArrayList(date);
-					for (var i:int =0; i < dao.daoitems.length; ++i) {
+					for (var i:int =0; i < dao.daoitems.length; ++i) 
+					{
 						dao.daoitems[i].conn.close();
 					}
-				});
+				});				
 			}
 			
 			//点击进入创建页面
@@ -90,7 +146,6 @@
 			{			
 				listpage.visible=false;
 				locallist.visible=false;
-				serverlist.visible=false;
 				updatepage.visible=true;
 			}
 			
@@ -99,51 +154,42 @@
 			{
 				listpage.visible=false;
 				locallist.visible=false;
-				serverlist.visible = false;
 				submitpage.visible=true;
+				
+				//提交本地数据得到的数据court_currentanswer				
 			}
 			
-			// 判断提交待办页面网络用户密码是否正确			
+			// 判断提交待办页面网络用户密码是否正确	
 			protected function submittask(event:MouseEvent):void
 			{
-				HttpRequest.post(httpurl+"/OffLineClientController/checkPasswordthird.vot",{"username":loginusernetusername.text,"netPassword":submitNetPassword.text},function(str)
+				var submitNetPass :String = submitNetPassword.text;
+				HttpRequest.post(httpurl+"/OffLineClientController/checkPasswordthird.vot",{"username":loginusernetusername.text,"netPassword":submitNetPass},function(str)
 				{
 					if(str == "yes")
-					{	
-						Alert.show("\t提示\n提交成功");
+					{							
+						submitNetPassword.text = null;
 						//提交列表
-						//HttpRequest.post(httpurl+"/OffLineClientController/checkPasswordthird.vot",{"username":loginusernetusername.text,"netPassword":submitNetPassword.text},function(str)
+						dao.query("select * from COURT_OPTION",function(data:*)
+						{		
+							for(var asdf:int=0 ; asdf<data.length ; asdf++)
+							{
+								/*HttpRequest.post(httpurl+"/court2/todotasks/todotasks/TodoTasksController/addOrUpdateOne.vot?sid = '1'",{"a":2 , "stopcache":3 , "ans_evalobjpapersid":4 , "ans_sid":5 , "ans_filegroupsid":6 , "papersid2":1 , "ans_questsid":data[asdf].questsid , "ans_answeroptionsid":data[asdf].answersid , "zbsid":data[asdf].zbsid , "sid":data[asdf].sid , "ans_inputor_memo":data[asdf].ans_inputor_memo , "currpapersid2":1 , "ans_answeroptionsidrad":data[asdf].answersid , "tempsave":data[asdf].tempsave , "evalobjsid": data[asdf].evalobjsid , "currpapersid" : 1 , "papercode" : enteringbz.text ,  "papersid":data[asdf].sid , "ans_name":data[asdf].evsid , "ans_memo":data[asdf].ans_memo },function(dete)
+								{
+								Alert.show(dete);
+								});*/
+							}
+						});
+						Alert.show("\t提示\n提交成功");
 						submitpage.visible=false;
-						locallist.visible=false;
-						listpage.visible=true;						
-						serverlist.visible = true;
-						
+						locallist.visible=true;
+						listpage.visible=true;
 					}
 					else
 					{
 						Alert.show("\t提示\n密码错误");
 						submitpage.visible=true;
 					}
-				})
-			}			
-			
-			//服务器更新列表的审核与提交的切换
-			private function indexChangeFunc(e:Event):void
-			{
-				if(tabnavigator1.selectedIndex==0)
-				{
-					titlesgrid2.visible=true;
-					titlesgrid2.percentHeight = 100;
-					titlesgrid3.visible=false;
-					titlesgrid3.height = -6;
-				}
-				else
-				{
-					titlesgrid3.visible=true;
-					titlesgrid3.percentHeight = 100;
-					titlesgrid2.visible=false;
-					titlesgrid2.height = -6;
-				}				
+				});
 			}
 			
 			//本地列表的审核与提交的切换
@@ -160,7 +206,7 @@
 				{
 					local2.visible=true;
 					local2.percentHeight = 100;
-					local1.visible=false;
+					local1.visible=false; 
 					local1.height = -6;
 				}				
 			}
@@ -168,63 +214,248 @@
 			// 判断更新待办页面网络用户密码是否正确
 			protected function updatetask(event:MouseEvent):void
 			{	
-				HttpRequest.post(httpurl+"/OffLineClientController/updateTask.vot",{"username":loginusernetusername.text,"netPassword":updetNetPassword.text},function(data)
+				var updetNetPass :String = updetNetPassword.text;
+				HttpRequest.post(httpurl+"/OffLineClientController/updateTask.vot",{"username":loginusernetusername.text,"netPassword":updetNetPass},function(data)
 				{
 					if(data == "no")
-					{	
+					{
 						Alert.show("\t提示\n密码错误");
 						updatepage.visible=true;
 					}
 					else
-					{
-						Alert.show("\t提示\n更新成功");
-						//列表更新
-						var JsonObj:Object = JSON.parse(data);						
-						if (JsonObj.list_audit.length >0)
+					{						
+						updetNetPassword.text = null;
+						//更新本地列表
+						HttpRequest.post(httpurl+"/OffLineClientController/updateLocal.vot",{"username":loginusernetusername.text},function(data)
 						{
-							titlesgrid3.dataProvider = new ArrayList(JsonObj.list_audit);
-							
-							/*if (JsonObj.list_audit.length >0)
+							var jobj:Object = JSON.parse(data);
+							if (jobj.list_audit.length >0)
 							{
-								dao.updateBySQL("delete from COURT_LIST_AUDIT");									
-								for(var i:int = 0; i<titlesgrid3.dataProvider.length ; ++i)
+								dao.updateBySQL("delete from COURT_LIST_AUDIT");			
+								var audititemsArr:Array = [];
+								for(var i:int = 0; i<jobj.list_audit.length ; ++i)
 								{
 									var list_audit_item:ListAuditItem = new ListAuditItem();
-									list_audit_item.sid = JSON.stringify(JsonObj.list_audit[i].sid);
-									list_audit_item.nairename = JSON.stringify(JsonObj.list_audit[i].nairename);
-									list_audit_item.evalobjname = JSON.stringify(JsonObj.list_audit[i].evalobjname);
-									list_audit_item.levelonezb = JSON.stringify(JsonObj.list_audit[i].levelonezb);
-									list_audit_item.audit_status = JSON.stringify(JsonObj.list_audit[i].audit_status);
-									list_audit_item.input_status = JSON.stringify(JsonObj.list_audit[i].input_status);
-									dao.insertOrUpdate(list_audit_item);
-								}
-							}*/
-						}
-						if (JsonObj.list_todo.length >0)
-						{							
-							titlesgrid2.dataProvider = new ArrayList(JsonObj.list_todo);
-							
-							/*IF (JSONOBJ.LIST_TODO.LENGTH >0)
-							{							
-								
-								DAO.UPDATEBYSQL("DELETE FROM COURT_LIST_TODO");
-								FOR(VAR I:INT = 0; I<TITLESGRID2.DATAPROVIDER.LENGTH ; ++I)						
+									list_audit_item.sid = (jobj.list_audit[i].sid);
+									list_audit_item.nairename = (jobj.list_audit[i].nairename);
+									list_audit_item.evalobjname = (jobj.list_audit[i].evalobjname);
+									list_audit_item.levelonezb = (jobj.list_audit[i].levelonezb);
+									list_audit_item.audit_status = (jobj.list_audit[i].audit_status);
+									list_audit_item.input_status = (jobj.list_audit[i].input_status);
+									list_audit_item.evalobjsid = (jobj.list_audit[i].evalobjsid);
+									list_audit_item.zbsid = (jobj.list_audit[i].zbsid);
+									list_audit_item.num = i+1;
+									audititemsArr.push(list_audit_item);
+								}												
+								dao.batchInsertWithHighSpeed(audititemsArr, function(status:*):void 
 								{
-									VAR LIST_TODO_ITEM:LISTTODOITEM = NEW LISTTODOITEM();								
-									LIST_TODO_ITEM.SID = JSON.STRINGIFY(JSONOBJ.LIST_TODO[I].SID);
-									LIST_TODO_ITEM.NAIRENAME = JSON.STRINGIFY(JSONOBJ.LIST_TODO[I].NAIRENAME);
-									LIST_TODO_ITEM.EVALOBJNAME = JSON.STRINGIFY(JSONOBJ.LIST_TODO[I].EVALOBJNAME);
-									LIST_TODO_ITEM.LEVELONEZB = JSON.STRINGIFY(JSONOBJ.LIST_TODO[I].LEVELONEZB);
-									LIST_TODO_ITEM.AUDIT_STATUS = JSON.STRINGIFY(JSONOBJ.LIST_TODO[I].AUDIT_STATUS);
-									LIST_TODO_ITEM.INPUT_STATUS = JSON.STRINGIFY(JSONOBJ.LIST_TODO[I].INPUT_STATUS);
-									DAO.INSERTORUPDATE(LIST_TODO_ITEM);		
-								}																			
-							}*/
-						}	
-						updatepage.visible=false;						
-						locallist.visible=false;
-						listpage.visible=true;
-						serverlist.visible = true;
+									if (status.committed) 
+									{
+										if (jobj.list_todo.length >0)
+										{													
+											dao.updateBySQL("delete from COURT_LIST_TODO");
+											var todolistarr:Array = [];
+											for(var i:int = 0; i<jobj.list_todo.length ; ++i)						
+											{
+												var list_todo_item:ListTodoItem = new ListTodoItem();								
+												list_todo_item.sid = (jobj.list_todo[i].sid);
+												list_todo_item.nairename = (jobj.list_todo[i].nairename);
+												list_todo_item.evalobjname = (jobj.list_todo[i].evalobjname);
+												list_todo_item.levelonezb = (jobj.list_todo[i].levelonezb);
+												list_todo_item.audit_status = (jobj.list_todo[i].audit_status);
+												list_todo_item.input_status = (jobj.list_todo[i].input_status);
+												list_todo_item.evalobjsid = (jobj.list_todo[i].evalobjsid);
+												list_todo_item.zbsid = (jobj.list_todo[i].zbsid);	
+												
+												list_todo_item.num = i+1;
+												todolistarr.push(list_todo_item);		
+											}			
+											
+											dao.batchInsertWithHighSpeed(todolistarr, function(status:*):void 
+											{										
+												if (status.committed) 
+												{
+													HttpRequest.post(httpurl+"/OffLineClientController/questionpage.vot",{"username":loginusernetusername.text},function(data)
+													{					
+														var quest:Object = JSON.parse(data);				
+														if (quest.list_question.length>0)
+														{
+															dao.updateBySQL("delete from COURT_QUESTION");
+															var questArr:Array = [];
+															for(var i:int = 0; i<quest.list_question.length; ++i)
+															{
+																var list_question:ListQuestion = new ListQuestion();
+																list_question.sid = (quest.list_question[i].sid);
+																list_question.name = (quest.list_question[i].name);
+																list_question.zbsid = (quest.list_question[i].zbsid);
+																list_question.memo = (quest.list_question[i].memo);
+																list_question.createtime = (quest.list_question[i].createtime);
+																list_question.filegroupsid = (quest.list_question[i].filegroupsid);
+																list_question.sortfield = (quest.list_question[i].sortfield);
+																list_question.maxscore = (quest.list_question[i].maxscore);
+																list_question.modifytime = (quest.list_question[i].modifytime);
+																list_question.willrest = (quest.list_question[i].willrest);
+																list_question.questcode = (quest.list_question[i].questcode);
+																list_question.questzbname = (quest.list_question[i].questzbname);
+																questArr.push(list_question);
+																
+															}
+															dao.batchInsertWithHighSpeed(questArr, function(status:*):void 
+															{
+																if (status.committed) 
+																{
+																	//把选项更新到本地数据库court_question_option
+																	HttpRequest.post(httpurl+"/OffLineClientController/option.vot",{"username":loginusernetusername.text},function(data)
+																	{					
+																		var option:Object = JSON.parse(data);				
+																		
+																		if (option.list_option.length>0)
+																		{
+																			dao.updateBySQL("delete from COURT_QUESTION_OPTION");	
+																			var optionArr:Array = [];
+																			for(var i:int = 0; i< option.list_option.length; ++i)
+																			{
+																				var list_option:ListOption = new ListOption();
+																				list_option.sid = (option.list_option[i].sid);
+																				list_option.name = (option.list_option[i].name);
+																				list_option.questsid = (option.list_option[i].questsid);
+																				list_option.score = (option.list_option[i].score);
+																				list_option.sortfield = (option.list_option[i].sortfield);
+																				optionArr.push(list_option);
+																			}
+																			dao.batchInsertWithHighSpeed(optionArr, function(status:*):void 
+																			{
+																				if (status.committed) 
+																				{
+																					//把选项更新到本地数据库court_question_option
+																					HttpRequest.post(httpurl+"/OffLineClientController/taskinfo.vot",{"zbsid":loginusernetusername.text},function(data)
+																					{																																										
+																						var taskinfoitem:Object = JSON.parse(data);				
+																						
+																						if (taskinfoitem.list_taskinfo.length>0)
+																						{
+																							dao.updateBySQL("delete from COURT_TASKINFOITEM");	
+																							var taskinfoArr:Array = [];
+																							for(var i:int = 0; i< taskinfoitem.list_taskinfo.length; ++i)
+																							{
+																								var list_taskinfo:ListTaskInfo = new ListTaskInfo();																								
+																								list_taskinfo.sid = (taskinfoitem.list_taskinfo[i].sid);
+																								list_taskinfo.evalobjsid = (taskinfoitem.list_taskinfo[i].evalobjsid);
+																								list_taskinfo.zbsid = (taskinfoitem.list_taskinfo[i].zbsid);
+																								list_taskinfo.inputorsid = (taskinfoitem.list_taskinfo[i].inputorsid);
+																								list_taskinfo.auditorsid = (taskinfoitem.list_taskinfo[i].auditorsid);
+																								list_taskinfo.input_status = (taskinfoitem.list_taskinfo[i].input_status);
+																								list_taskinfo.audit_status = (taskinfoitem.list_taskinfo[i].audit_status);
+																								taskinfoArr.push(list_taskinfo);
+																							}
+																							dao.batchInsertWithHighSpeed(taskinfoArr, function(status:*):void 
+																							{
+																								if (status.committed) 
+																								{																																																		
+																									//把court2_zb更新到本地数据库court2_zb
+																									HttpRequest.post(httpurl+"/OffLineClientController/courtzb.vot",{"username":loginusernetusername.text},function(data)
+																									{																				
+																										//Alert.show(JSON.stringify(data));
+																										var listzb:Object = JSON.parse(data);			
+																										if (listzb.list_zb.length>0)
+																										{
+																											dao.updateBySQL("delete from COURT2_ZB");	
+																											var listzbArr:Array = [];
+																											for(var i:int = 0; i< listzb.list_zb.length; ++i)
+																											{
+																												var list_zb:Court2Zb = new Court2Zb;																					
+																												list_zb.sid = (listzb.list_zb[i].sid);
+																												list_zb.name = (listzb.list_zb[i].name);
+																												list_zb.projsid = (listzb.list_zb[i].projsid);
+																												list_zb.parentsid = (listzb.list_zb[i].parentsid);
+																												list_zb.yearbelong = (listzb.list_zb[i].yearbelong);
+																												list_zb.answercount = (listzb.list_zb[i].answercount);
+																												list_zb.islevelonezb = (listzb.list_zb[i].islevelonezb);
+																												list_zb.zbweight = (listzb.list_zb[i].zbweight);
+																												list_zb.zbsidpath = (listzb.list_zb[i].zbsidpath);
+																												list_zb.sortfield = (listzb.list_zb[i].sortfield);
+																												list_zb.targetscore = (listzb.list_zb[i].targetscore);
+																												listzbArr.push(list_zb);
+																											}
+																											dao.batchInsertWithHighSpeed(listzbArr, function(status:*):void 
+																											{
+																												if (status.committed) 
+																												{
+																													//把court2_evaluate_obj更新到本地数据库court2_evaluate_obj
+																													/*HttpRequest.post(httpurl+"/OffLineClientController/courtevaluate.vot",{"username":loginusernetusername.text},function(data)
+																													{																																										
+																													var listevaluate:Object = JSON.parse(data);				
+																													
+																													if (listevaluate.list_evaluate.length>0)
+																													{
+																													dao.updateBySQL("delete from COURT2_EVALUATE_OBJ");	
+																													var listevaluateArr:Array = [];
+																													for(var i:int = 0; i< listevaluate.list_evaluate.length; ++i)
+																													{
+																													var list_evaluate:CourtEvaluate = new CourtEvaluate;																			
+																													list_evaluate.sid = (listevaluate.list_evaluate[i].sid);
+																													list_evaluate.name = (listevaluate.list_evaluate[i].name);
+																													list_evaluate.projsid = (listevaluate.list_evaluate[i].projsid);																															
+																													list_evaluate.yearbelong = (listevaluate.list_evaluate[i].yearbelong);																											
+																													list_evaluate.sortfield = (listevaluate.list_evaluate[i].sortfield);																																
+																													listevaluateArr.push(list_evaluate);
+																													}
+																													dao.batchInsertWithHighSpeed(listevaluateArr, function(status:*):void 
+																													{
+																													if (status.committed) 
+																													{*/
+																													updatepage.visible=false;						
+																													locallist.visible=true;
+																													listpage.visible=true;
+																													Alert.show("\t提示\n更新成功");
+																													
+																													dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
+																													{					
+																														local2.dataProvider = new ArrayList(data);
+																														for (var i:int =0; i < dao.daoitems.length; ++i) 
+																														{
+																															dao.daoitems[i].conn.close();
+																														}
+																													});	
+																													
+																													dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
+																													{
+																														local1.dataProvider = new ArrayList(date);
+																														for (var i:int =0; i < dao.daoitems.length; ++i) 
+																														{
+																															dao.daoitems[i].conn.close();
+																														}
+																													});																																	
+																													/*}
+																													});
+																													}
+																													});*/																												
+																												}
+																											});
+																										}
+																									});				
+																								}
+																							});
+																						}
+																					});
+																				}
+																			});
+																		}
+																	});
+																}
+																
+															});
+														}
+													});
+												}										
+											});
+										}
+									}
+								});
+							}
+						});
+						
+						
 					}
 				})
 			}
@@ -264,6 +495,7 @@
 								newuser.username = inputLoginName.text;
 								newuser.userpassword = inputFirstPassWord.text;
 								newuser.server_username = inputNetName.text;
+								userid = inputNetName.text;
 								dao.insertOrUpdate(newuser);
 							}
 							else
@@ -284,8 +516,47 @@
 			{
 				listpage.visible=false;
 				locallist.visible=false;
-				serverlist.visible=false;
 				backpage.visible=true;
+			}
+			
+			//本地录入页面退出登录
+			protected function enteringbacklogin(event:MouseEvent):void
+			{
+				entering.visible = false;
+				enteringpage.visible = false;
+				backpage.visible=true;
+			}
+			
+			//答题界面的退出当前用户页面（已登录）
+			protected function questbacktologin(event:MouseEvent):void
+			{
+				listpage.visible=false;
+				locallist.visible=false;
+				backpage.visible=true;
+				questionpage.visible=false;
+				qpage.visible=false;
+			}
+			
+			//退出当前用户页面（已登录取消）
+			protected function questbacktologinlook(event:MouseEvent):void
+			{
+				listpage.visible=false;
+				locallist.visible=false;
+				backpage.visible=true;
+				localchack.visible=false;
+				shlocalchack.visible=false;
+				chacklocal.visible=false;
+				shchacklocal.visible=false;				
+			}
+			
+			//答题界面的退出当前用户页面（服务器已登录）
+			protected function backtologinser(event:MouseEvent):void
+			{
+				listpage.visible=false;
+				locallist.visible=false;
+				backpage.visible=true;
+				questionpage.visible=false;
+				qpage.visible=false;
 			}
 			
 			//返回登录页面（未登录）
@@ -294,308 +565,1169 @@
 				makepage.visible=false;
 				backpage.visible=false;
 				locallist.visible=false;
-				serverlist.visible=false;
 				loginpage.visible=true;
 			}
 			
 			//留在当前页面
 			protected function stophere(event:MouseEvent):void
-			{
+			{ 
 				backpage.visible=false;
 				listpage.visible=true;
 				locallist.visible=true;
 			}
 			
-			//答题页面的返回到列表
-			protected function backlist(event:MouseEvent):void
+			//本地录入页面的返回列表
+			protected function enteringbacklist(event:MouseEvent):void
 			{
-				questionpage.visible=false;
 				listpage.visible=true;
 				locallist.visible=true;
+				enteringpagequestcontainer.removeAllElements();
+				entering.visible = false;
+				enteringpage.visible = false;
+				enteringbz.text = null;
 			}
 			
-			//答题页面的提交答案
+			//本地答题页面的返回到列表
+			protected function backlist(event:MouseEvent):void
+			{
+				questcontainer.removeAllElements();
+				questionpage.visible=false;
+				qpage.visible=false;
+				listpage.visible=true;
+				locallist.visible=true;
+				thebz.text = null;
+			}
+			
+			//本地答题页面的提交（审核任务）
+			protected function enteringsubmit(event:MouseEvent):void
+			{				
+				var alllen:int = int(enteringall.text);
+				var opt:OneOption = new OneOption();
+				opt.enteringoptall = "答案";			
+				var qaa:Object = new Object();
+				qaa = opt.entering_answer;		//从oneoption获得的objs
+				var evalobjname:String = local2.selectedItem.evalobjname;
+				
+				//把得到的数据存到数据库
+				/*if(alllen > qaa.length)
+				{
+				Alert.show("请答完所有题目再交卷！");
+				}
+				else*/
+				{
+					enteringpagequestcontainer.removeAllElements();
+					enteringpage.visible=false;
+					entering.visible=false;
+					listpage.visible=true;
+					locallist.visible=true;
+					
+					var answerArr:Array = [];
+					
+					dao.batchInsertWithHighSpeed(answerArr , function(status:*):void
+					{
+						if(status.committed)
+						{
+							opt.clear = "清空";
+							Alert.show("提交成功！");
+							dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
+							{					
+								local2.dataProvider = new ArrayList(data);
+								for (var i:int =0; i < dao.daoitems.length; ++i) 
+								{
+									dao.daoitems[i].conn.close();
+								}
+							});	
+							
+							dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
+							{
+								local1.dataProvider = new ArrayList(date);
+								for (var i:int =0; i < dao.daoitems.length; ++i) 
+								{
+									dao.daoitems[i].conn.close();
+								}
+							});
+						}
+					});		
+				}				
+			}
+			
+			//本地答题页面的提交答案（录入任务）
 			protected function submitanswer(event:MouseEvent):void
-			{
+			{				
+				var evalobjname:String = local1.selectedItem.evalobjname;
+				var evalobjsid:String = local1.selectedItem.evalobjsid;
+				var zbsid:String = local1.selectedItem.zbsid;
 				
+				var alllen:int = int(allquest.text);
+				var opt:OneOption = new OneOption();
+				opt.optall = "答案";			//可以获得 questid、answersid、evalobjsid、zbsid、papersid
+				var qaa:Object = new Object();
+				qaa = opt._answer;		//从oneoption获得的objs
+				
+				
+				var questOne:OneQuestion = new OneQuestion();
+				questOne.foranswer = "答案";		//可以获得ans_memo、ans_inputor_memo
+				var aaq:Object = new Object();
+				aaq = questOne.asdfasdf;
+				
+				
+				var shen:SoneQuestion = new SoneQuestion();
+				shen.foranswer = "审核说明";
+				var saq:Object = new Object();
+				saq = shen.asdfasdf;
+				//把得到的数据存到数据库
+				if(alllen > qaa.length)
+				{
+					Alert.show("请答完所有题目再交卷！");
+				}
+				else
+				{	
+					//向服务器提交东西，是错的
+					/*HttpRequest.post(httpurl+"/court2/todotasks/todotasks/TodoTasksController/addOrUpdateOne.vot?sid = '1'",{"tempsave":1 , "zbsid":zbsid , "papersid":papersid , "evalobjsid":evalobjsid},function(data)
+					{
+					//要提交的req的tempsave , zbsid , papersid , evalobjsid
+					Alert.show("提交成功！");
+					});
+					*/
+					questcontainer.removeAllElements();
+					questionpage.visible=false;
+					qpage.visible=false;
+					listpage.visible=true;
+					locallist.visible=true;
+					
+					var answerArr:Array = [];
+					for(var h:int = 0 ; h<qaa.length ; h++)
+					{
+						var listoption:Court_inputanswer = new Court_inputanswer;
+						listoption.sid = UIDUtil.createUID();
+						listoption.questsid = qaa[h].questid;
+						listoption.answersid = qaa[h].answersid;
+						listoption.evalobjsid = qaa[h].evalobjsid;
+						listoption.usersid = loginusernetusername.text;
+						/*listoption.ans_memo = aaq[h].ans_memo;
+						listoption.ans_input_memo = aaq[h].ans_inputor_memo;	*/	
+						listoption.zbsid = zbsid;
+						listoption.papercode = thebz.text;			//问卷备注
+						listoption.papersid = papersid.text;				
+						answerArr.push(listoption);
+					}
+					dao.batchInsertWithHighSpeed(answerArr , function(status:*):void
+					{
+						if(status.committed)
+						{
+							dao.updateBySQL("update COURT_LIST_TODO set input_status = '已完成' where evalobjname = '"+evalobjname+"' ");
+							opt.clear = "清空";
+							Alert.show("提交成功！");
+							
+							//刷新页面
+							dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
+							{					
+								local2.dataProvider = new ArrayList(data);
+								for (var i:int =0; i < dao.daoitems.length; ++i) 
+								{
+									dao.daoitems[i].conn.close();
+								}
+							});	
+							
+							dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
+							{
+								local1.dataProvider = new ArrayList(date);
+								for (var i:int =0; i < dao.daoitems.length; ++i) 
+								{
+									dao.daoitems[i].conn.close();
+								}
+							});
+						}
+					});		
+				}												
+			}
+			
+			//录入页面的暂存
+			protected function enteringtemporary(event:MouseEvent):void
+			{
+				var opt:OneOption = new OneOption();
+				opt.enteringoptall = "答案";			
+				var qaa:Object = new Object();
+				qaa = opt.entering_answer;
+				var opp:OneQuestion = new OneQuestion();
+				opp.enteringanswer = {qaa:qaa};
+				var i:int = opp.ccc;
+				if(i == 1)
+				{
+					Alert.show("暂存成功");
+				}
+				else
+				{
+					Alert.show("暂存失败");
+				}
 				
 			}
 			
-			//答题页面的取消
-			protected function cancel(event:MouseEvent):void
-			{
-				
-				
-			}
-			
-			//答题页面的暂存
+			//本地答题页面的暂存
 			protected function temporary(event:MouseEvent):void
-			{
-				
-				
+			{	
+				var opt:OneOption = new OneOption();
+				opt.optall = "答案";			
+				var qaa:Object = new Object();
+				qaa = opt._answer;
+				var opp:OneQuestion = new OneQuestion();
+				opp.answer = {qaa:qaa};
+				var i:int = opp.bbb;
+				if(i == 1)
+				{
+					Alert.show("暂存成功");
+				}
+				else
+				{
+					Alert.show("暂存失败");
+				}
 			}
 			
-			//本地列表的編輯頁面
+			//答题页面的取消(审核任务)
+			protected function enteringreset(event:MouseEvent):void
+			{
+				enteringpagequestcontainer.removeAllElements();
+				entering.visible = false;
+				enteringpage.visible = false;
+				listpage.visible=true;
+				locallist.visible=true;
+				listpage.visible=false;
+				locallist.visible=false;
+				entering.visible = true;
+				enteringpage.visible = true;
+				
+				var zbsidnum:String = local2.selectedItem.zbsid;
+				var evalobjname:String = local2.selectedItem.evalobjname;
+				var renwu:String = local2.selectedItem.nairename;
+				var wenjuan:String = local2.selectedItem.levelonezb;			
+				var quest_sid:String;
+				
+				//从数据库取出来的相应的题目	
+				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
+				{	
+					enteringnairname.text = wenjuan;
+					enteringcourtname.text = evalobjname;
+					cname = evalobjname;
+					enteringname.text = renwu;
+					enteringall.text = data.length;
+					for (var d:int = 0; d < data.length; ++d) 
+					{
+						var onequest:SoneQuestion = new SoneQuestion();
+						onequest.questdata = {num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
+						quest_sid = data[d].sid;
+						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
+						{	
+							var arr:Array =new Array();
+							var list:Array = new Array();
+							var num:int = date.length;
+							var zzz:int = 1;
+							for(var q :int ; q<date.length ; q++)
+							{		
+								arr.push( date[q].sid );
+								list.push( date[q].name);
+							}	
+							onequest.enteringremoveall = "清空enteringallanswer";
+							onequest.optiondata={zhang:0 , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+						});
+						enteringpagequestcontainer.addElement(onequest);
+					}
+				});
+			}
+			
+			//本地答题页面的取消
+			public function reset(event:MouseEvent):void
+			{
+				questcontainer.removeAllElements();
+				questionpage.visible=false;
+				qpage.visible=false;
+				listpage.visible=true;
+				locallist.visible=true;
+				listpage.visible=false;
+				locallist.visible=false;
+				questionpage.visible=true;
+				qpage.visible=true;
+				
+				var zbsidnum:String = local1.selectedItem.zbsid;
+				var evalobjname:String = local1.selectedItem.evalobjname;
+				var renwu:String = local1.selectedItem.nairename;
+				var wenjuan:String = local1.selectedItem.levelonezb;			
+				var quest_sid:String;
+				
+				//从数据库取出来的相应的题目				
+				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
+				{	
+					nairname.text = wenjuan;
+					courtname.text = evalobjname;
+					cname = evalobjname;
+					nainame.text = renwu;
+					allquest.text = data.length;
+					for (var d:int = 0; d < data.length; ++d) 
+					{
+						var onequest:OneQuestion = new OneQuestion();
+						onequest.questdata = {num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
+						quest_sid = data[d].sid;
+						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
+						{	
+							var arr:Array =new Array();
+							var list:Array = new Array();
+							var num:int = date.length;
+							var zzz:int = 1;
+							for(var q :int ; q<date.length ; q++)
+							{		
+								arr.push( date[q].sid );
+								list.push( date[q].name);
+							}	
+							onequest.removeall = "清空allanswer";
+							onequest.optiondata={ppsid:papersid.text , zhang:0 , evalobjname:evalobjname , cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+						});
+						questcontainer.addElement(onequest);
+					}
+				});	
+			}
+			
+			//本地列表的查看页面(录入任务)
+			public function chackout():void  
+			{
+				listpage.visible=false;
+				locallist.visible=false;
+				localchack.visible=true;
+				//shlocalchack.visible=true;
+				chacklocal.visible=true;
+				//shchacklocal.visible=true;
+				
+				var zbsidnum:String = local1.selectedItem.zbsid;
+				var evalobjname:String = local1.selectedItem.evalobjname;
+				var evalobjsid:String = local1.selectedItem.evalobjsid;
+				var renwu:String = local1.selectedItem.nairename;
+				var wenjuan:String = local1.selectedItem.levelonezb;	
+				var tasksid:String = local1.selectedItem.sid;
+				var quest_sid:String;
+				var papersobj:Object;
+				//先用httprequest获取一共有几张   此处只用显示第一张
+				HttpRequest.post(httpurl+"/court2/todotasks/todotasks/TodoTasksController/initTodoTask.vot",{"tasksid":tasksid},function(data)
+				{
+					papersobj= JSON.parse(data);
+					papers = papersobj.length;
+					papersid.text = papersobj[0].sid;
+					var number2:ArrayCollection = new ArrayCollection(
+						[
+							
+						]);
+					for(var x:int=0;x<papers;x++)
+					{
+						number2.addItem((x+1)+"/"+papers);
+						arr.push(papersobj[x].sid);						
+					}					
+					
+					allThisDropDownListLook.dataProvider = number2;
+					allThisDropDownListLook.validateNow();
+					allThisDropDownListLook.selectedIndex = 0;//可以设置默认
+					
+				});
+				
+				//从数据库取出来的相应的题目	
+				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
+				{
+					namenair.text = wenjuan;
+					shnamenair.text = wenjuan;
+					namecourt.text = evalobjname;
+					shnamecourt.text = evalobjname;
+					cname = evalobjname;
+					namenai.text = renwu;
+					shnamenai.text = renwu;
+					questall.text = data.length;
+					shquestall.text = data.length;
+					for (var d:int = 0; d < data.length; ++d) 
+					{
+						var onequest:OneQuestion = new OneQuestion();
+						onequest.questdata = {selet:1 , num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
+						quest_sid = data[d].sid;
+						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
+						{	
+							var arr:Array =new Array();
+							var list:Array = new Array();
+							var num:int = date.length;
+							var zzz:int = 0;
+							for(var q :int ; q<date.length ; q++)
+							{
+								arr.push( date[q].sid );
+								list.push( date[q].name);
+							}
+							onequest.optiondata={evalobjsid:evalobjsid , zhang:0 , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+						});
+						localchacklist.addElement(onequest);
+					}
+				});	
+			}						
+			
+			//本地列表的答题页面(审核任务)
+			public function aduiting():void  
+			{
+				listpage.visible=false;
+				locallist.visible=false;
+				entering.visible=true;
+				enteringpage.visible=true;
+				
+				var zbsidnum:String = local2.selectedItem.zbsid;
+				var evalobjname:String = local2.selectedItem.evalobjname;
+				var renwu:String = local2.selectedItem.nairename;
+				var wenjuan:String = local2.selectedItem.levelonezb;			
+				var quest_sid:String;		
+				var tasksid:String = local2.selectedItem.sid;
+				var papersobj:Object;
+				
+				//先用httprequest获取一共有几张   此处只用显示第一张
+				HttpRequest.post(httpurl+"/court2/todotasks/todotasks/TodoTasksController/initTodoTask.vot",{"tasksid":tasksid},function(data)
+				{
+					papersobj= JSON.parse(data);
+					papers = papersobj.length;
+					papersidshen.text = papersobj[0].sid;
+					var number3:ArrayCollection = new ArrayCollection(
+						[
+							
+						]);
+					for(var x:int=0;x<papers;x++)
+					{
+						number3.addItem((x+1)+"/"+papers);
+						arr.push(papersobj[x].sid);						
+					}					
+					
+					ShenThisDropDownList.dataProvider = number3;
+					ShenThisDropDownList.validateNow();
+					ShenThisDropDownList.selectedIndex = 0;//可以设置默认
+					
+				});	
+				
+				
+				//从数据库取出来的相应的题目	
+				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*)
+				{	
+					enteringnairname.text = wenjuan;
+					enteringcourtname.text = evalobjname;
+					cname = evalobjname;
+					enteringname.text = renwu;
+					enteringall.text = data.length;
+					for (var d:int = 0; d < data.length; ++d) 
+					{
+						var onequest:SoneQuestion = new SoneQuestion();
+						onequest.questdata = {selet:0 , num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
+						quest_sid = data[d].sid;
+						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
+						{	
+							var arr:Array =new Array();
+							var list:Array = new Array();
+							var num:int = date.length;
+							var zzz:int = 0;
+							for(var q :int ; q<date.length ; q++)
+							{		
+								arr.push( date[q].sid );
+								list.push( date[q].name);
+							}						
+							onequest.optiondata={zhang:0 , evalobjname : cname ,cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+						});
+						enteringpagequestcontainer.addElement(onequest);
+					}
+				});
+			}
+			
+			//本地列表的查看页面(审核任务)
+			public function chackoutsh():void  
+			{
+				listpage.visible=false;
+				locallist.visible=false;
+				localchack.visible=true;
+				shlocalchack.visible=true;
+				//chacklocal.visible=true;
+				shchacklocal.visible=true;
+				
+				var zbsidnum:String = local2.selectedItem.zbsid;
+				var evalobjname:String = local2.selectedItem.evalobjname;
+				var renwu:String = local2.selectedItem.nairename;
+				var wenjuan:String = local2.selectedItem.levelonezb;
+				var quest_sid:String;
+				var tasksid:String = local2.selectedItem.sid;
+				var papersobj:Object;
+				
+				//先用httprequest获取一共有几张   此处只用显示第一张
+				HttpRequest.post(httpurl+"/court2/todotasks/todotasks/TodoTasksController/initTodoTask.vot",{"tasksid":tasksid},function(data)
+				{
+					papersobj= JSON.parse(data);
+					papers = papersobj.length;
+					papersidshen.text = papersobj[0].sid;
+					var number3:ArrayCollection = new ArrayCollection(
+						[
+							
+						]);
+					for(var x:int=0;x<papers;x++)
+					{
+						number3.addItem((x+1)+"/"+papers);
+						arr.push(papersobj[x].sid);						
+					}					
+					
+					shallThisDropDownListLook.dataProvider = number3;
+					shallThisDropDownListLook.validateNow();
+					shallThisDropDownListLook.selectedIndex = 0;//可以设置默认
+					
+				});	
+				
+				//从数据库取出来的相应的题目	
+				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
+				{	
+					namenair.text = wenjuan;
+					shnamenair.text = wenjuan;
+					namecourt.text = evalobjname;
+					shnamecourt.text = evalobjname;
+					cname = evalobjname;
+					namenai.text = renwu;
+					shnamenai.text = renwu;
+					questall.text = data.length;
+					shquestall.text = data.length;
+					for (var d:int = 0; d < data.length; ++d) 
+					{
+						var onequest:SoneQuestion = new SoneQuestion();
+						onequest.questdata = {selet:1 , num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
+						quest_sid = data[d].sid;
+						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
+						{	
+							var arr:Array =new Array();
+							var list:Array = new Array();
+							var num:int = date.length;
+							var zzz:int = 0;
+							for(var q :int ; q<date.length ; q++)
+							{		
+								arr.push( date[q].sid );
+								list.push( date[q].name);
+							}
+							onequest.optiondata={zhang:0 , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+						});
+						shlocalchacklist.addElement(onequest);
+					}
+				});	
+			}
+			
+			//本地列表的答题頁面（录入任务）
 			public function changepageOut():void  
 			{
 				listpage.visible=false;
 				locallist.visible=false;
 				questionpage.visible=true;
+				qpage.visible=true;
 				
-				myhtml.htmlText = "<b>在这里写html</b>";
+				var zbsidnum:String = local1.selectedItem.zbsid;
+				var evalobjname:String = local1.selectedItem.evalobjname;
+				var evalobjsid:String = local1.selectedItem.evalobjsid;
+				var renwu:String = local1.selectedItem.nairename;
+				var wenjuan:String = local1.selectedItem.levelonezb;		
+				var foranswerzbsid :String = local1.selectedItem.zbsid;
+				var quest_sid:String;
+				var tasksid:String = local1.selectedItem.sid;
+				var papersobj:Object;
+				
+				//先用httprequest获取一共有几张   此处只用显示第一张
+				HttpRequest.post(httpurl+"/court2/todotasks/todotasks/TodoTasksController/initTodoTask.vot",{"tasksid":tasksid},function(data)
+				{
+					papersobj= JSON.parse(data);
+					papers = papersobj.length;
+					papersid.text = papersobj[0].sid;
+					var number2:ArrayCollection = new ArrayCollection(
+						[
+							
+						]);
+					for(var x:int=0;x<papers;x++)
+					{
+						number2.addItem((x+1)+"/"+papers);
+						arr.push(papersobj[x].sid);						
+					}					
+					
+					ThisDropDownList.dataProvider = number2;
+					ThisDropDownList.validateNow();
+					ThisDropDownList.selectedIndex = 0;//可以设置默认
+					
+				});
+				
+				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
+				{	
+					nairname.text = wenjuan;
+					courtname.text = evalobjname;
+					cname = evalobjname;
+					nainame.text = renwu;
+					allquest.text = data.length;
+					for (var d:int = 0; d < data.length; ++d) 
+					{
+						var onequest:OneQuestion = new OneQuestion();
+						onequest.questdata = {selet:0 , zbsid:foranswerzbsid , num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
+						quest_sid = data[d].sid;
+						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
+						{	
+							var arr:Array =new Array();
+							var list:Array = new Array();
+							var num:int = date.length;
+							var zzz:int = 1;
+							for(var q :int ; q<date.length ; q++)
+							{		
+								arr.push( date[q].sid );
+								list.push( date[q].name);
+							}			
+							onequest.optiondata={zhang:0 , evalobjsid:evalobjsid , evalobjname:evalobjname , cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+						});
+						questcontainer.addElement(onequest);					
+					}
+				});								
+				//从数据库取出来的相应的题目									
 			}
 			
-			protected function textarea(event:MouseEvent):void
-			{			
-				questionpage.visible=false;
-				text_area.visible=true;
-			}
 			
-			protected function close_text_area(event:MouseEvent):void
-			{
-				questionpage.visible=true;
-				text_area.visible=false;
-			}
 			
-			//更新本地数据库，时间较长，就先註釋了
+			//更新本地数据库
 			protected function updateSQLite(event:MouseEvent):void
 			{
-			HttpRequest.post(httpurl+"/OffLineClientController/updateLocal.vot",{"username":loginusernetusername.text},function(data)
+				
+			}
+			//返回papers
+			public function getPapers():int
+			{
+				return papers;
+			}
+			//本地的查看的返回列表
+			protected function backagain(event:MouseEvent):void
+			{
+				localchacklist.removeAllElements();
+				shlocalchacklist.removeAllElements();
+				qpage.visible=false;
+				localchack.visible=false;
+				shlocalchack.visible=false;
+				chacklocal.visible=false;
+				shchacklocal.visible=false;
+				listpage.visible=true;
+				locallist.visible=true;				
+			}
+			
+			//统一修改备注
+			protected function blackpage(event:MouseEvent):void
+			{
+				blackPage.visible = true;
+			}
+			
+			protected function sureToSave(event:MouseEvent):void
+			{
+				thebz.text = textthebz.text;
+				Alert.show("保存成功！");
+				blackPage.visible = false;
+			}
+			
+			protected function nonono(event:MouseEvent):void
+			{
+				textthebz.text = null;
+				blackPage.visible = false;
+			}
+			
+			//本地录入页面的统一修改备注
+			protected function enteringxiugai(event:MouseEvent):void
+			{
+				blackPage.visible = true;
+			}
+			
+			protected function enteringsureToSave(event:MouseEvent):void
+			{
+				enteringbz.text = enteringtybz.text;
+				Alert.show("保存成功！");
+				blackPage.visible = false;
+			}
+			
+			protected function enteringnonono(event:MouseEvent):void
+			{
+				blackPage.visible = false;
+			}
+			
+			//不知道是啥，不可以删，删了就报错
+			protected function init(event:FlexEvent):void 
+			{
+				
+			}
+			
+			public var selectedItem:Object;
+			//第几张的处理函数 每点击一下都要进行以此判断 (录入任务的录入)
+			protected function dropdownlist1_changeHandler(event:IndexChangeEvent):void
+			{
+				var sendanswersid:String;
+				var sendquestid:String;
+				var sendevalobjname:String;
+				selectedItem = event.target.selectedItem;
+				//每次切换页面时候，都要记录现在已经答了的题目并保存，保存到数据库listinfotask
+				var save:OneOption = new OneOption();
+				save.optall = "保存";
+				var justsave:Object = save._answer;
+				if(justsave.length>0)
 				{
-					var jobj:Object = JSON.parse(data);
-					/*if (jobj.list_audit.length >0)
+					
+					for(var ah:int = 0 ; ah<justsave.length ; ah++)
 					{
-						dao.updateBySQL("delete from COURT_LIST_AUDIT");									
-						for(var i:int = 0; i<jobj.list_audit.length ; ++i)
+						if(justsave[ah].answersid != null)
 						{
-							var list_audit_item:ListAuditItem = new ListAuditItem();
-							list_audit_item.sid = JSON.stringify(jobj.list_audit[i].sid);
-							list_audit_item.nairename = JSON.stringify(jobj.list_audit[i].nairename);
-							list_audit_item.evalobjname = JSON.stringify(jobj.list_audit[i].evalobjname);
-							list_audit_item.levelonezb = JSON.stringify(jobj.list_audit[i].levelonezb);
-							list_audit_item.audit_status = JSON.stringify(jobj.list_audit[i].audit_status);
-							list_audit_item.input_status = JSON.stringify(jobj.list_audit[i].input_status);
-							list_audit_item.num = i+1;
-							dao.insertOrUpdate(list_audit_item);
+							var listinfotask:ListInfoTask = new ListInfoTask();
+							listinfotask.sid = UIDUtil.createUID();
+							listinfotask.zbsid = justsave[ah].zbsid ;
+							listinfotask.evalobjsid = justsave[ah].evalobjsid;
+							listinfotask.papersid = papersid.text;
+							listinfotask.answersid = justsave[ah].answersid;
+							listinfotask.questid = justsave[ah].questid;
+							listinfotask.evalobjname = justsave[ah].evalobjname;
+							dao.insertOrUpdate(listinfotask);
 						}
-					}*/
-					if (jobj.list_todo.length >0)
-					{							
-						
-						dao.updateBySQL("delete from COURT_LIST_TODO");
-						Alert.show(jobj.list_todo.length + "") ; 
-						for(var i:int = 0; i<jobj.list_todo.length ; ++i)						
-						{
-							var list_todo_item:ListTodoItem = new ListTodoItem();								
-							list_todo_item.sid = JSON.stringify(jobj.list_todo[i].sid);
-							list_todo_item.nairename = JSON.stringify(jobj.list_todo[i].nairename);
-							list_todo_item.evalobjname = JSON.stringify(jobj.list_todo[i].evalobjname);
-							list_todo_item.levelonezb = JSON.stringify(jobj.list_todo[i].levelonezb);
-							list_todo_item.audit_status = JSON.stringify(jobj.list_todo[i].audit_status);
-							list_todo_item.input_status = JSON.stringify(jobj.list_todo[i].input_status);
-							list_todo_item.num = i+1;
-							dao.insert(list_todo_item);
-							
-							if (i % 10 == 0) {
-								Alert.show(i + "");
-								//break;
-							}
-						}																			
 					}					
-				})
-			}			
+				}
+				
+				//清空所有选项   或者是重新加载一遍题目
+				questcontainer.removeAllElements();
+				
+				var zbsidnum:String = local1.selectedItem.zbsid;
+				var evalobjname:String = local1.selectedItem.evalobjname;
+				var evalobjsid:String = local1.selectedItem.evalobjsid;
+				var renwu:String = local1.selectedItem.nairename;
+				var wenjuan:String = local1.selectedItem.levelonezb;		
+				var foranswerzbsid :String = local1.selectedItem.zbsid;
+				var quest_sid:String;
+				var tasksid:String = local1.selectedItem.sid;
+				var papersobj:Object;
+				
+				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
+				{	
+					nairname.text = wenjuan;
+					courtname.text = evalobjname;
+					cname = evalobjname;
+					nainame.text = renwu;
+					allquest.text = data.length;
+					for (var d:int = 0; d < data.length; ++d) 
+					{
+						var onequest:OneQuestion = new OneQuestion();
+						
+						//***************************************再次点开一张的同时判断是否已有选中****************************************************			
+						//保存后判断，从数据库中找出是否已经有这个papersid的答案了
+						var dataall:Object = new Object();
+						dao.query("select * from COURT_CURRENTANSWER" , function(data:*):void
+						{
+							dataall = data;
+						});
+						
+						for(var shuzi:int = 0 ; shuzi<dataall.length ; shuzi++)
+						{
+							if(dataall[shuzi].papersid == arr[event.newIndex])
+							{
+								sendanswersid = dataall[shuzi].answersid ;
+								sendquestid = dataall[shuzi].questid ;
+								sendevalobjname = dataall[shuzi].evalobjname ;
+							}
+						}
+						//每次点击完之后，再次把papersid.text的值换为arr[event.newIndex]
+						papersid.text = arr[event.newIndex];
+						//*******************************************************************************************************************			
+						onequest.questdata = {zbsid:foranswerzbsid , num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
+						quest_sid = data[d].sid;
+						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
+						{
+							var arr:Array =new Array();
+							var list:Array = new Array();
+							var num:int = date.length;
+							var zzz:int = 1;
+							for(var q :int ; q<date.length ; q++)
+							{
+								arr.push( date[q].sid );
+								list.push( date[q].name);
+							}
+							onequest.optiondata={zhang:1 , sendanswersid:sendanswersid , sendquestid:sendquestid , sendevalobjname:sendevalobjname , evalobjsid:evalobjsid , evalobjname:evalobjname , cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+						});
+						questcontainer.addElement(onequest);
+					}
+				});
+				
+			}
+			
+			[Bindable]
+			public var number:ArrayCollection = new ArrayCollection(
+				[
+					
+				]);
+			
+			
+			
+			protected function ShenThisDropDownList_changeHandler(event:IndexChangeEvent):void
+			{
+				// TODO Auto-generated method stub
+				var sendanswersid:String;
+				var sendquestid:String;
+				var sendevalobjname:String;
+				selectedItem = event.target.selectedItem;
+				//每次切换页面时候，都要记录现在已经答了的题目并保存，保存到数据库listinfotask
+				var save:OneOption = new OneOption();
+				save.optall = "保存";
+				var justsave:Object = save._answer;
+				if(justsave.length>0)
+				{
+					
+					for(var ah:int = 0 ; ah<justsave.length ; ah++)
+					{
+						if(justsave[ah].answersid != null)
+						{
+							var listinfotask:ListInfoTask = new ListInfoTask();
+							listinfotask.sid = UIDUtil.createUID();
+							listinfotask.zbsid = justsave[ah].zbsid ;
+							listinfotask.evalobjsid = justsave[ah].evalobjsid;
+							listinfotask.papersid = papersid.text;
+							listinfotask.answersid = justsave[ah].answersid;
+							listinfotask.questid = justsave[ah].questid;
+							listinfotask.evalobjname = justsave[ah].evalobjname;
+							dao.insertOrUpdate(listinfotask);
+						}
+					}					
+				}
+				
+				//清空所有选项   或者是重新加载一遍题目
+				enteringpagequestcontainer.removeAllElements();
+				
+				var zbsidnum:String = local2.selectedItem.zbsid;
+				var evalobjname:String = local2.selectedItem.evalobjname;
+				var evalobjsid:String = local2.selectedItem.evalobjsid;
+				var renwu:String = local2.selectedItem.nairename;
+				var wenjuan:String = local2.selectedItem.levelonezb;		
+				var foranswerzbsid :String = local2.selectedItem.zbsid;
+				var quest_sid:String;
+				var tasksid:String = local2.selectedItem.sid;
+				var papersobj:Object;
+				
+				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
+				{	
+					nairname.text = wenjuan;
+					courtname.text = evalobjname;
+					cname = evalobjname;
+					nainame.text = renwu;
+					allquest.text = data.length;
+					for (var d:int = 0; d < data.length; ++d) 
+					{
+						var onequest:OneQuestion = new OneQuestion();
+						
+						//***************************************再次点开一张的同时判断是否已有选中****************************************************			
+						//保存后判断，从数据库中找出是否已经有这个papersid的答案了
+						var dataall:Object = new Object();
+						dao.query("select * from COURT_CURRENTANSWER" , function(data:*):void
+						{
+							dataall = data;
+						});
+						
+						for(var shuzi:int = 0 ; shuzi<dataall.length ; shuzi++)
+						{
+							if(dataall[shuzi].papersid == arr[event.newIndex])
+							{
+								sendanswersid = dataall[shuzi].answersid ;
+								sendquestid = dataall[shuzi].questid ;
+								sendevalobjname = dataall[shuzi].evalobjname ;
+							}
+						}
+						//每次点击完之后，再次把papersid.text的值换为arr[event.newIndex]
+						papersidshen.text = arr[event.newIndex];
+						//*******************************************************************************************************************			
+						
+						onequest.questdata = {zbsid:foranswerzbsid , num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
+						quest_sid = data[d].sid;
+						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
+						{
+							var arr:Array =new Array();
+							var list:Array = new Array();
+							var num:int = date.length;
+							var zzz:int = 1;
+							for(var q :int ; q<date.length ; q++)
+							{
+								arr.push( date[q].sid );
+								list.push( date[q].name);
+							}
+							onequest.optiondata={zhang:1 , sendanswersid:sendanswersid , sendquestid:sendquestid , sendevalobjname:sendevalobjname , evalobjsid:evalobjsid , evalobjname:evalobjname , cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+						});
+						enteringpagequestcontainer.addElement(onequest);
+					}
+				});
+			}
+			
+			//提交待办和更新待办的返回
+			protected function turnBack(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				submitpage.visible = false;
+				updatepage.visible = false;
+				listpage.visible=true;
+				locallist.visible=true;
+			}
+			
+			[Bindable]
+			public var number2:ArrayCollection = new ArrayCollection(
+				[
+					
+				]);
+			
 		]]>
 	</fx:Script>
 	
 	<!--进入系统后显示的页面-->
-	<s:VGroup id="loginpage" fontSize="15" visible="true" height="100%" width="100%" horizontalAlign="center">
-		<s:Label/>
-		<s:Label/>
-		<s:Label text="欢迎登陆法制指数系统平台" fontWeight="bold" fontSize="30"  lineHeight="50"/>
-		<s:Label/>
-		<s:Label/>
-		<s:HGroup>
-			<s:Label text="用户名"/>
-			<s:TextInput id="inputUserName"/>
-		</s:HGroup>
-		<s:Label/>
-		<s:HGroup>
-			<s:Label text=" 密  码 "/>
-			<s:TextInput id="inputPassWord" displayAsPassword="true"/>
-		</s:HGroup>
-		<s:Label/>
-		<s:HGroup>
-			<s:Button label="创建本地用户" click="makeUser(event)"/>
-			<s:Button label="登录" click="login(event)"/>
-		</s:HGroup>
-	</s:VGroup>
+	<s:SkinnableContainer skinClass="skins.loginBackground" horizontalCenter="0" verticalCenter="0" id="loginpage" fontSize="20" visible="true" height="100%" width="100%">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+		</s:layout>
+		<s:VGroup paddingTop="50" >
+			<s:HGroup>
+				<s:Label text=" "  paddingRight="270" />
+				<s:Label text="用户名   "  fontWeight="bold" color="blue"/>
+				<s:TextInput id="inputUserName" width="150"/>
+			</s:HGroup>
+			<s:Label/>
+			<s:HGroup>
+				<s:Label text=" "  paddingRight="270" />
+				<s:Label text=" 密  码     "  fontWeight="bold" color="blue"/>
+				<s:TextInput id="inputPassWord" width="150" displayAsPassword="true"/>
+			</s:HGroup>
+			<s:Label/>
+			<s:HGroup fontSize="30">
+				<s:Label text=" "  paddingRight="255" />
+				<s:Button skinClass="skins.makeUserButton" label=" " click="makeUser(event)"/>
+				<s:Button skinClass="skins.login" label=" " click="login(event)"/>
+			</s:HGroup>
+		</s:VGroup>
+	</s:SkinnableContainer>
 	
-	<!--成功登录后的页面-->	
-	<s:Group id="listpage" fontSize="15" visible="false" width="100%" height="100%">			
-		<s:VGroup >
-			<s:HGroup >
-				<s:Label text="当前登陆者 : " id="loginuser" fontSize="25"/>	
-				<s:Label visible="false" id="loginusernetusername" fontSize="25"/>	
+	<!--创建本地用户页面-->
+	<s:SkinnableContainer skinClass="skins.loginBackground" id="makepage" horizontalCenter="0" verticalCenter="0" visible="false" fontSize="15" width="100%" height="100%">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="center" verticalAlign="middle"/>
+		</s:layout>
+		<s:VGroup paddingTop="40" >
+			<s:HGroup>
+				<s:Label text=" "  paddingRight="310" />
+				<s:Label text="用户名 : " fontWeight="bold" color="blue" />
+				<s:TextInput id="inputLoginName" restrict="0-9\a-z\^{'[\一-\龥]'}"/>
 			</s:HGroup>
-		</s:VGroup>
-		<s:VGroup fontSize="20" horizontalAlign="right"  height="100%" width="100%" >				
-			<s:Label/>	
-			<s:Label/>
-			<s:HGroup></s:HGroup>
+			<s:Label fontSize="5"/>
 			<s:HGroup>
-				<s:Button label="更新本地数据库" click="updateSQLite(event)"/>
+				<s:Label text=" "  paddingRight="312" />
+				<s:Label text=" 密 码  : " fontWeight="bold" color="blue"/>
+				<s:TextInput id="inputFirstPassWord" prompt="请输入6~16位字符" displayAsPassword="true" restrict="a-zA-Z0-9"/>
+			</s:HGroup>
+			<s:Label fontSize="5"/>
+			<s:HGroup>
+				<s:Label text=" "  paddingRight="295" />
+				<s:Label text="重复密码 : " fontWeight="bold" color="blue"/>
+				<s:TextInput id="inputSecondPassWord" prompt="只许使用字母与数字" displayAsPassword="true"/>
+			</s:HGroup>
+			<s:Label fontSize="5"/>
+			<s:HGroup>
+				<s:Label text=" "  paddingRight="250" />
+				<s:Label text="关联网络用户名 : " fontWeight="bold" color="blue"/>
+				<s:TextInput id="inputNetName"/>
 			</s:HGroup>
 			<s:HGroup>
-				<s:Button label="退出当前用户" click="backtologin(event)"/>
-			</s:HGroup>			
-		</s:VGroup>
-		<s:VGroup fontSize="20" horizontalAlign="center"  height="100%" width="100%" >				
-			<s:Label/>	
-			<s:Label/>
-			<s:HGroup></s:HGroup>
-			<s:HGroup>
-				<s:Button label="更新待办任务" click="updateWork(event)"/>
-				<s:Button label="提交待办任务" click="submitWork(event)"/>
+				<s:Label text=" "  paddingRight="300" />
+				<s:Button skinClass="skins.backLogin" label=" " click="backlogin(event)"/>
+				<s:Button skinClass="skins.makeUserSure" label=" " click="makeSure(event)"/>				
 			</s:HGroup>	
 		</s:VGroup>
-	</s:Group>
+	</s:SkinnableContainer>
+	
+	<!--成功登录后的页面-->	
+	<s:SkinnableContainer id="listpage" skinClass="skins.ToolBarBgSkin" fontSize="15" visible="false" width="100%" height="100%">							
+		<s:layout>
+			<s:VerticalLayout/>
+		</s:layout>
+		<s:SkinnableContainer width="100%">
+			<s:Button label=" " skinClass="skins.head"/>
+			<s:VGroup horizontalAlign="right" right="36" verticalAlign="middle" width="100%">
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>		
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>
+				<s:HGroup fontSize="20">
+					<s:Button label=" " skinClass="skins.serverUserName"/>	
+					<s:Label text=" " id="loginuser" fontSize="25"/>	
+					<s:Label visible="false" id="loginusernetusername" fontSize="25" color="white"/>	
+					<s:Button label=" " skinClass="skins.news"/>
+					<s:Label text=" 0 " id="unfinishedNews"/> 
+					<s:Label text="    "/><s:Label text="    "/><s:Label text="    "/><s:Label text="    "/>
+					<s:Button label=" " skinClass="skins.backToLogin"  click="backtologin(event)"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:SkinnableContainer>
 		
-	<!--从服务器端更新的列表-->
-	<s:Group id="serverlist" visible="false" width="100%" height="100%">
-		<s:VGroup  height="100%" width="100%" top="80" horizontalAlign="left">
-			<s:HGroup></s:HGroup>
-			<s:Label/>
-			<mx:TabNavigator id="tabnavigator1" change="indexChangeFunc(event)" width="100%" height="30" fontSize="20">
-				<mx:Panel horizontalAlign="center" id="writein" label="录入任务" headerHeight="0">
-				</mx:Panel>
-				<mx:Panel horizontalAlign="center"  id="check" label="审核任务" headerHeight="0">
-				</mx:Panel>
-			</mx:TabNavigator>	
-		</s:VGroup>
-		<s:VGroup  height="100%" width="100%" top="150" horizontalAlign="center">
-				<s:DataGrid textAlign="left" id="titlesgrid2"  selectionChange="" editable="true" width="100%" height="100%" contentBackgroundColor="white" color="gray" borderColor="black">
-					<s:columns>
-						<s:ArrayList>
-							<s:GridColumn editable="false" dataField="n" headerText="序号"/>
-							<s:GridColumn editable="false" dataField="nairename" headerText="问卷"/>
-							<s:GridColumn editable="false" dataField="evalobjname" headerText="测评对象"/>
-							<s:GridColumn editable="false" dataField="levelonezb" headerText="任务" id="Task"/>
-							<s:GridColumn editable="false" dataField="input_status" headerText="录入任务状态"/>
-							<s:GridColumn editable="false" dataField="audit_status" headerText="审核任务状态"/>
-							<s:GridColumn headerText="操作" editable="false" dataField="operation">
-								<s:itemRenderer>
-									<fx:Component>
-										<s:GridItemRenderer horizontalCenter="">
-											<mx:LinkButton label="编辑" visible="true" width="50%"/>
-											<mx:LinkButton label="查看" visible="true"/>
-										</s:GridItemRenderer>							
-									</fx:Component>
-								</s:itemRenderer>
-							</s:GridColumn>
-						</s:ArrayList>
-					</s:columns>
-				</s:DataGrid>
-				<s:DataGrid textAlign="left" id="titlesgrid3" selectionChange="" editable="true" width="100%" height="-6" contentBackgroundColor="white" color="gray" borderColor="black">
-					<s:columns>
-						<s:ArrayList>
-							<s:GridColumn editable="false" dataField="order" headerText="序号"/>
-							<s:GridColumn editable="false" dataField="nairename" headerText="问卷"/>
-							<s:GridColumn editable="false" dataField="evalobjname" headerText="测评对象"/>
-							<s:GridColumn editable="false" dataField="levelonezb" headerText="任务"/>
-							<s:GridColumn editable="false" dataField="input_status" headerText="录入任务状态"/>
-							<s:GridColumn editable="false" dataField="audit_status" headerText="审核任务状态"/>
-							<s:GridColumn headerText="操作" editable="false" dataField="id">
-								<s:itemRenderer>
-									<fx:Component>
-										<s:GridItemRenderer horizontalCenter="">											
-											<mx:LinkButton label="查看" visible="true"/>
-										</s:GridItemRenderer>							
-									</fx:Component>
-								</s:itemRenderer>
-							</s:GridColumn>
-						</s:ArrayList>
-					</s:columns>
-				</s:DataGrid>
-		</s:VGroup>
-	</s:Group>
-		
+		<s:SkinnableContainer skinClass="skins.middle" width="98%">
+			<s:VGroup fontSize="22" right="100" horizontalAlign="right" width="100%" >				
+				<s:HGroup></s:HGroup>
+				<s:HGroup></s:HGroup>
+				<s:HGroup></s:HGroup>
+				<s:HGroup></s:HGroup>
+				<s:HGroup>
+					<s:Label id="updatestatus" visible="false"/>
+					<!--<s:Button skinClass="skins.submitSQL" label=" " id="tjbdda" visible="false" click="submitlocal(event)"/>
+					<s:Button visible="false" id="tijiao" label="提交本地答案" skinClass="skins.hanzitijiao" click="submitlocal(event)"/>
+					-->
+					<s:Label text="       " /><s:Label text="       " /><s:Label text="       " />
+					<!--<s:Button id="gengxinshujuku" skinClass="skins.unpdateSQL" label=" " click="updateSQLite(event)" color="#333333"/>			
+					<s:Button id="gengxinbendi" label="更新本地数据库"  skinClass="skins.hanzigengxin" click="updateSQLite(event)"/>-->
+				</s:HGroup>			
+			</s:VGroup>
+			<s:VGroup left="100"  fontSize="22" horizontalAlign="left" width="100%" >				
+				<s:HGroup></s:HGroup>
+				<s:HGroup></s:HGroup>
+				<s:HGroup></s:HGroup>
+				<s:HGroup></s:HGroup>
+				<s:HGroup>
+					<s:Button skinClass="skins.updateWork" label=" " click="updateWork(event)"/>
+					<s:Button label="更新待办任务" skinClass="skins.hanzidaiban" click="updateWork(event)"/>
+					<s:Label text="       " /><s:Label text="       " /><s:Label text="       " />
+					<s:Button skinClass="skins.submitWork" label=" " click="submitWork(event)"/>
+					<s:Button label="提交待办任务" skinClass="skins.hanzitijiaodaiban" click="submitWork(event)"/>
+				</s:HGroup>	
+			</s:VGroup>
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+	
 	<!--从本地更新的列表-->
-	<s:Group id="locallist" visible="false" width="100%" height="100%">
-		<s:VGroup  height="100%" width="100%" top="80" horizontalAlign="left">
+	<s:Group id="locallist" top="90 " visible="false" width="98%" height="100%" horizontalCenter="1">
+		<s:VGroup  height="100%" width="100%" top="85" horizontalAlign="left">
 			<s:HGroup></s:HGroup>
 			<s:Label/>
 			<mx:TabNavigator id="local3" change="indexChangelocal(event)" width="100%" height="30" fontSize="20">
-				<mx:Panel horizontalAlign="center" id="localwritein" label="录入任务" headerHeight="0">
+				<mx:Panel horizontalAlign="center" label="录入任务" headerHeight="0">
 				</mx:Panel>
-				<mx:Panel horizontalAlign="center"  id="localcheck" label="审核任务" headerHeight="0">
+				<mx:Panel horizontalAlign="center" label="审核任务" headerHeight="0">
 				</mx:Panel>
 			</mx:TabNavigator>	
 		</s:VGroup>
-		<s:VGroup  height="100%" width="100%" top="150" horizontalAlign="center">
-			<s:DataGrid textAlign="left" id="local1"  selectionChange="" editable="true" width="100%" height="100%" contentBackgroundColor="white" color="gray" borderColor="black">
-				<s:columns>
+		<s:VGroup  height="100%" width="100%" top="140" horizontalAlign="center">
+			<s:DataGrid skinClass="skins.statusBar" textAlign="center" id="local1"  selectionChange="" editable="true" width="100%" height="100%" contentBackgroundColor="white" color="0x000000" borderColor="black">
+				<s:columns>	
 					<s:ArrayList>
-						<s:GridColumn editable="false" dataField="num" headerText="序号"/>
-						<s:GridColumn editable="false" dataField="nairename" headerText="问卷"/>
-						<s:GridColumn editable="false" dataField="evalobjname" headerText="测评对象"/>
-						<s:GridColumn editable="false" dataField="levelonezb" headerText="任务"/>
-						<s:GridColumn editable="false" dataField="input_status" headerText="录入任务状态"/>
-						<s:GridColumn editable="false" dataField="audit_status" headerText="审核任务状态"/>
-						<s:GridColumn headerText="操作" editable="false" dataField="operation">
+						<s:GridColumn editable="false" dataField="num" headerText="序号">
+							<s:headerRenderer>
+								<fx:Component>
+									<s:DefaultGridHeaderRenderer >
+										<s:Rect width="100%" height="100%">
+											<s:fill>
+												<s:SolidColor color="#74a7e8"/>
+											</s:fill>
+										</s:Rect>
+										<s:Label id="titlelabel" text="序号" fontWeight="bold" color="#ffffff" verticalCenter="1" horizontalCenter="1" fontSize="20"/>
+									</s:DefaultGridHeaderRenderer>
+								</fx:Component>
+							</s:headerRenderer>													
+						</s:GridColumn>
+						<s:GridColumn editable="false" dataField="nairename" headerText="问卷">
+							<s:headerRenderer>
+								<fx:Component>
+									<s:DefaultGridHeaderRenderer>
+										<s:Rect width="100%" height="100%">
+											<s:fill>
+												<s:SolidColor color="#63a4f4"/>
+											</s:fill>
+										</s:Rect>
+										<s:Label id="titlelabel" text="问卷" fontWeight="bold" color="#ffffff" verticalCenter="1" horizontalCenter="1" fontSize="20"/>
+									</s:DefaultGridHeaderRenderer>
+								</fx:Component>
+							</s:headerRenderer>
+						</s:GridColumn>
+						<s:GridColumn editable="false" dataField="evalobjname" headerText="测评对象">
+							<s:headerRenderer>
+								<fx:Component>
+									<s:DefaultGridHeaderRenderer>
+										<s:Rect width="100%" height="100%">
+											<s:fill>
+												<s:SolidColor color="#74a7e8"/>
+											</s:fill>
+										</s:Rect>
+										<s:Label id="titlelabel" text="测评对象" fontWeight="bold" color="#ffffff" verticalCenter="1" horizontalCenter="1" fontSize="20"/>
+									</s:DefaultGridHeaderRenderer>
+								</fx:Component>
+							</s:headerRenderer>
+						</s:GridColumn>
+						<s:GridColumn editable="false" dataField="levelonezb" headerText="任务">
+							<s:headerRenderer>
+								<fx:Component>
+									<s:DefaultGridHeaderRenderer>
+										<s:Rect width="100%" height="100%">
+											<s:fill>
+												<s:SolidColor color="#7caff0"/>
+											</s:fill>
+										</s:Rect>
+										<s:Label id="titlelabel" text="任务" fontWeight="bold" color="#ffffff" verticalCenter="1" horizontalCenter="1" fontSize="20"/>
+									</s:DefaultGridHeaderRenderer>
+								</fx:Component>
+							</s:headerRenderer>
+						</s:GridColumn>
+						<s:GridColumn editable="false" dataField="input_status" headerText="录入任务状态">
+							<s:headerRenderer>
+								<fx:Component>
+									<s:DefaultGridHeaderRenderer>
+										<s:Rect width="100%" height="100%">
+											<s:fill>
+												<s:SolidColor color="#63a4f4"/>
+											</s:fill>
+										</s:Rect>
+										<s:Label id="titlelabel" text="录入任务状态" fontWeight="bold" color="#ffffff" verticalCenter="1" horizontalCenter="1" fontSize="20"/>
+									</s:DefaultGridHeaderRenderer>
+								</fx:Component>
+							</s:headerRenderer>
+						</s:GridColumn>
+						<s:GridColumn editable="false" dataField="audit_status" headerText="审核任务状态">
+							<s:headerRenderer>
+								<fx:Component>
+									<s:DefaultGridHeaderRenderer>
+										<s:Rect width="100%" height="100%">
+											<s:fill>
+												<s:SolidColor color="#74a7e8"/>
+											</s:fill>
+										</s:Rect>
+										<s:Label id="titlelabel" text="审核任务状态" fontWeight="bold" color="#ffffff" verticalCenter="1" horizontalCenter="1" fontSize="20"/>
+									</s:DefaultGridHeaderRenderer>
+								</fx:Component>
+							</s:headerRenderer>
+						</s:GridColumn> <!--itemRenderer="localentering"-->
+						<s:GridColumn editable="false" dataField="operation" headerText="操作">
+							<s:headerRenderer>
+								<fx:Component>
+									<s:DefaultGridHeaderRenderer>
+										<s:Rect width="100%" height="100%">
+											<s:fill>
+												<s:SolidColor color="#7caff0"/>
+											</s:fill>
+										</s:Rect>
+										<s:Label id="titlelabel" text="操作" fontWeight="bold" color="#ffffff" verticalCenter="1" horizontalCenter="1" fontSize="20"/>
+									</s:DefaultGridHeaderRenderer>
+								</fx:Component>
+							</s:headerRenderer>
 							<s:itemRenderer>
 								<fx:Component>
-									<s:GridItemRenderer horizontalCenter="">		
+									<s:GridItemRenderer horizontalCenter="1"  dataChange="griditemrenderer2_dataChangeHandler(event)">		
 										<fx:Script>
 											<![CDATA[
-												 
 												import mx.controls.Alert;
+												import mx.events.FlexEvent;
 												
 												protected function justlook(event:MouseEvent):void
-												{
-													
-													Alert.show("就看一看");
+												{													
+													outerDocument.chackout();  
 												}
 												protected function changepage(event:MouseEvent):void
 												{
 													outerDocument.changepageOut();  
 												}
-											]]>
-										</fx:Script>
-										<mx:LinkButton label="编辑" visible="true" width="50%" click="changepage(event)"/>										
-										<mx:LinkButton label="查看" visible="true" click="justlook(event)"/>
-									</s:GridItemRenderer>							
-								</fx:Component>
-							</s:itemRenderer>
-						</s:GridColumn>
-					</s:ArrayList>
-				</s:columns>
-			</s:DataGrid>
-			<s:DataGrid textAlign="left" id="local2" selectionChange="" editable="true" width="100%" height="-6" contentBackgroundColor="white" color="gray" borderColor="black">
-				<s:columns>
-					<s:ArrayList>
-						<s:GridColumn editable="false" dataField="num" headerText="序号"/>
-						<s:GridColumn editable="false" dataField="nairename" headerText="问卷"/>
-						<s:GridColumn editable="false" dataField="evalobjname" headerText="测评对象"/>
-						<s:GridColumn editable="false" dataField="levelonezb" headerText="任务"/>
-						<s:GridColumn editable="false" dataField="input_status" headerText="录入任务状态"/>
-						<s:GridColumn editable="false" dataField="audit_status" headerText="审核任务状态"/>
-						<s:GridColumn headerText="操作" editable="false" dataField="id">
-							<s:itemRenderer>
-								<fx:Component>
-									<s:GridItemRenderer horizontalCenter="">		
-										<fx:Script>
-											<![CDATA[
-												
-												import mx.controls.Alert;
-												
-												protected function justlook(event:MouseEvent):void
+												protected function griditemrenderer2_dataChangeHandler(event:FlexEvent):void
 												{
-													
-													Alert.show("就看一看");
+													viewbtn.visible = (data.input_status != "已完成");
+													iconbtn.visible =  (data.input_status != "已完成")
 												}
 											]]>
 										</fx:Script>
-										<mx:LinkButton label="查看" visible="true" click="justlook(event)"/>
+										<s:HGroup width="100%" horizontalAlign="center">
+											<s:Button skinClass="skins.buttonSetLocal" click="justlook(event)" left="30"/>
+											<mx:LinkButton  label="查看" visible="true" click="justlook(event)"/>										
+											<s:Button id="viewbtn" skinClass="skins.buttonLookLocal" click="changepage(event)"/>											
+											<mx:LinkButton id="iconbtn" label="录入" visible="true" click="changepage(event)"/>
+										</s:HGroup>
 									</s:GridItemRenderer>							
 								</fx:Component>
 							</s:itemRenderer>
@@ -603,69 +1735,180 @@
 					</s:ArrayList>
 				</s:columns>
 			</s:DataGrid>
-		</s:VGroup>
-	</s:Group>
-	
-	<!--创建本地用户页面-->
-	<s:Group id="makepage" visible="false" horizontalCenter="0">
-		<s:VGroup horizontalAlign="center">		
-			<s:Label/>
-			<s:Label/>
-			<s:Label text="请输入本地用户用户名密码" fontWeight="bold" fontSize="30"  lineHeight="50"/>	
-		</s:VGroup>
-		<s:VGroup fontSize="15" horizontalAlign="right" top="66">
-			<s:Label/>
-			<s:Label/>
-			<s:HGroup>
-				<s:Label text="用户名 : "/>
-				<s:TextInput id="inputLoginName" prompt="请输入真实姓名" restrict="0-9\a-z\^{'[\一-\龥]'}"/>
-			</s:HGroup>
-			<s:Label/>
-			<s:HGroup>
-				<s:Label text="密码 : "/>
-				<s:TextInput id="inputFirstPassWord" prompt="请输入6~16位字符" displayAsPassword="true" restrict="a-zA-Z0-9"/>
-			</s:HGroup>
-			<s:Label/>
-			<s:HGroup>
-				<s:Label text="重复密码 : "/>
-				<s:TextInput id="inputSecondPassWord" prompt="只许使用字母与数字" displayAsPassword="true"/>
-			</s:HGroup>
-			<s:Label/>
-			<s:HGroup>
-				<s:Label text="关联网络用户名 : "/>
-				<s:TextInput id="inputNetName"/>
-			</s:HGroup>
-			<s:Label/>
-			<s:HGroup>
-				<s:Button label="返回登陆" click="backlogin(event)"/>
-				<s:Label/><s:Label/><s:Label/><s:Label/>
-				<s:Button label="确定创建" click="makeSure(event)"/>				
-			</s:HGroup>	
-		</s:VGroup>
-		<s:VGroup horizontalAlign="center" top="300" >
-			<s:Label/>	
+			<s:DataGrid  skinClass="skins.statusBar" horizontalCenter="1" textAlign="center" id="local2" selectionChange="" editable="true" width="100%" height="-6" contentBackgroundColor="white" color="0x000000" borderColor="black">
+				<s:columns>
+					<s:ArrayList>
+						<s:GridColumn editable="false" dataField="num" headerText="序号" >
+							<s:headerRenderer>
+								<fx:Component>
+									<s:DefaultGridHeaderRenderer >
+										<s:Rect width="100%" height="100%">
+											<s:fill>
+												<s:SolidColor color="#74a7e8"/>
+											</s:fill>
+										</s:Rect>
+										<s:Label id="titlelabel" text="序号" fontWeight="bold" color="#ffffff" verticalCenter="1" horizontalCenter="1" fontSize="20"/>
+									</s:DefaultGridHeaderRenderer>
+								</fx:Component>
+							</s:headerRenderer>
+						</s:GridColumn>
+						<s:GridColumn editable="false" dataField="nairename" headerText="问卷">
+							<s:headerRenderer>
+								<fx:Component>
+									<s:DefaultGridHeaderRenderer>
+										<s:Rect width="100%" height="100%">
+											<s:fill>
+												<s:SolidColor color="#63a4f4"/>
+											</s:fill>
+										</s:Rect>
+										<s:Label id="titlelabel" text="问卷" fontWeight="bold" color="#ffffff" verticalCenter="1" horizontalCenter="1" fontSize="20"/>
+									</s:DefaultGridHeaderRenderer>
+								</fx:Component>
+							</s:headerRenderer>
+						</s:GridColumn>
+						<s:GridColumn editable="false" dataField="evalobjname" headerText="测评对象">
+							<s:headerRenderer>
+								<fx:Component>
+									<s:DefaultGridHeaderRenderer>
+										<s:Rect width="100%" height="100%">
+											<s:fill>
+												<s:SolidColor color="#74a7e8"/>
+											</s:fill>
+										</s:Rect>
+										<s:Label id="titlelabel" text="测评对象" fontWeight="bold" color="#ffffff" verticalCenter="1" horizontalCenter="1" fontSize="20"/>
+									</s:DefaultGridHeaderRenderer>
+								</fx:Component>
+							</s:headerRenderer>
+						</s:GridColumn>
+						<s:GridColumn editable="false" dataField="levelonezb" headerText="任务">
+							<s:headerRenderer>
+								<fx:Component>
+									<s:DefaultGridHeaderRenderer>
+										<s:Rect width="100%" height="100%">
+											<s:fill>
+												<s:SolidColor color="#7caff0"/>
+											</s:fill>
+										</s:Rect>
+										<s:Label id="titlelabel" text="任务" fontWeight="bold" color="#ffffff" verticalCenter="1" horizontalCenter="1" fontSize="20"/>
+									</s:DefaultGridHeaderRenderer>
+								</fx:Component>
+							</s:headerRenderer>
+						</s:GridColumn>
+						<s:GridColumn editable="false" dataField="input_status" headerText="录入任务状态">
+							<s:headerRenderer>
+								<fx:Component>
+									<s:DefaultGridHeaderRenderer>
+										<s:Rect width="100%" height="100%">
+											<s:fill>
+												<s:SolidColor color="#63a4f4"/>
+											</s:fill>
+										</s:Rect>
+										<s:Label id="titlelabel" text="录入任务状态" fontWeight="bold" color="#ffffff" verticalCenter="1" horizontalCenter="1" fontSize="20"/>
+									</s:DefaultGridHeaderRenderer>
+								</fx:Component>
+							</s:headerRenderer>
+						</s:GridColumn>
+						<s:GridColumn editable="false" dataField="audit_status" headerText="审核任务状态">
+							<s:headerRenderer>
+								<fx:Component>
+									<s:DefaultGridHeaderRenderer>
+										<s:Rect width="100%" height="100%">
+											<s:fill>
+												<s:SolidColor color="#74a7e8"/>
+											</s:fill>
+										</s:Rect>
+										<s:Label id="titlelabel" text="审核任务状态" fontWeight="bold" color="#ffffff" verticalCenter="1" horizontalCenter="1" fontSize="20"/>
+									</s:DefaultGridHeaderRenderer>
+								</fx:Component>
+							</s:headerRenderer>
+						</s:GridColumn><!--itemRenderer="localaudit"-->
+						<s:GridColumn  editable="false" dataField="operation" headerText="操作">
+							<s:headerRenderer>
+								<fx:Component>
+									<s:DefaultGridHeaderRenderer>
+										<s:Rect width="100%" height="100%">
+											<s:fill>
+												<s:SolidColor color="#7caff0"/>
+											</s:fill>
+										</s:Rect>
+										<s:Label id="titlelabel" text="操作" fontWeight="bold" color="#ffffff" verticalCenter="1" horizontalCenter="1" fontSize="20"/>
+									</s:DefaultGridHeaderRenderer>
+								</fx:Component>
+							</s:headerRenderer>
+							<s:itemRenderer>
+								<fx:Component>
+									<s:GridItemRenderer horizontalCenter=""  dataChange="griditemrenderer2_dataChangeHandler(event)">		
+										<fx:Script>
+											<![CDATA[
+												import mx.controls.Alert;
+												import mx.events.FlexEvent;		
+												
+												protected function justlook(event:MouseEvent):void
+												{
+													outerDocument.chackoutsh();
+												}
+												
+												protected function entering(event:MouseEvent):void
+												{
+													outerDocument.aduiting();
+												}
+												
+												protected function griditemrenderer2_dataChangeHandler(event:FlexEvent):void
+												{
+													rupianluru.visible = (data.input_status == "已完成");
+													luru.visible =  (data.input_status == "已完成")
+												}
+											]]>
+										</fx:Script>
+										<s:HGroup width="100%" horizontalAlign="center">																					
+											<s:Button skinClass="skins.buttonSetLocal" click="justlook(event)" left="30"/>
+											<mx:LinkButton label="查看" visible="true" click="justlook(event)"/>
+											<s:Button id="rupianluru" skinClass="skins.buttonLookLocal" click="entering(event)" visible="true"/>											
+											<mx:LinkButton label="录入" id="luru" click="entering(event)" visible="true"/>
+										</s:HGroup>
+									</s:GridItemRenderer>							
+								</fx:Component>
+							</s:itemRenderer>
+						</s:GridColumn>
+					</s:ArrayList>
+				</s:columns>
+			</s:DataGrid>
+			
 		</s:VGroup>
 	</s:Group>
 	
 	<!--关联网络用户更新待办页面-->
-	<s:Group id="updatepage" visible="false" horizontalCenter="0">
-		<s:VGroup fontSize="15" horizontalAlign="center">
+	<s:SkinnableContainer skinClass="skins.littlePage" id="updatepage" visible="false" verticalCenter="0" horizontalCenter="0">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="center"/>
+		</s:layout>
+		<s:VGroup fontSize="15"  horizontalAlign="center">
 			<s:Label/>
 			<s:Label/>
 			<s:Label text="请输入网络用户密码" fontWeight="bold" fontSize="30"  lineHeight="50"/>			
 			<s:Label/>
 			<s:Label/>
+			<s:Label/>
 			<s:HGroup>
-				<s:Label text="密码 : "/>
+				<s:Label text="密码 : " fontSize="20"/>
 				<s:TextInput id="updetNetPassword" displayAsPassword="true"/>
 			</s:HGroup>
 			<s:Label/>
-			<s:Button label="确定更新" click="updatetask(event)"/>			
+			<s:Label/>
+			<s:Label/>
+			<s:HGroup>
+				<s:Button label=" " skinClass="skins.makeSureUpdate" click="updatetask(event)"/>
+				<s:Label/><s:Label/><s:Label/>
+				<s:Button label=" " skinClass="skins.turnBack" click="turnBack(event)"/>
+			</s:HGroup>		
 		</s:VGroup>		
-	</s:Group>
+	</s:SkinnableContainer>
 	
 	<!--关联网络用户提交待办页面-->
-	<s:Group id="submitpage" visible="false" horizontalCenter="0">
+	<s:SkinnableContainer skinClass="skins.littlePage" id="submitpage" visible="false" verticalCenter="0" horizontalCenter="0">
+		<s:layout>
+			<s:HorizontalLayout horizontalAlign="center"/>
+		</s:layout>
 		<s:VGroup fontSize="15" horizontalAlign="center">
 			<s:Label/>
 			<s:Label/>
@@ -673,83 +1916,452 @@
 			<s:Label/>
 			<s:Label/>
 			<s:HGroup>
-				<s:Label text="密码 : "/>
+				<s:Label text="密码 : " fontSize="20"/>
 				<s:TextInput id="submitNetPassword" displayAsPassword="true"/>
 			</s:HGroup>
 			<s:Label/>
-			<s:Button label="确定提交" click="submittask(event)"/>			
+			<s:Label/>
+			<s:Label/>
+			<s:HGroup>
+				<s:Button label=" " skinClass="skins.makeSureSubmit" click="submittask(event)"/>	
+				<s:Label/>
+				<s:Label/><s:Label/>
+				<s:Button label=" " skinClass="skins.turnBack" click="turnBack(event)"/>
+			</s:HGroup>			
 		</s:VGroup>		
-	</s:Group>
+	</s:SkinnableContainer>
 	
 	<!--判断是否返回登录页-->
-	<s:Group id="backpage" fontSize="15" visible="false" width="100%" height="100%">
+	<s:SkinnableContainer skinClass="skins.littlePage" id="backpage" fontSize="15" visible="false" horizontalCenter="0" verticalCenter="0">
 		<s:VGroup horizontalAlign="center" width="100%" height="100%">
 			<s:Label/>
 			<s:Label/>
 			<s:Label top="50" text="返回登录页面" fontSize="30" fontWeight="bold" lineHeight="50"/>
 			<s:Label/>
 			<s:Label/>
+			<s:Label/>
+			<s:Label/>
+			<s:Label/>
 			<s:HGroup>
-				<s:Button label="是" click="backlogin(event)"/>
-				<s:Button label="否" click="stophere(event)"/>
+				<s:Button top="600" label=" " skinClass="skins.yes" click="backlogin(event)"/>
+				<s:Button label=" " skinClass="skins.no" click="stophere(event)"/>
 			</s:HGroup>
 		</s:VGroup>		
-	</s:Group>	
+	</s:SkinnableContainer>
 	
-	<!--答题页面-->
-	<s:Group id="questionpage" width="100%" height="100%" visible="false">
+	<!--本地答题首--><!--审核任务-->
+	<s:SkinnableContainer  fontFamily="宋体" skinClass="skins.questList" id="entering" visible="false" horizontalCenter="1" width="100%">
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center"/>
+		</s:layout>
+		<s:SkinnableContainer width="100%">
+			<s:Button label=" " skinClass="skins.head"/>
+			<s:VGroup right="36" horizontalAlign="right" verticalAlign="middle" width="100%">
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>		
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>
+				<s:HGroup fontSize="20">
+					<s:Button label=" " skinClass="skins.serverUserName"/>	
+					<s:Label text=" " id="enteringuser" fontSize="25"/>	
+					<s:Label visible="false" id="enteringusername" fontSize="25" color="white"/>	
+					<s:Button label=" " skinClass="skins.news"/>
+					<s:Label text=" 0 " id="enteringunfinish"/> 
+					<s:Label text="    "/>
+					<s:Button label=" " skinClass="skins.backToLogin" click="enteringbacklogin(event)"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:SkinnableContainer>
 		
-
+		<s:SkinnableContainer  width="100%" >
+			<s:HGroup horizontalAlign="left" top="10" left="30" fontSize="25">
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="&lt;&lt; 返回列表  " click="enteringbacklist(event)"/>
+				<s:Label/><s:Label />
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label=" 暂存 " click="enteringtemporary(event)"/>
+				<s:Label/><s:Label/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label=" 提交 " click="enteringsubmit(event)"/>
+				<s:Label/><s:Label/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label=" 取消 " click="enteringreset(event)"/>
+			</s:HGroup>	
+		</s:SkinnableContainer>
 		
-		<s:VGroup horizontalAlign="left" width="100%">
-			<s:HGroup fontSize="50">	
+		<s:SkinnableContainer skinClass="skins.queatHead" width="100%" fontSize="20">
+			<s:HGroup horizontalAlign="center" top="30" width="100%">
+				<s:Label/>
+				<s:Label text="当前问卷：" fontWeight="bold"/>
+				<s:Label text=" " id="enteringnairname" color="red"/>
+				<s:Label/>
+				<s:Label/>
+				<s:Label text="当前测评对象: " fontWeight="bold"/>
+				<s:Label text=" " id="enteringcourtname" color="red"/>
+				<s:Label/>
+				<s:Label/>
+				<s:Label text="当前任务：" fontWeight="bold"/>
+				<s:Label text=" " id="enteringname" color="red"/>
 				<s:Label/>
 			</s:HGroup>
-			<s:HGroup horizontalAlign="left" fontSize="30">
-				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
-				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
-				<s:Button label="&lt; 返回列表  " click="backlist(event)"/>
-				<s:Label/><s:Label/>
-				<s:Button label=" 暂存 " click="temporary(event)"/>
-				<s:Label/><s:Label/>
-				<s:Button label=" 提交 " click="submitanswer(event)"/>
-				<s:Label/><s:Label/>
-				<s:Button label=" 取消 " click="cancel(event)"/>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+			<s:HGroup horizontalAlign="center" width="100%" top="75">
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="统一修改备注" click="enteringxiugai(event)"/>
+			</s:HGroup>
+			<s:Label text=" " id="papersidshen" visible="false"/>
+			<s:HGroup horizontalAlign="center" width="100%" top="120">
+				<s:FormItem label="第"  top="120">
+				</s:FormItem>
+				<s:FormItem  top="120" left="900">
+					<s:DropDownList  dataProvider="{number2}" labelField="tnumber" prompt="1"  change="ShenThisDropDownList_changeHandler(event)" width="70%" id="ShenThisDropDownList"/>										
+				</s:FormItem>
+				<s:FormItem label="张"  top="120" left="1050">
+				</s:FormItem>
+				<s:Label text=" " id="allquestshen" visible="false"/>
+			</s:HGroup>
+			<s:HGroup verticalAlign="bottom" top="135" horizontalAlign="center" width="100%" visible="false">
+				<s:Label text="共 "/>
+				<s:Label text=" " id="enteringall" fontWeight="bold" color="red"/>
+				<s:Label text="道题"/>
 			</s:HGroup>			
-		</s:VGroup>
-		<s:VGroup horizontalAlign="center" width="100%" fontSize="25" top="120">
-			<s:Button width="100%" height="1"/>
-			<s:Label/>
-			<s:Label text="当前问卷：'+ +'当前测评对象:'+ +'当前任务：'+ +' " fontWeight="bold"/>
-			<s:Label/>
-			<s:Button label="统一修改备注" fontSize="20" click="textarea(event)"/>
-			<s:Label />
-			<s:Label text="第'++'张"/>
-			<s:Label />
-			<s:HGroup verticalAlign="middle">
-				<s:Label text="问卷备注："/>
-				<s:TextArea  width="1500" height="50"/>
+			<s:HGroup horizontalCenter="0" top="160" width="85%">
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>			
+				<s:Label text="问卷备注 ："/>
+				<s:TextArea id="enteringbz"  width="900" height="30"/>
 			</s:HGroup>
 			<s:HGroup>
-				<s:Label text="第'++'题: "/>
-				<!--从数据库中取出题目（题目需要从服务器端获取）-->
+				<s:Label text=" "/>
+			</s:HGroup>
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+	
+	<!--本地录入题目--><!--审核任务-->
+	<s:Group  fontFamily="宋体" id="enteringpage" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="400">
+		<supportClasses:MyScroller skinClass="ffdf" width="100%" height="100%">
+			<s:Group width="100%" height="100%">
+				<s:VGroup horizontalAlign="center">
+				</s:VGroup>
+				<s:VGroup id="enteringpagequestcontainer" width="100%">
+				</s:VGroup>
+			</s:Group>
+		</supportClasses:MyScroller>
+	</s:Group>
+	
+	<!--本地答题首--><!--录入任务-->
+	<s:SkinnableContainer  fontFamily="宋体" skinClass="skins.questList" id="questionpage" visible="false" horizontalCenter="1" width="100%">
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center"/>
+		</s:layout>
+		<s:SkinnableContainer width="100%">
+			<s:Button label=" " skinClass="skins.head"/>
+			<s:VGroup right="36" horizontalAlign="right" verticalAlign="middle" width="100%">
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>		
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>
+				<s:HGroup fontSize="20">
+					<s:Button label=" " skinClass="skins.serverUserName"/>	
+					<s:Label text=" " id="loginusers" fontSize="25"/>	
+					<s:Label visible="false" id="loginusernetusernames" fontSize="25" color="white"/>	
+					<s:Button label=" " skinClass="skins.news"/>
+					<s:Label text=" 0 " id="unfinishedNew"/> 
+					<s:Label text="    "/>
+					<s:Button label=" " skinClass="skins.backToLogin"  click="questbacktologin(event)"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:SkinnableContainer>
+		
+		<s:SkinnableContainer  width="100%" >
+			<s:HGroup horizontalAlign="left" top="10" left="30" fontSize="25">
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="&lt;&lt; 返回列表  " click="backlist(event)"/>
+				<s:Label/><s:Label />
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label=" 暂存 " click="temporary(event)"/>
+				<s:Label/><s:Label/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label=" 提交 " click="submitanswer(event)"/>
+				<s:Label/><s:Label/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label=" 取消 " click="reset(event)"/>
+			</s:HGroup>	
+		</s:SkinnableContainer>
+		
+		<s:SkinnableContainer skinClass="skins.queatHead" width="100%" fontSize="20">
+			<s:HGroup horizontalAlign="center" top="30" width="100%">
+				<s:Label/>
+				<s:Label text="当前问卷：" fontWeight="bold"/>
+				<s:Label text=" " id="nairname" color="red"/>
+				<s:Label/><s:Label/>
+				<s:Label text="当前测评对象: " fontWeight="bold"/>
+				<s:Label text=" " id="courtname" color="red"/>
+				<s:Label/><s:Label/>
+				<s:Label text="当前任务：" fontWeight="bold"/>
+				<s:Label text=" " id="nainame" color="red"/>
+				<s:Label/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+				<s:Label text=" " id="allquest" visible="false"/>
+			</s:HGroup>
+			<s:HGroup horizontalAlign="center" width="100%" top="70">
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="统一修改备注" click="blackpage(event)"/>
+			</s:HGroup>
+			<s:Label text=" " id="papersid" visible="false"/>
+			<s:HGroup horizontalAlign="center" width="100%" top="120">
+				<s:FormItem label="第 " top="120">
+					<s:DropDownList  dataProvider="{number}" labelField="tnumber" prompt="1" change="dropdownlist1_changeHandler(event)" width="70%" id="ThisDropDownList"/>											
+				</s:FormItem> 
+				<s:FormItem label="张" />
 			</s:HGroup>			
-		</s:VGroup>
-		
-		<mx:HTML id="myhtml" location="http://www.baidu.com" width="100%" height="100%">
+			<s:HGroup horizontalCenter="0" top="160" width="85%">
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="问卷备注 ："/>
+				<s:TextArea id="thebz"  width="900" height="30"/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
 			
-		</mx:HTML>
-		
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+	
+	<!--本地题目--><!--录入任务-->
+	<s:Group  fontFamily="宋体" id="qpage" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="400">
+		<supportClasses:MyScroller skinClass="ffdf" id="scroller" width="100%" height="100%">
+			<s:Group width="100%" height="100%">
+				<s:VGroup horizontalAlign="center">
+				</s:VGroup>
+				<s:VGroup id="questcontainer" width="100%">
+				</s:VGroup>
+			</s:Group>
+		</supportClasses:MyScroller>
+	</s:Group>
+	
+	<!--本地查看页面--><!--录入任务-->
+	<s:SkinnableContainer  fontFamily="宋体" skinClass="skins.questList" id="localchack" visible="false"  fontSize="25" horizontalCenter="0" width="100%">
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center"/>
+		</s:layout>
+		<s:SkinnableContainer width="100%" fontStyle="normal">
+			<s:Button label=" " skinClass="skins.head"/>
+			<s:VGroup right="36" horizontalAlign="right" verticalAlign="middle" width="100%">
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>		
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>
+				<s:HGroup fontSize="20">
+					<s:Button label=" " skinClass="skins.serverUserName"/>	
+					<s:Label text=" " id="loginusera" fontSize="25"/>	
+					<s:Label visible="false" id="loginusernetusernamea" fontSize="25" color="white"/>	
+					<s:Button label=" " skinClass="skins.news"/>
+					<s:Label text=" 0 " id="unfinishedN"/> 
+					<s:Label text="    "/>
+					<s:Button label=" " skinClass="skins.backToLogin"  click="questbacktologinlook(event)"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer  width="100%" >
+			<s:HGroup horizontalAlign="left" fontSize="25" top="10">
+				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
+				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="&lt;&lt; 返回列表  " click="backagain(event)"/>
+			</s:HGroup>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer skinClass="skins.queatHead" width="96%" fontSize="20">			
+			<s:HGroup horizontalAlign="center" width="100%" verticalAlign="middle" top="30">
+				<s:Label/>
+				<s:Label text="当前问卷：" fontWeight="bold"/>
+				<s:Label text=" " id="namenair" color="red"/>
+				<s:Label/><s:Label/>
+				<s:Label text="当前测评对象: " fontWeight="bold"/>
+				<s:Label text=" " id="namecourt" color="red"/>
+				<s:Label/><s:Label/>
+				<s:Label text="当前任务：" fontWeight="bold"/>
+				<s:Label text=" " id="namenai" color="red"/>
+				<s:Label/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+			<s:HGroup horizontalAlign="center" width="100%" top="80">	
+				<s:FormItem label="第"  top="120">
+				</s:FormItem>
+				<s:FormItem  top="120" left="900">
+					<s:DropDownList dataProvider="{number2}" labelField="tnumber" prompt="1" change="dropdownlist1_changeHandler(event)" width="70%" id="allThisDropDownListLook"/>															
+				</s:FormItem>
+				<s:FormItem label="张" >
+				</s:FormItem>
+				<s:Label text=" " id="allquestlook" visible="false"/>
+			</s:HGroup>
+			<s:HGroup horizontalAlign="center" width="100%" top="60">
+				<s:Label text="共 "/>
+				<s:Label text=" " id="questall" fontWeight="bold" color="red"/>
+				<s:Label text="道题"/>
+			</s:HGroup>			
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+	
+	<!--本地查看题目--><!--录入任务-->
+	<s:Group fontFamily="宋体" id="chacklocal" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="320">
+		<supportClasses:MyScroller skinClass="ffdf" width="100%" height="100%">
+			<s:Group width="100%" height="100%">
+				<s:VGroup horizontalAlign="center" height="100%">
+				</s:VGroup>
+				<s:VGroup id="localchacklist" width="100%">					
+				</s:VGroup>
+			</s:Group>
+		</supportClasses:MyScroller>
+	</s:Group>
+	
+	
+	<!--本地查看页面--><!--审核任务-->
+	<s:SkinnableContainer  fontFamily="宋体" skinClass="skins.questList" id="shlocalchack" visible="false"  fontSize="25" horizontalCenter="0" width="100%">
+		<s:layout>
+			<s:VerticalLayout horizontalAlign="center"/>
+		</s:layout>
+		<s:SkinnableContainer width="100%" >
+			<s:Button label=" " skinClass="skins.head"/>
+			<s:VGroup right="36" horizontalAlign="right" verticalAlign="middle" width="100%">
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>		
+				<s:HGroup>
+					<s:Label text=" "/>
+				</s:HGroup>
+				<s:HGroup fontSize="20">
+					<s:Button label=" " skinClass="skins.serverUserName"/>	
+					<s:Label text=" " id="shloginusera" fontSize="25"/>	
+					<s:Label visible="false" id="shloginusernetusernamea" fontSize="25" color="white"/>	
+					<s:Button label=" " skinClass="skins.news"/>
+					<s:Label text=" 0 " id="shunfinishedN"/> 
+					<s:Label text="    "/>
+					<s:Button label=" " skinClass="skins.backToLogin"  click="questbacktologinlook(event)"/>
+				</s:HGroup>
+			</s:VGroup>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer  width="100%" >
+			<s:HGroup horizontalAlign="left" fontSize="25" top="10">
+				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
+				<s:Label /><s:Label/><s:Label/><s:Label/><s:Label/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="&lt;&lt; 返回列表  " click="backagain(event)"/>
+			</s:HGroup>
+		</s:SkinnableContainer>
+		<s:SkinnableContainer skinClass="skins.queatHead" width="96%" fontSize="20">			
+			<s:HGroup horizontalAlign="center" width="100%" verticalAlign="middle" top="30">
+				<s:Label/>
+				<s:Label text="当前问卷：" fontWeight="bold"/>
+				<s:Label text=" " id="shnamenair" color="red"/>
+				<s:Label/><s:Label/>
+				<s:Label text="当前测评对象: " fontWeight="bold"/>
+				<s:Label text=" " id="shnamecourt" color="red"/>
+				<s:Label/><s:Label/>
+				<s:Label text="当前任务：" fontWeight="bold"/>
+				<s:Label text=" " id="shnamenai" color="red"/>
+				<s:Label/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+				<s:Label text=" " id="shallquestlook" visible="false"/>
+			</s:HGroup>
+			<s:HGroup horizontalAlign="center" width="100%" top="80">
+				<s:FormItem label="第   "  top="80">					
+				</s:FormItem>
+				<s:FormItem  top="120">
+					<s:DropDownList dataProvider="{number2}" labelField="tnumber" prompt="1" change="dropdownlist1_changeHandler(event)" width="70%" id="shallThisDropDownListLook"/>										
+				</s:FormItem>
+				<s:FormItem label="张"  top="120">
+				</s:FormItem>
+				
+			</s:HGroup>
+			<s:HGroup horizontalAlign="center" width="100%" top="60">
+				<s:Label text="共 "/>
+				<s:Label text=" " id="shquestall" fontWeight="bold" color="red"/>
+				<s:Label text="道题"/>
+			</s:HGroup>			
+		</s:SkinnableContainer>
+	</s:SkinnableContainer>
+	
+	
+	<!--本地查看题目--><!--审核任务-->
+	<s:Group  fontFamily="宋体" id="shchacklocal" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="320">
+		<supportClasses:MyScroller skinClass="ffdf" width="100%" height="100%">
+			<s:Group width="100%" height="100%">
+				<s:VGroup horizontalAlign="center" height="100%">
+				</s:VGroup>
+				<s:VGroup id="shlocalchacklist" width="100%">					
+				</s:VGroup>
+			</s:Group>
+		</supportClasses:MyScroller>
 	</s:Group>
 	
 	<!--统一修改备注-->
-	<s:Group id="text_area" visible="false" width="100%" height="100%" fontSize="25">
-		<s:VGroup width="100%" height="100%" horizontalAlign="center">
-			<s:Label fontSize="30"/>
-			<s:Label text="备注统一修改" fontSize="40" fontWeight="bold"/>
-			<s:Label fontSize="40"/>
-			<s:TextArea id="remark" top="20" width="80%" height="50%" />
-			<s:Button label="填写完毕" fontSize="35" click="close_text_area(event)"/>
-		</s:VGroup>
-	</s:Group>
+	<s:SkinnableContainer id="blackPage" skinClass="skins.toback" height="100%" width="100%" visible="false">
+		<s:VGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+			<s:HGroup width="100%" horizontalAlign="center">
+				<s:Label text=" "/>
+				<s:Label text=" "/>
+				<s:Label text=" "/>
+				<s:Label text=" "/>
+				
+				<s:Label text="统一修改备注" fontSize="30"  fontFamily="宋体"/>
+				<s:TextArea id="textthebz" width="1300" height="200" fontSize="25"/>
+			</s:HGroup>
+			<s:HGroup width="100%" horizontalAlign="center" fontSize="20">
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="确定" click="sureToSave(event)"/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="取消" click="nonono(event)"/>
+			</s:HGroup>
+		</s:VGroup>		
+	</s:SkinnableContainer>
+	
+	<!--录入页面统一修改备注-->
+	<s:SkinnableContainer id="enteringblackPage" skinClass="skins.toback" height="100%" width="100%" visible="false">
+		<s:VGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+			<s:HGroup>
+				<s:Label text=" "/>
+			</s:HGroup>
+			<s:HGroup width="100%" horizontalAlign="center">
+				<s:Label text=" "/>
+				<s:Label text=" "/>
+				<s:Label text=" "/>
+				<s:Label text=" "/>				
+				<s:Label text="统一修改备注" fontSize="30"  fontFamily="宋体"/>
+				<s:TextArea id="enteringtybz" width="1300" height="200" fontSize="25"/>
+			</s:HGroup>
+			<s:HGroup width="100%" horizontalAlign="center" fontSize="20">
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="确定" click="enteringsureToSave(event)"/>
+				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="取消" click="enteringnonono(event)"/>
+			</s:HGroup>
+		</s:VGroup>		
+	</s:SkinnableContainer>
 </s:WindowedApplication>

@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" horizontalAlign="left"
+		  fontFamily="宋体">
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.core.UIComponent;
+			import mx.events.ItemClickEvent;
+			public var _answer:Object ;
+			public var asdfasdf:Object ;
+			public static var num:String ;
+			public static var sid2:String ;
+			public static var objs:Array = new Array();
+			public static var answers:Array = new Array();
+			public static var allAnswer:Object;
+			public static var enteringallAnswer:Object;
+			public  var bbb:int;
+			public  var ccc:int;
+			public var questzbsid:String ;
+			public var answeragain:Object;
+
+			
+			//录入附件
+			private var file:File = new File();
+			protected function selectVideoclickHandler():void {
+				file.addEventListener(Event.SELECT, fileSelectHandler);
+				file.browseForOpen("原始数据文件", [new FileFilter("*.xls","*.xls")]);
+				
+			}
+			protected function fileSelectHandler(event:Event):void {
+			//	origindatafile.text = file.nativePath;
+				file.removeEventListener(Event.SELECT, fileSelectHandler);
+			}
+			
+			//填写题目
+			public function set questdata(val:*):void
+			{
+				questzbsid = val.zbsid;
+				tmsm1.text = val.tmsms;
+				qnum1.text = String(val.num+1);
+				question1.text = val.quests;
+				sid3.text = val.sid1;
+				papersid.text = val.papersid;
+				if(val.selet == 1)
+				{
+					lrysm.enabled = false;
+					shysm.enabled = false;
+					isSubmit.enabled = false;
+				}
+			}
+			
+			
+			public function get foranswer():Object
+			{
+				return asdfasdf;
+			}
+			
+			public function set enteringanswer(val:*):void
+			{
+				enteringallAnswer = val.qaa;
+				var aaa:int = 1;
+				this.ccc = aaa;
+			}
+			
+			public function get enteringanswer():int
+			{
+				return ccc;
+			}
+			
+			public function set answer(val:*):void
+			{
+				allAnswer = val.qaa;
+				var aaa:int = 1;
+				this.bbb = aaa;
+			}
+			
+			public function get answer():int
+			{
+				return bbb;
+			}
+			
+			//填写选项
+			public var option :OneOption = new OneOption();
+			public function set optiondata(val:*):void
+			{	
+				answeragain = val;
+				var n:int = val.num;
+				for(var z:int = 0 ; z<n　; z++)
+				{
+					var option :OneOption = new OneOption();
+					var opid:String = (val.ar[z]);
+					var nameid:String = (val.list[z]);
+					var questid:String = (val.qstid);
+					if( allAnswer != null )
+					{
+						var zlen:int = allAnswer.length;
+						for(var r:int = 0 ; r<zlen ; r++)
+						{						
+							if( (val.ppsid == allAnswer[r].papersid) && (opid == allAnswer[r].answersid) && (questid == allAnswer[r].questid) && (val.cname == allAnswer[r].evalobjname)  )
+							{
+								option.foroption.selected = true;
+							}
+						}
+					}
+					
+					if(val.zhang == 1)
+					{
+						//if(把三个id引用进来)
+						if( (opid == val.sendanswersid) && (questid == val.sendquestid) && (val.cname == val.sendevalobjname)  )
+						{
+							option.foroption.selected = true;
+						}						
+					}
+					
+					if( enteringallAnswer != null )
+					{
+						var len:int = enteringallAnswer.length;
+						for(var o:int = 0 ; o<len ; o++)
+						{
+							if( (opid == enteringallAnswer[o].answersid) && (questid == enteringallAnswer[o].questid) && (val.cname == enteringallAnswer[o].evalobjname)  )
+							{
+								option.foroption.selected = true;
+							}
+						}
+					}
+					option.quest = quest;
+					option.optiondata = {papersid:papersid.text , zbsid:questzbsid , evalobjsid:val.evalobjsid , evalobjname:val.evalobjname , all:n , n:z , opid:opid , nameid:nameid , questid:questid}
+					options.addElement(option);
+					if(val.bool == 0)
+					{
+						option.foroption.enabled = false;
+						//option.foroption.selected = true;
+					}
+					else
+					{
+						option.foroption.visible = true;
+					}
+				}
+			}
+			
+			public function set foranswer(val:*):void
+			{
+				var obj:Object =  new Object();
+				
+				obj['aud_memo'] = shysm.text;
+				obj['aud_input_memo'] = shorigindatafile.text;
+				
+				answers.push(obj);
+				
+				this.asdfasdf = answers;
+			}
+			
+			//设置所有选项为没有选中
+			public function set none(val:*):void
+			{
+				option.foroption.visible = false;
+			}
+			
+			//发送答案
+			public function set optall(val1:*):void
+			{				
+				this._answer = objs;
+			}
+			
+			public function get optall():Object
+			{			
+				return _answer;
+			}
+			
+			public function set removeall(val:*):void
+			{
+				if(allAnswer != null)
+				{
+					var j:int = allAnswer.length;
+					for(var i:int = 0 ; i<j ; i++)
+					{
+						allAnswer.pop();
+					}
+				}
+			}
+			
+			public function set enteringremoveall(val:*):void
+			{
+				if(enteringallAnswer != null)
+				{
+					var j:int = enteringallAnswer.length;
+					for(var i:int = 0 ; i<j ; i++)
+					{
+						enteringallAnswer.pop();
+					}
+				}
+			}
+			
+			public function findThis( sid:String):int
+			{
+				for(var i:int =0 ; i < objs.length ; i++)
+				{				
+					if(objs[i].sid==sid)
+					{
+						return i;
+					}
+				}
+				return -1;
+			}
+			
+			//取消所有选项
+			public function cancel(event:MouseEvent):void
+			{
+				quest.selection=null;
+			}		
+			
+			
+			protected function checkbox1_clickHandler(event:MouseEvent):void
+			{
+				options.removeAllElements();
+				var val:Object = answeragain ; 
+				var n:int = val.num;
+				for(var z:int = 0 ; z<n　; z++)
+				{
+					var option :OneOption = new OneOption();
+					var opid:String = (val.ar[z]);
+					var nameid:String = (val.list[z]);
+					var questid:String = (val.qstid);
+					if( allAnswer != null )
+					{
+						var zlen:int = allAnswer.length;
+						for(var r:int = 0 ; r<zlen ; r++)
+						{						
+							if( (val.ppsid == allAnswer[r].papersid) && (opid == allAnswer[r].answersid) && (questid == allAnswer[r].questid) && (val.cname == allAnswer[r].evalobjname)  )
+							{
+								option.foroption.selected = true;
+							}
+						}
+					}
+					
+					if(val.zhang == 1)
+					{
+						//if(把三个id引用进来)
+						if( (opid == val.sendanswersid) && (questid == val.sendquestid) && (val.cname == val.sendevalobjname)  )
+						{
+							option.foroption.selected = true;
+						}						
+					}
+					
+					if( enteringallAnswer != null )
+					{
+						var len:int = enteringallAnswer.length;
+						for(var o:int = 0 ; o<len ; o++)
+						{
+							if( (opid == enteringallAnswer[o].answersid) && (questid == enteringallAnswer[o].questid) && (val.cname == enteringallAnswer[o].evalobjname)  )
+							{
+								option.foroption.selected = true;
+							}
+						}
+					}
+					option.quest = quest;
+					option.optiondata = {papersid:papersid.text , zbsid:questzbsid , evalobjsid:val.evalobjsid , evalobjname:val.evalobjname , all:n , n:z , opid:opid , nameid:nameid , questid:questid}
+					options.addElement(option);
+					if(val.bool == 0)
+					{
+						//option.foroption.enabled = false;
+						option.foroption.selected = true;
+					}
+					else
+					{
+						option.foroption.visible = true;
+					}
+				}
+				
+				//是否出错    需要重新加载选项
+				if(isSubmit.selected == true)
+				{
+					radio1.enabled = true;
+					radio2.enabled = true;
+					quest.enabled = true;
+					option.foroption.enabled = true;
+				}
+				else
+				{
+					radio1.enabled = false;
+					radio2.enabled = false;
+					quest.enabled = false;
+					option.foroption.enabled = false;
+				}
+			}
+			
+			protected function radiobutton1_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			protected function radiobutton2_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+
+			
+		]]>
+	</fx:Script>
+	
+	<s:HGroup>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="第  "/>
+		<s:Label text="   "/>
+		<s:Label text="" id="qnum1" width="22"/>
+		<s:Label text="题 ："/>		
+		<s:Label text=" " id="question1"/>
+	</s:HGroup>
+	
+	<s:HGroup fontSize="8">
+		<s:Label text=" " id="papersid" visible="false"/>
+		<s:Label text=" " visible="false" id="sid3"/>
+	</s:HGroup>
+	<s:HGroup>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="题目说明 ："/>
+		<s:Label text=" " id="tmsm1"/>
+	</s:HGroup>
+	<s:HGroup fontSize="8">
+		<s:Label text=" "/>
+	</s:HGroup>
+	
+	<fx:Declarations>
+		<s:RadioButtonGroup id="quest"/>		
+	</fx:Declarations>
+	
+	<s:HGroup>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="备选答案 ："/>
+	</s:HGroup>
+		
+	<s:VGroup verticalAlign="middle" id="options" fontStyle="normal">	
+	</s:VGroup>
+	
+	<s:HGroup>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="录入员说明 ："/>
+		<s:TextArea id="lrysm" width="900" height="30" enabled="false"/>
+	</s:HGroup>
+	
+	<s:HGroup fontSize="8">
+		<s:Label text=" "/>
+	</s:HGroup>
+	
+	<s:HGroup>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="录入员附件 ："/>
+		<s:TextInput id="origindatafile" enabled="false" width="900"/>
+		<s:Button label="附件" click="selectVideoclickHandler()"/>
+	</s:HGroup>
+	
+	<s:HGroup fontSize="8">
+		<s:Label text=" "/>
+	</s:HGroup>
+	
+	<s:HGroup>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="是否出错 ：" />
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:CheckBox label=" " click="checkbox1_clickHandler(event)" id="isSubmit"/>
+	</s:HGroup>
+	
+	<s:HGroup fontSize="8">
+		<s:Label text=" "/>
+	</s:HGroup>
+	
+	<s:HGroup>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="人工错误 ："/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:RadioButton id="radio2" enabled="false"  click="radiobutton1_clickHandler(event)" />
+	</s:HGroup>
+	
+	<s:HGroup fontSize="8">
+		<s:Label text=" "/>
+	</s:HGroup>
+	
+	<s:HGroup>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text=" 非人工错误 ："/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:RadioButton id="radio1" enabled="false" click="radiobutton2_clickHandler(event)"/>
+	</s:HGroup>
+	
+	<s:HGroup fontSize="8">
+		<s:Label text=" "/>
+	</s:HGroup>
+	
+	<s:HGroup>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="审核人员说明 ："/>
+		<s:TextArea id="shysm" width="900" height="30"/>		
+	</s:HGroup>
+	
+	<s:HGroup fontSize="8">
+		<s:Label text=" "/>
+	</s:HGroup>
+	
+	<s:HGroup>
+		<s:Label text="   "/>
+		<s:Label text="   "/>
+		<s:Label text="审核人员附件 ："/>
+		<s:TextInput id="shorigindatafile" enabled="false" width="900"/>
+		<s:Button label="附件" click="selectVideoclickHandler()"/>
+	</s:HGroup>
+	
+	<s:HGroup>
+		<s:Label text=" "/>
+	</s:HGroup>
+	
+	<s:HGroup>
+		<s:Label text=" "/>
+	</s:HGroup>
+</s:VGroup>

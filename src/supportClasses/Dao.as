@@ -8,12 +8,12 @@ package supportClasses {
 	
 	public class Dao {
 		
-		public var daoitems: Vector.<DaoItem> = new <DaoItem>[];
-		
+		public var daoitems: Vector.<DaoItem> = new <DaoItem>[];		
 		public var dbfilename:String;
 		
 		
-		public function insertOrUpdate(a:*):void {
+		public function insertOrUpdate(a:*):void 
+		{
 			var daoitem:DaoItem = new DaoItem();
 			daoitem.a = a;
 			daoitem.dbfilename = dbfilename;
@@ -33,13 +33,11 @@ package supportClasses {
 			daoitems.push(daoitem);
 		}
 		
-		
-		public function insert(a:*):void {
+		public function batchInsertWithHighSpeed(a:Array, callback:Function):void 
+		{
 			var daoitem:DaoItem = new DaoItem();
-			daoitem.a = a;
 			daoitem.dbfilename = dbfilename;
-			daoitem.executeInsert();
-			daoitems.push(daoitem);
+			daoitem.batchInsertWithHighSpeed(a, callback);
 		}
 		
 		public function query(sql:String, callback: Function):void {
