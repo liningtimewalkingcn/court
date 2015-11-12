@@ -5,13 +5,21 @@
 	xmlns:mx="library://ns.adobe.com/flex/mx"
 	xmlns:supportClasses="supportClasses.*" 
 	skinClass="skins.appbgSkin" applicationComplete="init(event)"
-	
 	>
 	
 	<fx:Declarations>
 		<supportClasses:Dao id="dao" dbfilename="mydatabase"/>
 		<supportClasses:HTTPServicePool id="HttpRequest" />
 	</fx:Declarations>
+		<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+		@namespace supportClasses "supportClasses.*";
+		/*s|Label{fontFamily:'Microsoft YaHei Light',微软雅黑,宋体}
+		s|Button{fontFamily:'Microsoft YaHei Light',微软雅黑,宋体}
+		mx|Label{fontFamily:'Microsoft YaHei Light',微软雅黑,宋体}
+		s|DataGrid{fontFamily:'Microsoft YaHei Light',微软雅黑,宋体}*/
+	</fx:Style>
 	
 	<fx:Script>
 		<![CDATA[
@@ -28,21 +36,16 @@
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.http.mxml.HTTPService;
 			import mx.utils.UIDUtil;
-			import mx.utils.object_proxy;
-			
+			import mx.utils.object_proxy;			
 			import spark.components.List;
 			import spark.events.DropDownEvent;
 			import spark.events.GridItemEditorEvent;
 			import spark.events.GridSelectionEvent;
 			import spark.events.IndexChangeEvent;
-			import spark.events.TextOperationEvent;
-			
-			import org.osmf.events.TimeEvent;
-			
+			import spark.events.TextOperationEvent;			
+			import org.osmf.events.TimeEvent;			
 			import supportClasses.Court2Zb;
 			import supportClasses.CourtEvaluate;
-			import supportClasses.Court_auditanswer;
-			import supportClasses.Court_inputanswer;
 			import supportClasses.ListAnswer;
 			import supportClasses.ListAuditItem;
 			import supportClasses.ListInfoTask;
@@ -50,11 +53,12 @@
 			import supportClasses.ListQuestion;
 			import supportClasses.ListTaskInfo;
 			import supportClasses.ListTodoItem;
+			//import supportClasses.Option;
 			import supportClasses.UserItem;
 			
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
 			private var newuser:UserItem = new UserItem();
-			private var _httpurl:String = "http://192.168.1.237:8080/court";
+			private var _httpurl:String = "http://192.168.1.158:8289/court";
 			private var n:int = 0;
 			private var answer:String; 		//选项的内容
 			private var qsid:String;		//问题的
@@ -155,11 +159,9 @@
 				listpage.visible=false;
 				locallist.visible=false;
 				submitpage.visible=true;
-				
-				//提交本地数据得到的数据court_currentanswer				
 			}
 			
-			// 判断提交待办页面网络用户密码是否正确	
+			// 判断提交待办页面网络用户密码是否正确			
 			protected function submittask(event:MouseEvent):void
 			{
 				var submitNetPass :String = submitNetPassword.text;
@@ -178,19 +180,20 @@
 								Alert.show(dete);
 								});*/
 							}
-						});
+						});						
+						
 						Alert.show("\t提示\n提交成功");
 						submitpage.visible=false;
 						locallist.visible=true;
-						listpage.visible=true;
+						listpage.visible=true;										
 					}
 					else
 					{
 						Alert.show("\t提示\n密码错误");
 						submitpage.visible=true;
 					}
-				});
-			}
+				})
+			}			
 			
 			//本地列表的审核与提交的切换
 			private function indexChangelocal(e:Event):void
@@ -218,7 +221,7 @@
 				HttpRequest.post(httpurl+"/OffLineClientController/updateTask.vot",{"username":loginusernetusername.text,"netPassword":updetNetPass},function(data)
 				{
 					if(data == "no")
-					{
+					{	
 						Alert.show("\t提示\n密码错误");
 						updatepage.visible=true;
 					}
@@ -381,33 +384,89 @@
 																											{
 																												if (status.committed) 
 																												{
-																													//把court2_evaluate_obj更新到本地数据库court2_evaluate_obj
-																													/*HttpRequest.post(httpurl+"/OffLineClientController/courtevaluate.vot",{"username":loginusernetusername.text},function(data)
+																													//把court2_evalobjpaperinfo更新到本地数据库court2_evalobjpaperinfo
+																													HttpRequest.post(httpurl+"/OffLineClientController/courtevaluate.vot",{"username":loginusernetusername.text},function(data)
 																													{																																										
-																													var listevaluate:Object = JSON.parse(data);				
-																													
-																													if (listevaluate.list_evaluate.length>0)
-																													{
-																													dao.updateBySQL("delete from COURT2_EVALUATE_OBJ");	
-																													var listevaluateArr:Array = [];
-																													for(var i:int = 0; i< listevaluate.list_evaluate.length; ++i)
-																													{
-																													var list_evaluate:CourtEvaluate = new CourtEvaluate;																			
-																													list_evaluate.sid = (listevaluate.list_evaluate[i].sid);
-																													list_evaluate.name = (listevaluate.list_evaluate[i].name);
-																													list_evaluate.projsid = (listevaluate.list_evaluate[i].projsid);																															
-																													list_evaluate.yearbelong = (listevaluate.list_evaluate[i].yearbelong);																											
-																													list_evaluate.sortfield = (listevaluate.list_evaluate[i].sortfield);																																
-																													listevaluateArr.push(list_evaluate);
-																													}
-																													dao.batchInsertWithHighSpeed(listevaluateArr, function(status:*):void 
-																													{
-																													if (status.committed) 
-																													{*/
+																														var listevaluate:Object = JSON.parse(data);				
+																														
+																														Alert.show(JSON.stringify(data));
+																														
+																														if (listevaluate.list_evaluate.length>0)
+																															{
+																															dao.updateBySQL("delete from COURT2_EVALOBJPAPERINFO");	
+																															var listevaluateArr:Array = [];
+																															for(var i:int = 0; i< listevaluate.list_evaluate.length; ++i)
+																															{
+																																var list_evaluate:CourtEvaluate = new CourtEvaluate;																			
+																																list_evaluate.sid = (listevaluate.list_evaluate[i].sid);
+																																list_evaluate.papercode = (listevaluate.list_evaluate[i].papercode);
+																																list_evaluate.zbsid = (listevaluate.list_evaluate[i].zbsid);																															
+																																list_evaluate.evalobjsid = (listevaluate.list_evaluate[i].evalobjsid);																											
+																																list_evaluate.sortfield = (listevaluate.list_evaluate[i].sortfield);																																
+																																listevaluateArr.push(list_evaluate);
+																															}
+																															dao.batchInsertWithHighSpeed(listevaluateArr, function(status:*):void 
+																															{
+																																if (status.committed) 
+																																{
+																																	updatepage.visible=false;						
+																																	locallist.visible=true;
+																																	listpage.visible=true;
+																																	Alert.show("\n更新成功","提示");
+																																	
+																																	dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
+																																	{					
+																																		local2.dataProvider = new ArrayList(data);
+																																		for (var i:int =0; i < dao.daoitems.length; ++i) 
+																																		{
+																																			dao.daoitems[i].conn.close();
+																																		}
+																																	});	
+																																	
+																																	dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
+																																	{
+																																		local1.dataProvider = new ArrayList(date);
+																																		for (var i:int =0; i < dao.daoitems.length; ++i) 
+																																		{
+																																			dao.daoitems[i].conn.close();
+																																		}
+																																	});																																	
+																																}
+																																else
+																																{
+																																	updatepage.visible=false;						
+																																	locallist.visible=true;
+																																	listpage.visible=true;
+																																	Alert.show("court2_evalobjpaperinfo列表更新失败！","提示");
+																																	
+																																	dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
+																																	{					
+																																		local2.dataProvider = new ArrayList(data);
+																																		for (var i:int =0; i < dao.daoitems.length; ++i) 
+																																		{
+																																			dao.daoitems[i].conn.close();
+																																		}
+																																	});	
+																																	
+																																	dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
+																																	{
+																																		local1.dataProvider = new ArrayList(date);
+																																		for (var i:int =0; i < dao.daoitems.length; ++i) 
+																																		{
+																																			dao.daoitems[i].conn.close();
+																																		}
+																																	});
+																																}
+																															});
+																														}
+																													});																												
+																												}
+																												else
+																												{
 																													updatepage.visible=false;						
 																													locallist.visible=true;
 																													listpage.visible=true;
-																													Alert.show("\t提示\n更新成功");
+																													Alert.show("court2_zb列表更新失败！","提示");
 																													
 																													dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
 																													{					
@@ -425,17 +484,63 @@
 																														{
 																															dao.daoitems[i].conn.close();
 																														}
-																													});																																	
-																													/*}
 																													});
-																													}
-																													});*/																												
 																												}
 																											});
 																										}
 																									});				
 																								}
+																								else
+																								{
+																									updatepage.visible=false;						
+																									locallist.visible=true;
+																									listpage.visible=true;
+																									Alert.show("court2_taskinfoitem列表更新失败！","提示");
+																									
+																									dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
+																									{					
+																										local2.dataProvider = new ArrayList(data);
+																										for (var i:int =0; i < dao.daoitems.length; ++i) 
+																										{
+																											dao.daoitems[i].conn.close();
+																										}
+																									});	
+																									
+																									dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
+																									{
+																										local1.dataProvider = new ArrayList(date);
+																										for (var i:int =0; i < dao.daoitems.length; ++i) 
+																										{
+																											dao.daoitems[i].conn.close();
+																										}
+																									});
+																								}
 																							});
+																						}
+																					});
+																				}
+																				else
+																				{
+																					updatepage.visible=false;						
+																					locallist.visible=true;
+																					listpage.visible=true;
+																					Alert.show("court2_question_option列表更新失败！","提示");
+																					
+																					dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
+																					{					
+																						local2.dataProvider = new ArrayList(data);
+																						for (var i:int =0; i < dao.daoitems.length; ++i) 
+																						{
+																							dao.daoitems[i].conn.close();
+																						}
+																					});	
+																					
+																					dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
+																					{
+																						local1.dataProvider = new ArrayList(date);
+																						for (var i:int =0; i < dao.daoitems.length; ++i) 
+																						{
+																							dao.daoitems[i].conn.close();
 																						}
 																					});
 																				}
@@ -443,19 +548,92 @@
 																		}
 																	});
 																}
+																else
+																{
+																	updatepage.visible=false;						
+																	locallist.visible=true;
+																	listpage.visible=true;
+																	Alert.show("court2_question列表更新失败！","提示");
+																	
+																	dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
+																	{					
+																		local2.dataProvider = new ArrayList(data);
+																		for (var i:int =0; i < dao.daoitems.length; ++i) 
+																		{
+																			dao.daoitems[i].conn.close();
+																		}
+																	});	
+																	
+																	dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
+																	{
+																		local1.dataProvider = new ArrayList(date);
+																		for (var i:int =0; i < dao.daoitems.length; ++i) 
+																		{
+																			dao.daoitems[i].conn.close();
+																		}
+																	});
+																}
 																
 															});
 														}
 													});
-												}										
+												}
+												else
+												{
+													updatepage.visible=false;						
+													locallist.visible=true;
+													listpage.visible=true;
+													Alert.show("court2_list_todo列表更新失败！","提示");
+													
+													dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
+													{					
+														local2.dataProvider = new ArrayList(data);
+														for (var i:int =0; i < dao.daoitems.length; ++i) 
+														{
+															dao.daoitems[i].conn.close();
+														}
+													});	
+													
+													dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
+													{
+														local1.dataProvider = new ArrayList(date);
+														for (var i:int =0; i < dao.daoitems.length; ++i) 
+														{
+															dao.daoitems[i].conn.close();
+														}
+													});
+												}
 											});
 										}
+									}
+									else
+									{
+										updatepage.visible=false;						
+										locallist.visible=true;
+										listpage.visible=true;
+										Alert.show("court2_list_audit列表更新失败！","提示");
+										
+										dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
+										{					
+											local2.dataProvider = new ArrayList(data);
+											for (var i:int =0; i < dao.daoitems.length; ++i) 
+											{
+												dao.daoitems[i].conn.close();
+											}
+										});	
+										
+										dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
+										{
+											local1.dataProvider = new ArrayList(date);
+											for (var i:int =0; i < dao.daoitems.length; ++i) 
+											{
+												dao.daoitems[i].conn.close();
+											}
+										});
 									}
 								});
 							}
 						});
-						
-						
 					}
 				})
 			}
@@ -598,7 +776,7 @@
 				thebz.text = null;
 			}
 			
-			//本地答题页面的提交（审核任务）
+			//录入页面的提交（录入页面）
 			protected function enteringsubmit(event:MouseEvent):void
 			{				
 				var alllen:int = int(enteringall.text);
@@ -609,11 +787,11 @@
 				var evalobjname:String = local2.selectedItem.evalobjname;
 				
 				//把得到的数据存到数据库
-				/*if(alllen > qaa.length)
+				if(alllen > qaa.length)
 				{
-				Alert.show("请答完所有题目再交卷！");
+					Alert.show("请答完所有题目再交卷！");
 				}
-				else*/
+				else
 				{
 					enteringpagequestcontainer.removeAllElements();
 					enteringpage.visible=false;
@@ -648,97 +826,92 @@
 							});
 						}
 					});		
-				}				
+				}
+				
 			}
 			
-			//本地答题页面的提交答案（录入任务）
+			//本地答题页面的提交答案
 			protected function submitanswer(event:MouseEvent):void
 			{				
-				var evalobjname:String = local1.selectedItem.evalobjname;
-				var evalobjsid:String = local1.selectedItem.evalobjsid;
-				var zbsid:String = local1.selectedItem.zbsid;
+				
+				//getpapers的data是一行的数据，用local1.selecteditem得到
+				//initTodeTask的data是getpapers的返回值
 				
 				var alllen:int = int(allquest.text);
 				var opt:OneOption = new OneOption();
-				opt.optall = "答案";			//可以获得 questid、answersid、evalobjsid、zbsid、papersid
+				opt.optall = "答案";			
 				var qaa:Object = new Object();
 				qaa = opt._answer;		//从oneoption获得的objs
-				
-				
-				var questOne:OneQuestion = new OneQuestion();
-				questOne.foranswer = "答案";		//可以获得ans_memo、ans_inputor_memo
+				var evalobjname:String = local1.selectedItem.evalobjname;
+				var evalobjsid:String = local1.selectedItem.evalobjsid;
+				var zbsid:String = local1.selectedItem.zbsid;
+				var questOne:OneQuestion = new OneQuestion;
+				var papersids:String = papersid.text;
+				questOne.foranswer = "答案";
 				var aaq:Object = new Object();
 				aaq = questOne.asdfasdf;
-				
-				
-				var shen:SoneQuestion = new SoneQuestion();
-				shen.foranswer = "审核说明";
-				var saq:Object = new Object();
-				saq = shen.asdfasdf;
 				//把得到的数据存到数据库
 				if(alllen > qaa.length)
 				{
 					Alert.show("请答完所有题目再交卷！");
 				}
 				else
-				{	
-					//向服务器提交东西，是错的
-					/*HttpRequest.post(httpurl+"/court2/todotasks/todotasks/TodoTasksController/addOrUpdateOne.vot?sid = '1'",{"tempsave":1 , "zbsid":zbsid , "papersid":papersid , "evalobjsid":evalobjsid},function(data)
+				{					
+					HttpRequest.post(httpurl+"/court2/todotasks/todotasks/TodoTasksController/addOrUpdateOne.vot?sid = '1'",{"tempsave":1 , "zbsid":zbsid , "papersid":papersid , "evalobjsid":evalobjsid},function(data)
 					{
-					//要提交的req的tempsave , zbsid , papersid , evalobjsid
-					Alert.show("提交成功！");
+						//要提交的req的tempsave , zbsid , papersid , evalobjsid
+						Alert.show("提交成功！");
 					});
-					*/
+					
 					questcontainer.removeAllElements();
 					questionpage.visible=false;
 					qpage.visible=false;
 					listpage.visible=true;
 					locallist.visible=true;
 					
-					var answerArr:Array = [];
+					/*var answerArr:Array = [];
 					for(var h:int = 0 ; h<qaa.length ; h++)
 					{
-						var listoption:Court_inputanswer = new Court_inputanswer;
-						listoption.sid = UIDUtil.createUID();
-						listoption.questsid = qaa[h].questid;
-						listoption.answersid = qaa[h].answersid;
-						listoption.evalobjsid = qaa[h].evalobjsid;
-						listoption.usersid = loginusernetusername.text;
-						/*listoption.ans_memo = aaq[h].ans_memo;
-						listoption.ans_input_memo = aaq[h].ans_inputor_memo;	*/	
-						listoption.zbsid = zbsid;
-						listoption.papercode = thebz.text;			//问卷备注
-						listoption.papersid = papersid.text;				
-						answerArr.push(listoption);
+					var listoption:Option = new Option();
+					listoption.sid = UIDUtil.createUID();
+					listoption.questsid = qaa[h].questid;
+					listoption.answersid = qaa[h].answersid;
+					listoption.evsid = cname;
+					listoption.evalobjsid = qaa[h].evalobjsid;
+					listoption.usersid = loginusernetusername.text;
+					listoption.ans_memo = qaa[h].ans_memo;
+					listoption.ans_inputor_memo = qaa[h].ans_inputor_memo;
+					listoption.zbsid = zbsid;
+					answerArr.push(listoption);
 					}
 					dao.batchInsertWithHighSpeed(answerArr , function(status:*):void
 					{
-						if(status.committed)
+					if(status.committed)
+					{*/
+					dao.updateBySQL("update COURT_LIST_TODO set input_status = '已完成' where evalobjname = '"+evalobjname+"' ");
+					opt.clear = "清空";
+					Alert.show("提交成功！");
+					
+					//刷新页面
+					dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
+					{					
+						local2.dataProvider = new ArrayList(data);
+						for (var i:int =0; i < dao.daoitems.length; ++i) 
 						{
-							dao.updateBySQL("update COURT_LIST_TODO set input_status = '已完成' where evalobjname = '"+evalobjname+"' ");
-							opt.clear = "清空";
-							Alert.show("提交成功！");
-							
-							//刷新页面
-							dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
-							{					
-								local2.dataProvider = new ArrayList(data);
-								for (var i:int =0; i < dao.daoitems.length; ++i) 
-								{
-									dao.daoitems[i].conn.close();
-								}
-							});	
-							
-							dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
-							{
-								local1.dataProvider = new ArrayList(date);
-								for (var i:int =0; i < dao.daoitems.length; ++i) 
-								{
-									dao.daoitems[i].conn.close();
-								}
-							});
+							dao.daoitems[i].conn.close();
 						}
-					});		
+					});	
+					
+					dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
+					{
+						local1.dataProvider = new ArrayList(date);
+						for (var i:int =0; i < dao.daoitems.length; ++i) 
+						{
+							dao.daoitems[i].conn.close();
+						}
+					});
+					/*}
+					});	*/	
 				}												
 			}
 			
@@ -897,7 +1070,6 @@
 				
 				var zbsidnum:String = local1.selectedItem.zbsid;
 				var evalobjname:String = local1.selectedItem.evalobjname;
-				var evalobjsid:String = local1.selectedItem.evalobjsid;
 				var renwu:String = local1.selectedItem.nairename;
 				var wenjuan:String = local1.selectedItem.levelonezb;	
 				var tasksid:String = local1.selectedItem.sid;
@@ -949,16 +1121,17 @@
 							var num:int = date.length;
 							var zzz:int = 0;
 							for(var q :int ; q<date.length ; q++)
-							{
+							{		
 								arr.push( date[q].sid );
 								list.push( date[q].name);
-							}
-							onequest.optiondata={evalobjsid:evalobjsid , zhang:0 , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+							}						
+							onequest.optiondata={zhang:0 , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
 						});
 						localchacklist.addElement(onequest);
 					}
 				});	
-			}						
+			}
+			
 			
 			//本地列表的答题页面(审核任务)
 			public function aduiting():void  
@@ -1043,7 +1216,7 @@
 				var zbsidnum:String = local2.selectedItem.zbsid;
 				var evalobjname:String = local2.selectedItem.evalobjname;
 				var renwu:String = local2.selectedItem.nairename;
-				var wenjuan:String = local2.selectedItem.levelonezb;
+				var wenjuan:String = local2.selectedItem.levelonezb;			
 				var quest_sid:String;
 				var tasksid:String = local2.selectedItem.sid;
 				var papersobj:Object;
@@ -1321,6 +1494,7 @@
 						//每次点击完之后，再次把papersid.text的值换为arr[event.newIndex]
 						papersid.text = arr[event.newIndex];
 						//*******************************************************************************************************************			
+						Alert.show("dsaf");
 						onequest.questdata = {zbsid:foranswerzbsid , num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
 						quest_sid = data[d].sid;
 						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
@@ -1949,8 +2123,8 @@
 		</s:VGroup>		
 	</s:SkinnableContainer>
 	
-	<!--本地答题首--><!--审核任务-->
-	<s:SkinnableContainer  fontFamily="宋体" skinClass="skins.questList" id="entering" visible="false" horizontalCenter="1" width="100%">
+	<!--本地录入页面答题首-->
+	<s:SkinnableContainer skinClass="skins.questList" id="entering" visible="false" horizontalCenter="1" width="100%">
 		<s:layout>
 			<s:VerticalLayout horizontalAlign="center"/>
 		</s:layout>
@@ -2010,10 +2184,10 @@
 			</s:HGroup>
 			<s:Label text=" " id="papersidshen" visible="false"/>
 			<s:HGroup horizontalAlign="center" width="100%" top="120">
-				<s:FormItem label="第"  top="120">
+				<s:FormItem label="第   "  top="120" left="850">					
 				</s:FormItem>
 				<s:FormItem  top="120" left="900">
-					<s:DropDownList  dataProvider="{number2}" labelField="tnumber" prompt="1"  change="ShenThisDropDownList_changeHandler(event)" width="70%" id="ShenThisDropDownList"/>										
+					<s:DropDownList dataProvider="{number2}" labelField="tnumber" prompt="1"  change="ShenThisDropDownList_changeHandler(event)" width="70%" id="ShenThisDropDownList"/>										
 				</s:FormItem>
 				<s:FormItem label="张"  top="120" left="1050">
 				</s:FormItem>
@@ -2028,13 +2202,7 @@
 				<s:Label text="   "/>
 				<s:Label text="   "/>
 				<s:Label text="   "/>
-				<s:Label text="   "/>
-				<s:Label text="   "/>
-				<s:Label text="   "/>
-				<s:Label text="   "/>
-				<s:Label text="   "/>
-				<s:Label text="   "/>			
-				<s:Label text="问卷备注 ："/>
+				<s:Label text="问卷备注   ："/>
 				<s:TextArea id="enteringbz"  width="900" height="30"/>
 			</s:HGroup>
 			<s:HGroup>
@@ -2044,7 +2212,7 @@
 	</s:SkinnableContainer>
 	
 	<!--本地录入题目--><!--审核任务-->
-	<s:Group  fontFamily="宋体" id="enteringpage" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="400">
+	<s:Group id="enteringpage" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="400">
 		<supportClasses:MyScroller skinClass="ffdf" width="100%" height="100%">
 			<s:Group width="100%" height="100%">
 				<s:VGroup horizontalAlign="center">
@@ -2055,8 +2223,8 @@
 		</supportClasses:MyScroller>
 	</s:Group>
 	
-	<!--本地答题首--><!--录入任务-->
-	<s:SkinnableContainer  fontFamily="宋体" skinClass="skins.questList" id="questionpage" visible="false" horizontalCenter="1" width="100%">
+	<!--本地答题首-->
+	<s:SkinnableContainer skinClass="skins.questList" id="questionpage" visible="false" horizontalCenter="1" width="100%">
 		<s:layout>
 			<s:VerticalLayout horizontalAlign="center"/>
 		</s:layout>
@@ -2108,28 +2276,23 @@
 			</s:HGroup>
 			<s:HGroup>
 				<s:Label text=" "/>
-				<s:Label text=" " id="allquest" visible="false"/>
 			</s:HGroup>
 			<s:HGroup horizontalAlign="center" width="100%" top="70">
 				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="统一修改备注" click="blackpage(event)"/>
 			</s:HGroup>
 			<s:Label text=" " id="papersid" visible="false"/>
 			<s:HGroup horizontalAlign="center" width="100%" top="120">
-				<s:FormItem label="第 " top="120">
-					<s:DropDownList  dataProvider="{number}" labelField="tnumber" prompt="1" change="dropdownlist1_changeHandler(event)" width="70%" id="ThisDropDownList"/>											
-				</s:FormItem> 
-				<s:FormItem label="张" />
+				<s:FormItem label="第   "  top="120" left="850">					
+				</s:FormItem>
+				<s:FormItem  top="120" left="900">
+					<s:DropDownList dataProvider="{number}" labelField="tnumber" prompt="1" change="dropdownlist1_changeHandler(event)" width="70%" id="ThisDropDownList"/>										
+				</s:FormItem>
+				<s:FormItem label="张"  top="120" left="1050">
+				</s:FormItem>
+				<s:Label text=" " id="allquest" visible="false"/>
 			</s:HGroup>			
 			<s:HGroup horizontalCenter="0" top="160" width="85%">
-				<s:Label text="   "/>
-				<s:Label text="   "/>
-				<s:Label text="   "/>
-				<s:Label text="   "/>
-				<s:Label text="   "/>
-				<s:Label text="   "/>
-				<s:Label text="   "/>
-				<s:Label text="   "/>
-				<s:Label text="问卷备注 ："/>
+				<s:Label text="问卷备注   ："/>
 				<s:TextArea id="thebz"  width="900" height="30"/>
 			</s:HGroup>
 			<s:HGroup>
@@ -2140,7 +2303,7 @@
 	</s:SkinnableContainer>
 	
 	<!--本地题目--><!--录入任务-->
-	<s:Group  fontFamily="宋体" id="qpage" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="400">
+	<s:Group id="qpage" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="400">
 		<supportClasses:MyScroller skinClass="ffdf" id="scroller" width="100%" height="100%">
 			<s:Group width="100%" height="100%">
 				<s:VGroup horizontalAlign="center">
@@ -2152,7 +2315,7 @@
 	</s:Group>
 	
 	<!--本地查看页面--><!--录入任务-->
-	<s:SkinnableContainer  fontFamily="宋体" skinClass="skins.questList" id="localchack" visible="false"  fontSize="25" horizontalCenter="0" width="100%">
+	<s:SkinnableContainer skinClass="skins.questList" id="localchack" visible="false"  fontSize="25" horizontalCenter="0" width="100%">
 		<s:layout>
 			<s:VerticalLayout horizontalAlign="center"/>
 		</s:layout>
@@ -2199,14 +2362,12 @@
 			<s:HGroup>
 				<s:Label text=" "/>
 			</s:HGroup>
-			<s:HGroup horizontalAlign="center" width="100%" top="80">	
-				<s:FormItem label="第"  top="120">
-				</s:FormItem>
-				<s:FormItem  top="120" left="900">
-					<s:DropDownList dataProvider="{number2}" labelField="tnumber" prompt="1" change="dropdownlist1_changeHandler(event)" width="70%" id="allThisDropDownListLook"/>															
-				</s:FormItem>
-				<s:FormItem label="张" >
-				</s:FormItem>
+			<s:HGroup horizontalAlign="center" width="100%" top="80">
+				<s:HGroup gap="5" verticalAlign="middle">
+					<s:Label text="第"/>
+					<s:DropDownList skinClass="skins.MyDropDownListSkin" dataProvider="{number2}" labelField="tnumber" prompt="1" minWidth="20" change="dropdownlist1_changeHandler(event)" id="allThisDropDownListLook"/>										
+					<s:Label text="张"/>
+				</s:HGroup>
 				<s:Label text=" " id="allquestlook" visible="false"/>
 			</s:HGroup>
 			<s:HGroup horizontalAlign="center" width="100%" top="60">
@@ -2218,7 +2379,7 @@
 	</s:SkinnableContainer>
 	
 	<!--本地查看题目--><!--录入任务-->
-	<s:Group fontFamily="宋体" id="chacklocal" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="320">
+	<s:Group fontStyle="normal" id="chacklocal" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="320">
 		<supportClasses:MyScroller skinClass="ffdf" width="100%" height="100%">
 			<s:Group width="100%" height="100%">
 				<s:VGroup horizontalAlign="center" height="100%">
@@ -2231,11 +2392,11 @@
 	
 	
 	<!--本地查看页面--><!--审核任务-->
-	<s:SkinnableContainer  fontFamily="宋体" skinClass="skins.questList" id="shlocalchack" visible="false"  fontSize="25" horizontalCenter="0" width="100%">
+	<s:SkinnableContainer skinClass="skins.questList" id="shlocalchack" visible="false"  fontSize="25" horizontalCenter="0" width="100%">
 		<s:layout>
 			<s:VerticalLayout horizontalAlign="center"/>
 		</s:layout>
-		<s:SkinnableContainer width="100%" >
+		<s:SkinnableContainer width="100%">
 			<s:Button label=" " skinClass="skins.head"/>
 			<s:VGroup right="36" horizontalAlign="right" verticalAlign="middle" width="100%">
 				<s:HGroup>
@@ -2277,20 +2438,24 @@
 			</s:HGroup>
 			<s:HGroup>
 				<s:Label text=" "/>
-				<s:Label text=" " id="shallquestlook" visible="false"/>
 			</s:HGroup>
 			<s:HGroup horizontalAlign="center" width="100%" top="80">
+				<!--<s:HGroup gap="5" verticalAlign="middle">
+					<s:Label text="第"/>
+					<s:DropDownList skinClass="skins.MyDropDownListSkin" dataProvider="{number2}" labelField="tnumber" prompt="1" minWidth="20" change="dropdownlist1_changeHandler(event)" id="allThisDropDownListLook"/>										
+					<s:Label text="张"/>
+				</s:HGroup>
+				<s:Label text=" " id="allquestlook" visible="false"/>-->
 				
 				
-				
-				<s:FormItem label="第   "  top="80">					
+				<s:FormItem label="第   "  top="80" left="850">					
 				</s:FormItem>
-				<s:FormItem  top="120">
+				<s:FormItem  top="120" left="900">
 					<s:DropDownList dataProvider="{number2}" labelField="tnumber" prompt="1" change="dropdownlist1_changeHandler(event)" width="70%" id="shallThisDropDownListLook"/>										
 				</s:FormItem>
-				<s:FormItem label="张"  top="120">
+				<s:FormItem label="张"  top="120" left="1050">
 				</s:FormItem>
-				
+				<s:Label text=" " id="shallquestlook" visible="false"/>
 			</s:HGroup>
 			<s:HGroup horizontalAlign="center" width="100%" top="60">
 				<s:Label text="共 "/>
@@ -2302,7 +2467,7 @@
 	
 	
 	<!--本地查看题目--><!--审核任务-->
-	<s:Group  fontFamily="宋体" id="shchacklocal" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="320">
+	<s:Group id="shchacklocal" visible="false" horizontalCenter="0" width="85%" height="100%" fontSize="20" top="320">
 		<supportClasses:MyScroller skinClass="ffdf" width="100%" height="100%">
 			<s:Group width="100%" height="100%">
 				<s:VGroup horizontalAlign="center" height="100%">
@@ -2331,7 +2496,7 @@
 				<s:Label text=" "/>
 				<s:Label text=" "/>
 				
-				<s:Label text="统一修改备注" fontSize="30"  fontFamily="宋体"/>
+				<s:Label text="统一修改备注" fontSize="30"/>
 				<s:TextArea id="textthebz" width="1300" height="200" fontSize="25"/>
 			</s:HGroup>
 			<s:HGroup width="100%" horizontalAlign="center" fontSize="20">
@@ -2358,7 +2523,7 @@
 				<s:Label text=" "/>
 				<s:Label text=" "/>
 				<s:Label text=" "/>				
-				<s:Label text="统一修改备注" fontSize="30"  fontFamily="宋体"/>
+				<s:Label text="统一修改备注" fontSize="30"/>
 				<s:TextArea id="enteringtybz" width="1300" height="200" fontSize="25"/>
 			</s:HGroup>
 			<s:HGroup width="100%" horizontalAlign="center" fontSize="20">
