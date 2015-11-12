@@ -58,7 +58,7 @@
 			
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
 			private var newuser:UserItem = new UserItem();
-			private var _httpurl:String = "http://192.168.1.237:8080/court";
+			private var _httpurl:String = "http://192.168.1.158:8289/court";
 			private var n:int = 0;
 			private var answer:String; 		//选项的内容
 			private var qsid:String;		//问题的
@@ -2188,13 +2188,11 @@
 				<s:Label text=" "/>
 			</s:HGroup>
 			<s:HGroup horizontalAlign="center" width="100%" top="80">
-				<s:FormItem label="第   "  top="80" left="850">					
-				</s:FormItem>
-				<s:FormItem  top="120" left="900">
-					<s:DropDownList dataProvider="{number2}" labelField="tnumber" prompt="1" change="dropdownlist1_changeHandler(event)" width="70%" id="allThisDropDownListLook"/>										
-				</s:FormItem>
-				<s:FormItem label="张"  top="120" left="1050">
-				</s:FormItem>
+				<s:HGroup gap="5" verticalAlign="middle">
+					<s:Label text="第"/>
+					<s:DropDownList skinClass="skins.MyDropDownListSkin" dataProvider="{number2}" labelField="tnumber" prompt="1" minWidth="20" change="dropdownlist1_changeHandler(event)" id="allThisDropDownListLook"/>										
+					<s:Label text="张"/>
+				</s:HGroup>
 				<s:Label text=" " id="allquestlook" visible="false"/>
 			</s:HGroup>
 			<s:HGroup horizontalAlign="center" width="100%" top="60">
