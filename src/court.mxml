@@ -2280,6 +2280,9 @@
 				<s:Label text=" " id="shallquestlook" visible="false"/>
 			</s:HGroup>
 			<s:HGroup horizontalAlign="center" width="100%" top="80">
+				
+				
+				
 				<s:FormItem label="第   "  top="80">					
 				</s:FormItem>
 				<s:FormItem  top="120">
