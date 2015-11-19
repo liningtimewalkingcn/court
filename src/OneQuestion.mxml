@@ -43,7 +43,6 @@
 				var filePath:File = new File();
 				filePath.nativePath = "D:\\court\\xxx.xls";
 				new File(file.nativePath).copyTo(filePath,true);
-				
 				file.removeEventListener(Event.SELECT, fileSelectHandler);
 			}
 			
@@ -64,31 +63,12 @@
 			
 			public function set foranswer(val:*):void
 			{
-				
-				
-				
-				
-				
-				
-				
 				this.asdfasdf = answers;
 			}
 			
 			public function get foranswer():Object
 			{
 				return asdfasdf;
-			}
-			
-			public function set enteringanswer(val:*):void
-			{
-				enteringallAnswer = val.qaa;
-				var aaa:int = 1;
-				this.ccc = aaa;
-			}
-			
-			public function get enteringanswer():int
-			{
-				return ccc;
 			}
 			
 			public function set answer(val:*):void
@@ -104,7 +84,7 @@
 			}
 						
 			//填写选项
-			public var option :OneOption = new OneOption();
+			public var option:OneOption = new OneOption();
 			public function set optiondata(val:*):void
 			{	
 				var n:int = val.num;
@@ -114,7 +94,8 @@
 					var opid:String = (val.ar[z]);
 					var nameid:String = (val.list[z]);
 					var questid:String = (val.qstid);
-					if( allAnswer != null )
+					
+					if( allAnswer != null )//暂存
 					{
 						var zlen:int = allAnswer.length;
 						
@@ -126,41 +107,62 @@
 							}
 						}
 					}
-
-					if(val.zhang == 1)
+					/*else if(val.sureanswer == opid)//本地的提交
 					{
-						//if(把三个id引用进来)
-						if( (opid == val.sendanswersid) && (questid == val.sendquestid) && (val.cname == val.sendevalobjname)  )
+						option.foroption.selected = true;
+					}
+					else if(val.answersid == opid)//从court_answer中获取的数据
+					{
+						option.foroption.selected = true;
+					}*/
+					option.quest = quest;
+					option.optiondata = {papersid:papersid.text , zbsid:questzbsid , evalobjsid:val.evalobjsid , evalobjname:val.evalobjname , all:n , n:z , opid:opid , nameid:nameid , questid:questid}
+					options.addElement(option);
+				}
+			}
+			
+			
+			public function set choptiondata(val:*):void
+			{	
+				var n:int = val.num;
+				/*if(val.sureanswer.ans_memo !=  null)//录入人员说明
+				{
+					lrysm.text = val.sureanswer.ans;
+				}
+				if(val.sureanswer.ans_input_memo != null)
+				{
+					origindatafile.text = val.sureanswer.ans_input_memo;
+				}*/
+				
+				for(var z:int = 0 ; z<n　; z++)
+				{
+					var option :OneOption = new OneOption();
+					var opid:String = val.ar[z];
+					var nameid:String = val.list[z];
+					var questid:String = val.qstid;
+					if(val.aaa == 1)
+					{
+						if(val.sureanswer == opid)	//本地的提交
 						{
 							option.foroption.selected = true;
-						}						
+							option.foroption.enabled = false;
+						}
 					}
-					
-					if( enteringallAnswer != null )
+					else 	//不能加判断条件
 					{
-						var len:int = enteringallAnswer.length;
-						for(var o:int = 0 ; o<len ; o++)
+						if(val.answersid == opid)
 						{
-							if( (opid == enteringallAnswer[o].answersid) && (questid == enteringallAnswer[o].questid) && (val.cname == enteringallAnswer[o].evalobjname)  )
-							{
-								option.foroption.selected = true;
-							}
+							option.foroption.selected = true;
+							option.foroption.enabled = false;
 						}
 					}
 					option.quest = quest;
 					option.optiondata = {papersid:papersid.text , zbsid:questzbsid , evalobjsid:val.evalobjsid , evalobjname:val.evalobjname , all:n , n:z , opid:opid , nameid:nameid , questid:questid}
 					options.addElement(option);
-					if(val.bool == 0)
-					{
-						option.foroption.enabled = false;
-						option.foroption.selected = true;
-					}
-					else
-					{
-						option.foroption.visible = true;
-					}
+					option.foroption.enabled = false;
 				}
 			}
+			
 
 			//设置所有选项为没有选中
 			public function set none(val:*):void

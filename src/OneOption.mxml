@@ -20,6 +20,7 @@
 			public var entering_answer:Object ;
 			public var evalobjname:String;
 			public var evalobjsid:String;
+			public var obj:Object =  new Object();
 			
 			public function set optiondata (val:*):void
 			{
@@ -46,13 +47,42 @@
 					var res:String = String.fromCharCode(65+l);
 					return res;
 				}
+				
+				/*var answerId:String;
+				var questId:String;
+				answerId = sid.text;
+				questId = bid.text;
+				if(foroption.selected = true)
+				{
+					obj['evalobjname'] = evalobjname;
+					obj['questid'] = questId;
+					obj['answersid'] = answerId;
+					obj['evalobjsid'] = val.evalobjsid;
+					obj['zbsid'] = val.zbsid ;
+					obj['papersid'] = val.papersid;
+				}
+				var len:int = objs.length;
+				if(len == 0)
+				{
+					objs.push(obj);
+				}
+				else
+				{
+					for(var a:int = 0 ; a<len ; a++)
+					{
+						if(objs[a].questid == obj.questid)
+						{							
+							objs[a] = obj;
+							return ;
+						}						
+					}
+					objs.push(obj);
+				}*/
 			}
 
 			
-			
 			protected function clickradiobutton(event:MouseEvent):void
 			{		
-				var obj:Object =  new Object();
 				var answerId:String;
 				var questId:String;
 				var cnam:String;
@@ -85,6 +115,18 @@
 					}
 					objs.push(obj);
 				}
+				/*for(var a:int ; a<len ; a++)
+				{
+					if(obj.answersid == objs[a].answersid)
+					{
+						//if(objs[a].questid == obj.questid)
+						{							
+							objs[a].answersid = obj.answersid;
+							//return ;
+						}						
+					}
+					//objs.push(obj);
+				}*/
 			}
 			
 			public function set optall(val1:*):void

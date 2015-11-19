@@ -36,24 +36,29 @@
 			import mx.rpc.events.ResultEvent;
 			import mx.rpc.http.mxml.HTTPService;
 			import mx.utils.UIDUtil;
-			import mx.utils.object_proxy;			
+			import mx.utils.object_proxy;
+			
 			import spark.components.List;
 			import spark.events.DropDownEvent;
 			import spark.events.GridItemEditorEvent;
 			import spark.events.GridSelectionEvent;
 			import spark.events.IndexChangeEvent;
-			import spark.events.TextOperationEvent;			
-			import org.osmf.events.TimeEvent;			
+			import spark.events.TextOperationEvent;
+			
+			import org.osmf.events.TimeEvent;
+			
+			import supportClasses.AnswerItem;
 			import supportClasses.Court2Zb;
 			import supportClasses.CourtEvaluate;
-			import supportClasses.ListAnswer;
+			import supportClasses.Court_auditanswer;
+			import supportClasses.Court_inputanswer;
 			import supportClasses.ListAuditItem;
 			import supportClasses.ListInfoTask;
 			import supportClasses.ListOption;
 			import supportClasses.ListQuestion;
 			import supportClasses.ListTaskInfo;
 			import supportClasses.ListTodoItem;
-			//import supportClasses.Option;
+			import supportClasses.Option;
 			import supportClasses.UserItem;
 			
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
@@ -93,7 +98,7 @@
 				{	
 					if( data != null && data.length > 0)
 					{
-						Alert.show("成功");
+						Alert.show("成功","提示");
 						inputPassWord.text = null;
 						loginpage.visible = false;
 						listpage.visible = true;
@@ -109,7 +114,7 @@
 					}
 					else
 					{
-						Alert.show("用户名或密码错误");
+						Alert.show("用户名或密码错误","提示");
 					}
 					for (var i:int =0; i < dao.daoitems.length; ++i) 
 					{
@@ -119,7 +124,7 @@
 				
 				//录入
 				dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
-				{							
+				{
 					local2.dataProvider = new ArrayList(data);
 					for (var i:int =0; i < dao.daoitems.length; ++i) 
 					{
@@ -182,14 +187,14 @@
 							}
 						});						
 						
-						Alert.show("\t提示\n提交成功");
+						Alert.show("\n提交成功","提示");
 						submitpage.visible=false;
 						locallist.visible=true;
 						listpage.visible=true;										
 					}
 					else
 					{
-						Alert.show("\t提示\n密码错误");
+						Alert.show("\n密码错误","提示");
 						submitpage.visible=true;
 					}
 				})
@@ -222,12 +227,16 @@
 				{
 					if(data == "no")
 					{	
-						Alert.show("\t提示\n密码错误");
+						Alert.show("\n密码错误","提示");
 						updatepage.visible=true;
 					}
 					else
 					{						
 						updetNetPassword.text = null;
+						updetNetPassword.enabled = false;
+						first.enabled = false;
+						second.enabled = false;
+						
 						//更新本地列表
 						HttpRequest.post(httpurl+"/OffLineClientController/updateLocal.vot",{"username":loginusernetusername.text},function(data)
 						{
@@ -388,11 +397,8 @@
 																													HttpRequest.post(httpurl+"/OffLineClientController/courtevaluate.vot",{"username":loginusernetusername.text},function(data)
 																													{																																										
 																														var listevaluate:Object = JSON.parse(data);				
-																														
-																														Alert.show(JSON.stringify(data));
-																														
 																														if (listevaluate.list_evaluate.length>0)
-																															{
+																														{
 																															dao.updateBySQL("delete from COURT2_EVALOBJPAPERINFO");	
 																															var listevaluateArr:Array = [];
 																															for(var i:int = 0; i< listevaluate.list_evaluate.length; ++i)
@@ -409,51 +415,92 @@
 																															{
 																																if (status.committed) 
 																																{
-																																	updatepage.visible=false;						
-																																	locallist.visible=true;
-																																	listpage.visible=true;
-																																	Alert.show("\n更新成功","提示");
-																																	
-																																	dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
-																																	{					
-																																		local2.dataProvider = new ArrayList(data);
-																																		for (var i:int =0; i < dao.daoitems.length; ++i) 
-																																		{
-																																			dao.daoitems[i].conn.close();
-																																		}
-																																	});	
-																																	
-																																	dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
+																																	//把court_answer更新到本地
+																																	HttpRequest.post(httpurl+"/OffLineClientController/answer.vot",{"username":loginusernetusername.text},function(data)
 																																	{
-																																		local1.dataProvider = new ArrayList(date);
-																																		for (var i:int =0; i < dao.daoitems.length; ++i) 
+																																		var canswer:Object = JSON.parse(data);
+																																		if(canswer.list_answer.length>0)
 																																		{
-																																			dao.daoitems[i].conn.close();
-																																		}
-																																	});																																	
-																																}
-																																else
-																																{
-																																	updatepage.visible=false;						
-																																	locallist.visible=true;
-																																	listpage.visible=true;
-																																	Alert.show("court2_evalobjpaperinfo列表更新失败！","提示");
-																																	
-																																	dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
-																																	{					
-																																		local2.dataProvider = new ArrayList(data);
-																																		for (var i:int =0; i < dao.daoitems.length; ++i) 
-																																		{
-																																			dao.daoitems[i].conn.close();
-																																		}
-																																	});	
-																																	
-																																	dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
-																																	{
-																																		local1.dataProvider = new ArrayList(date);
-																																		for (var i:int =0; i < dao.daoitems.length; ++i) 
-																																		{
-																																			dao.daoitems[i].conn.close();
+																																			dao.updateBySQL("delete from COURT_ANSWER");
+																																			var answerlistArr:Array = [] ;
+																																			for(var h:int = 0 ; h<canswer.list_answer.length ; h++)
+																																			{
+																																				var list_answers:AnswerItem = new AnswerItem();
+																																				list_answers.sid = canswer.list_answer[h].sid;
+																																				list_answers.questsid = canswer.list_answer[h].questsid;
+																																				list_answers.answeroptionsid = canswer.list_answer[h].answeroptionsid;
+																																				list_answers.evalobjpapersid = canswer.list_answer[h].evalobjpapersid;
+																																				list_answers.score = canswer.list_answer[h].score;
+																																				list_answers.inputor_memo = canswer.list_answer[h].inputor_memo;
+																																				list_answers.filegroupsid = canswer.list_answer[h].filegroupsid;
+																																				list_answers.auditor_memo = canswer.list_answer[h].auditor_memo;
+																																				list_answers.haserror = canswer.list_answer[h].haserror;
+																																				list_answers.isdisabled = canswer.list_answer[h].isdisabled;
+																																				list_answers.auditfilegroupsid = canswer.list_answer[h].auditfilegroupsid;
+																																				answerlistArr.push(list_answers);
+																																			}
+																																			dao.batchInsertWithHighSpeed(answerlistArr, function(status:*):void 
+																																			{
+																																				if (status.committed) 
+																																				{
+																																					//把court_ans_ques更新到本地
+																																					/*HttpRequest.post(httpurl+"/OffLineClientController/answer_question.vot",{"username":loginusernetusername.text},function(data)
+																																					{																																						
+																																						Alert.show(JSON.stringify(data.length));
+																																						if(canswer.list_answer.length>0)
+																																						{
+																																							dao.updateBySQL("delete from COURT_ANSWER");
+																																							var answerlistArr:Array = [] ;
+																																							for(var h:int = 0 ; h<canswer.list_answer.length ; h++)
+																																							{
+																																								var list_answers:AnswerItem = new AnswerItem();
+																																								list_answers.sid = canswer.list_answer[h].sid;
+																																								list_answers.questsid = canswer.list_answer[h].questsid;
+																																								list_answers.answeroptionsid = canswer.list_answer[h].answeroptionsid;
+																																								list_answers.evalobjpapersid = canswer.list_answer[h].evalobjpapersid;
+																																								list_answers.score = canswer.list_answer[h].score;
+																																								list_answers.inputor_memo = canswer.list_answer[h].inputor_memo;
+																																								list_answers.filegroupsid = canswer.list_answer[h].filegroupsid;
+																																								list_answers.auditor_memo = canswer.list_answer[h].auditor_memo;
+																																								list_answers.haserror = canswer.list_answer[h].haserror;
+																																								list_answers.isdisabled = canswer.list_answer[h].isdisabled;
+																																								list_answers.auditfilegroupsid = canswer.list_answer[h].auditfilegroupsid;
+																																								answerlistArr.push(list_answers);
+																																							}
+																																							dao.batchInsertWithHighSpeed(answerlistArr, function(status:*):void 
+																																							{
+																																								if (status.committed) 
+																																								{
+																																									
+																																								}
+																																							});
+																																						}*/
+																																					//});
+																																					updatepage.visible=false;						
+																																					locallist.visible=true;
+																																					listpage.visible=true;
+																																					updetNetPassword.enabled = true;
+																																					Alert.show("\n更新成功","提示");
+																																					
+																																					dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
+																																					{					
+																																						local2.dataProvider = new ArrayList(data);
+																																						for (var i:int =0; i < dao.daoitems.length; ++i) 
+																																						{
+																																							dao.daoitems[i].conn.close();
+																																						}
+																																					});	
+																																					
+																																					dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
+																																					{
+																																						local1.dataProvider = new ArrayList(date);
+																																						for (var i:int =0; i < dao.daoitems.length; ++i) 
+																																						{
+																																							dao.daoitems[i].conn.close();
+																																						}
+																																					});
+																																				}
+																																			});
 																																		}
 																																	});
 																																}
@@ -461,86 +508,11 @@
 																														}
 																													});																												
 																												}
-																												else
-																												{
-																													updatepage.visible=false;						
-																													locallist.visible=true;
-																													listpage.visible=true;
-																													Alert.show("court2_zb列表更新失败！","提示");
-																													
-																													dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
-																													{					
-																														local2.dataProvider = new ArrayList(data);
-																														for (var i:int =0; i < dao.daoitems.length; ++i) 
-																														{
-																															dao.daoitems[i].conn.close();
-																														}
-																													});	
-																													
-																													dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
-																													{
-																														local1.dataProvider = new ArrayList(date);
-																														for (var i:int =0; i < dao.daoitems.length; ++i) 
-																														{
-																															dao.daoitems[i].conn.close();
-																														}
-																													});
-																												}
 																											});
 																										}
 																									});				
 																								}
-																								else
-																								{
-																									updatepage.visible=false;						
-																									locallist.visible=true;
-																									listpage.visible=true;
-																									Alert.show("court2_taskinfoitem列表更新失败！","提示");
-																									
-																									dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
-																									{					
-																										local2.dataProvider = new ArrayList(data);
-																										for (var i:int =0; i < dao.daoitems.length; ++i) 
-																										{
-																											dao.daoitems[i].conn.close();
-																										}
-																									});	
-																									
-																									dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
-																									{
-																										local1.dataProvider = new ArrayList(date);
-																										for (var i:int =0; i < dao.daoitems.length; ++i) 
-																										{
-																											dao.daoitems[i].conn.close();
-																										}
-																									});
-																								}
 																							});
-																						}
-																					});
-																				}
-																				else
-																				{
-																					updatepage.visible=false;						
-																					locallist.visible=true;
-																					listpage.visible=true;
-																					Alert.show("court2_question_option列表更新失败！","提示");
-																					
-																					dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
-																					{					
-																						local2.dataProvider = new ArrayList(data);
-																						for (var i:int =0; i < dao.daoitems.length; ++i) 
-																						{
-																							dao.daoitems[i].conn.close();
-																						}
-																					});	
-																					
-																					dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
-																					{
-																						local1.dataProvider = new ArrayList(date);
-																						for (var i:int =0; i < dao.daoitems.length; ++i) 
-																						{
-																							dao.daoitems[i].conn.close();
 																						}
 																					});
 																				}
@@ -548,88 +520,12 @@
 																		}
 																	});
 																}
-																else
-																{
-																	updatepage.visible=false;						
-																	locallist.visible=true;
-																	listpage.visible=true;
-																	Alert.show("court2_question列表更新失败！","提示");
-																	
-																	dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
-																	{					
-																		local2.dataProvider = new ArrayList(data);
-																		for (var i:int =0; i < dao.daoitems.length; ++i) 
-																		{
-																			dao.daoitems[i].conn.close();
-																		}
-																	});	
-																	
-																	dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
-																	{
-																		local1.dataProvider = new ArrayList(date);
-																		for (var i:int =0; i < dao.daoitems.length; ++i) 
-																		{
-																			dao.daoitems[i].conn.close();
-																		}
-																	});
-																}
-																
 															});
-														}
-													});
-												}
-												else
-												{
-													updatepage.visible=false;						
-													locallist.visible=true;
-													listpage.visible=true;
-													Alert.show("court2_list_todo列表更新失败！","提示");
-													
-													dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
-													{					
-														local2.dataProvider = new ArrayList(data);
-														for (var i:int =0; i < dao.daoitems.length; ++i) 
-														{
-															dao.daoitems[i].conn.close();
-														}
-													});	
-													
-													dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
-													{
-														local1.dataProvider = new ArrayList(date);
-														for (var i:int =0; i < dao.daoitems.length; ++i) 
-														{
-															dao.daoitems[i].conn.close();
 														}
 													});
 												}
 											});
 										}
-									}
-									else
-									{
-										updatepage.visible=false;						
-										locallist.visible=true;
-										listpage.visible=true;
-										Alert.show("court2_list_audit列表更新失败！","提示");
-										
-										dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
-										{					
-											local2.dataProvider = new ArrayList(data);
-											for (var i:int =0; i < dao.daoitems.length; ++i) 
-											{
-												dao.daoitems[i].conn.close();
-											}
-										});	
-										
-										dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
-										{
-											local1.dataProvider = new ArrayList(date);
-											for (var i:int =0; i < dao.daoitems.length; ++i) 
-											{
-												dao.daoitems[i].conn.close();
-											}
-										});
 									}
 								});
 							}
@@ -645,17 +541,17 @@
 				{	
 					if( data != null && data.length > 0)
 					{
-						Alert.show("用户已存在\n请重新输入");
+						Alert.show("用户已存在\n请重新输入","提示");
 						makepage.visible=true;
 					}
 					else if(inputFirstPassWord.text.length>16 || inputFirstPassWord.text.length<6)
 					{
-						Alert.show("请输入6~16位字符");
+						Alert.show("请输入6~16位字符","提示");
 						makepage.visible=true;
 					}
 					else if(inputFirstPassWord.text != inputSecondPassWord.text)
 					{
-						Alert.show("密码不一致，请重新输入");
+						Alert.show("密码不一致，请重新输入","提示");
 						makepage.visible=true;
 					}						
 					else
@@ -665,7 +561,7 @@
 						{
 							if(data == "yes")
 							{
-								Alert.show("创建成功");	
+								Alert.show("创建成功","提示");	
 								makepage.visible=false;
 								loginpage.visible = true;
 								//发送数据到数据库
@@ -678,7 +574,7 @@
 							}
 							else
 							{
-								Alert.show("\t\t提示\n网络用户不存在");
+								Alert.show("\n网络用户不存在","提示");
 								makepage.visible=true;
 							}
 						})	
@@ -687,7 +583,7 @@
 						dao.daoitems[i].conn.close();
 					}
 				});
-			}			
+			}
 			
 			//退出当前用户页面（已登录）
 			protected function backtologin(event:MouseEvent):void
@@ -776,7 +672,7 @@
 				thebz.text = null;
 			}
 			
-			//录入页面的提交（录入页面）
+			//答题页面的提交（审核任务）
 			protected function enteringsubmit(event:MouseEvent):void
 			{				
 				var alllen:int = int(enteringall.text);
@@ -785,11 +681,12 @@
 				var qaa:Object = new Object();
 				qaa = opt.entering_answer;		//从oneoption获得的objs
 				var evalobjname:String = local2.selectedItem.evalobjname;
+				var zbsid:String = local2.selectedItem.zbsid;
 				
 				//把得到的数据存到数据库
 				if(alllen > qaa.length)
 				{
-					Alert.show("请答完所有题目再交卷！");
+					Alert.show("请答完所有题目再交卷！","提示");
 				}
 				else
 				{
@@ -800,13 +697,100 @@
 					locallist.visible=true;
 					
 					var answerArr:Array = [];
-					
+					for(var h:int = 0 ; h<qaa.length ; h++)
+					{
+						var listoption:Court_auditanswer = new Court_auditanswer();
+						listoption.sid =   UIDUtil.createUID();
+						listoption.questsid = qaa[h].questid;
+						listoption.answersid = qaa[h].answersid;
+						listoption.evalobjsid = qaa[h].evalobjsid;
+						listoption.usersid = loginusernetusername.text;
+						/*listoption.aud_memo = aaq[h].aud_memo;
+						listoption.aud_input_memo = aaq[h].aud_input_memo;*/
+						listoption.zbsid = zbsid;
+						answerArr.push(listoption);
+					}
 					dao.batchInsertWithHighSpeed(answerArr , function(status:*):void
 					{
 						if(status.committed)
 						{
+							dao.updateBySQL("update COURT_LIST_AUDIT set audit_status = '已完成' where evalobjname = '"+evalobjname+"' ");
 							opt.clear = "清空";
-							Alert.show("提交成功！");
+							Alert.show("提交成功！","提示");
+							dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
+							{					
+								local2.dataProvider = new ArrayList(data);
+								for (var i:int =0; i < dao.daoitems.length; ++i) 
+								{
+									dao.daoitems[i].conn.close();
+								}
+							});	
+							
+							dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
+							{
+								local1.dataProvider = new ArrayList(date);
+								for (var i:int =0; i < dao.daoitems.length; ++i)
+								{
+									dao.daoitems[i].conn.close();
+								}
+							});
+						}
+					});		
+				}
+			}
+			
+			//答题页面的提交答案（录入任务）
+			protected function submitanswer(event:MouseEvent):void
+			{				
+				var alllen:int = int(allquest.text);
+				var opt:OneOption = new OneOption();
+				opt.optall = "答案";			
+				var qaa:Object = new Object();
+				qaa = opt._answer;		//从oneoption获得的objs
+				var evalobjname:String = local1.selectedItem.evalobjname;
+				var evalobjsid:String = local1.selectedItem.evalobjsid;
+				var zbsid:String = local1.selectedItem.zbsid;
+				var questOne:OneQuestion = new OneQuestion;
+				var papersids:String = papersid.text;
+				questOne.foranswer = "答案";
+				var aaq:Object = new Object();
+				aaq = questOne.asdfasdf;
+				//把得到的数据存到数据库
+				if(alllen > qaa.length)
+				{
+					Alert.show("请答完所有题目再交卷！","提示");
+				}
+				else
+				{					
+					questcontainer.removeAllElements();
+					questionpage.visible=false;
+					qpage.visible=false;
+					listpage.visible=true;
+					locallist.visible=true;
+					
+					var answerArr:Array = [];
+					for(var h:int = 0 ; h<qaa.length ; h++)
+					{
+						var listoption:Court_inputanswer = new Court_inputanswer();
+						listoption.sid =  UIDUtil.createUID();
+						listoption.questsid = qaa[h].questid;
+						listoption.answersid = qaa[h].answersid;
+						listoption.evalobjsid = qaa[h].evalobjsid;
+						listoption.usersid = loginusernetusername.text;
+						/*listoption.ans_memo = aaq[h].ans_memo;
+						listoption.ans_input_memo = aaq[h].ans_inputor_memo;*/
+						listoption.zbsid = zbsid;
+						answerArr.push(listoption);
+					}
+					dao.batchInsertWithHighSpeed(answerArr , function(status:*):void
+					{
+						if(status.committed)
+						{
+							dao.updateBySQL("update COURT_LIST_TODO set input_status = '已完成' where evalobjname = '"+evalobjname+"' ");
+							opt.clear = "清空";
+							Alert.show("提交成功！","提示");
+							
+							//刷新页面
 							dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
 							{					
 								local2.dataProvider = new ArrayList(data);
@@ -826,92 +810,6 @@
 							});
 						}
 					});		
-				}
-				
-			}
-			
-			//本地答题页面的提交答案
-			protected function submitanswer(event:MouseEvent):void
-			{				
-				
-				//getpapers的data是一行的数据，用local1.selecteditem得到
-				//initTodeTask的data是getpapers的返回值
-				
-				var alllen:int = int(allquest.text);
-				var opt:OneOption = new OneOption();
-				opt.optall = "答案";			
-				var qaa:Object = new Object();
-				qaa = opt._answer;		//从oneoption获得的objs
-				var evalobjname:String = local1.selectedItem.evalobjname;
-				var evalobjsid:String = local1.selectedItem.evalobjsid;
-				var zbsid:String = local1.selectedItem.zbsid;
-				var questOne:OneQuestion = new OneQuestion;
-				var papersids:String = papersid.text;
-				questOne.foranswer = "答案";
-				var aaq:Object = new Object();
-				aaq = questOne.asdfasdf;
-				//把得到的数据存到数据库
-				if(alllen > qaa.length)
-				{
-					Alert.show("请答完所有题目再交卷！");
-				}
-				else
-				{					
-					HttpRequest.post(httpurl+"/court2/todotasks/todotasks/TodoTasksController/addOrUpdateOne.vot?sid = '1'",{"tempsave":1 , "zbsid":zbsid , "papersid":papersid , "evalobjsid":evalobjsid},function(data)
-					{
-						//要提交的req的tempsave , zbsid , papersid , evalobjsid
-						Alert.show("提交成功！");
-					});
-					
-					questcontainer.removeAllElements();
-					questionpage.visible=false;
-					qpage.visible=false;
-					listpage.visible=true;
-					locallist.visible=true;
-					
-					/*var answerArr:Array = [];
-					for(var h:int = 0 ; h<qaa.length ; h++)
-					{
-					var listoption:Option = new Option();
-					listoption.sid = UIDUtil.createUID();
-					listoption.questsid = qaa[h].questid;
-					listoption.answersid = qaa[h].answersid;
-					listoption.evsid = cname;
-					listoption.evalobjsid = qaa[h].evalobjsid;
-					listoption.usersid = loginusernetusername.text;
-					listoption.ans_memo = qaa[h].ans_memo;
-					listoption.ans_inputor_memo = qaa[h].ans_inputor_memo;
-					listoption.zbsid = zbsid;
-					answerArr.push(listoption);
-					}
-					dao.batchInsertWithHighSpeed(answerArr , function(status:*):void
-					{
-					if(status.committed)
-					{*/
-					dao.updateBySQL("update COURT_LIST_TODO set input_status = '已完成' where evalobjname = '"+evalobjname+"' ");
-					opt.clear = "清空";
-					Alert.show("提交成功！");
-					
-					//刷新页面
-					dao.query("select * from COURT_LIST_AUDIT",function (data:*):void
-					{					
-						local2.dataProvider = new ArrayList(data);
-						for (var i:int =0; i < dao.daoitems.length; ++i) 
-						{
-							dao.daoitems[i].conn.close();
-						}
-					});	
-					
-					dao.query("select * from COURT_LIST_TODO" ,function (date:*):void
-					{
-						local1.dataProvider = new ArrayList(date);
-						for (var i:int =0; i < dao.daoitems.length; ++i) 
-						{
-							dao.daoitems[i].conn.close();
-						}
-					});
-					/*}
-					});	*/	
 				}												
 			}
 			
@@ -923,15 +821,15 @@
 				var qaa:Object = new Object();
 				qaa = opt.entering_answer;
 				var opp:OneQuestion = new OneQuestion();
-				opp.enteringanswer = {qaa:qaa};
+				opp.answer = {qaa:qaa};
 				var i:int = opp.ccc;
 				if(i == 1)
 				{
-					Alert.show("暂存成功");
+					Alert.show("暂存成功","提示");
 				}
 				else
 				{
-					Alert.show("暂存失败");
+					Alert.show("暂存失败","提示");
 				}
 				
 			}
@@ -948,11 +846,11 @@
 				var i:int = opp.bbb;
 				if(i == 1)
 				{
-					Alert.show("暂存成功");
+					Alert.show("暂存成功","提示");
 				}
 				else
 				{
-					Alert.show("暂存失败");
+					Alert.show("暂存失败","提示");
 				}
 			}
 			
@@ -1058,81 +956,6 @@
 				});	
 			}
 			
-			//本地列表的查看页面(录入任务)
-			public function chackout():void  
-			{
-				listpage.visible=false;
-				locallist.visible=false;
-				localchack.visible=true;
-				//shlocalchack.visible=true;
-				chacklocal.visible=true;
-				//shchacklocal.visible=true;
-				
-				var zbsidnum:String = local1.selectedItem.zbsid;
-				var evalobjname:String = local1.selectedItem.evalobjname;
-				var renwu:String = local1.selectedItem.nairename;
-				var wenjuan:String = local1.selectedItem.levelonezb;	
-				var tasksid:String = local1.selectedItem.sid;
-				var quest_sid:String;
-				var papersobj:Object;
-				//先用httprequest获取一共有几张   此处只用显示第一张
-				HttpRequest.post(httpurl+"/court2/todotasks/todotasks/TodoTasksController/initTodoTask.vot",{"tasksid":tasksid},function(data)
-				{
-					papersobj= JSON.parse(data);
-					papers = papersobj.length;
-					papersid.text = papersobj[0].sid;
-					var number2:ArrayCollection = new ArrayCollection(
-						[
-							
-						]);
-					for(var x:int=0;x<papers;x++)
-					{
-						number2.addItem((x+1)+"/"+papers);
-						arr.push(papersobj[x].sid);						
-					}					
-					
-					allThisDropDownListLook.dataProvider = number2;
-					allThisDropDownListLook.validateNow();
-					allThisDropDownListLook.selectedIndex = 0;//可以设置默认
-					
-				});
-				
-				//从数据库取出来的相应的题目	
-				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
-				{
-					namenair.text = wenjuan;
-					shnamenair.text = wenjuan;
-					namecourt.text = evalobjname;
-					shnamecourt.text = evalobjname;
-					cname = evalobjname;
-					namenai.text = renwu;
-					shnamenai.text = renwu;
-					questall.text = data.length;
-					shquestall.text = data.length;
-					for (var d:int = 0; d < data.length; ++d) 
-					{
-						var onequest:OneQuestion = new OneQuestion();
-						onequest.questdata = {selet:1 , num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
-						quest_sid = data[d].sid;
-						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
-						{	
-							var arr:Array =new Array();
-							var list:Array = new Array();
-							var num:int = date.length;
-							var zzz:int = 0;
-							for(var q :int ; q<date.length ; q++)
-							{		
-								arr.push( date[q].sid );
-								list.push( date[q].name);
-							}						
-							onequest.optiondata={zhang:0 , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
-						});
-						localchacklist.addElement(onequest);
-					}
-				});	
-			}
-			
-			
 			//本地列表的答题页面(审核任务)
 			public function aduiting():void  
 			{
@@ -1150,27 +973,29 @@
 				var papersobj:Object;
 				
 				//先用httprequest获取一共有几张   此处只用显示第一张
-				HttpRequest.post(httpurl+"/court2/todotasks/todotasks/TodoTasksController/initTodoTask.vot",{"tasksid":tasksid},function(data)
+
+				dao.query("select * from COURT_TASKINFOITEM where sid = '"+tasksid+"'",function(date:*):void
 				{
-					papersobj= JSON.parse(data);
-					papers = papersobj.length;
-					papersidshen.text = papersobj[0].sid;
-					var number3:ArrayCollection = new ArrayCollection(
-						[
-							
-						]);
-					for(var x:int=0;x<papers;x++)
+					dao.query("select * from COURT2_EVALOBJPAPERINFO where evalobjsid = '"+date[0].evalobjsid+"' and zbsid = '"+ date[0].zbsid+"'" , function(data:*):void
 					{
-						number3.addItem((x+1)+"/"+papers);
-						arr.push(papersobj[x].sid);						
-					}					
-					
-					ShenThisDropDownList.dataProvider = number3;
-					ShenThisDropDownList.validateNow();
-					ShenThisDropDownList.selectedIndex = 0;//可以设置默认
-					
-				});	
-				
+						papersobj= data;
+						papers = papersobj.length;
+						papersidshen.text = papersobj[0].sid;
+						var number3:ArrayCollection = new ArrayCollection(
+							[
+								
+							]);
+						for(var x:int=0;x<papers;x++)
+						{
+							number3.addItem((x+1)+"/"+papers);
+							arr.push(papersobj[x].sid);						
+						}					
+						
+						ShenThisDropDownList.dataProvider = number3;
+						ShenThisDropDownList.validateNow();
+						ShenThisDropDownList.selectedIndex = 0;//可以设置默认
+					});
+				});
 				
 				//从数据库取出来的相应的题目	
 				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*)
@@ -1191,12 +1016,30 @@
 							var list:Array = new Array();
 							var num:int = date.length;
 							var zzz:int = 0;
+							var evalobjpapersid :String = papersidshen.text
 							for(var q :int ; q<date.length ; q++)
 							{		
 								arr.push( date[q].sid );
 								list.push( date[q].name);
-							}						
-							onequest.optiondata={zhang:0 , evalobjname : cname ,cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+							}
+							
+							var sureanswer:String;
+							dao.query("select * from COURT_AUDITANSWER where evalobjsid = '"+evalobjpapersid+"' and questsid = '"+date[0].questsid+"'" , function(data:*):void
+							{
+								if(data != null)
+								{
+									sureanswer = data[0].answersid;
+								}
+								else
+								{
+									sureanswer = null;
+								}
+							});
+							
+							dao.query("select * from COURT_ANSWER where evalobjpapersid = '"+evalobjpapersid+"' and questsid = '"+date[0].questsid+"'" , function(data:*):void
+							{
+								onequest.optiondata={sureanswer:sureanswer , answersid:data[0].answeroptionsid , zhang:0 , evalobjname : cname ,cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+							});
 						});
 						enteringpagequestcontainer.addElement(onequest);
 					}
@@ -1220,29 +1063,34 @@
 				var quest_sid:String;
 				var tasksid:String = local2.selectedItem.sid;
 				var papersobj:Object;
+				var evalobj:String;
 				
 				//先用httprequest获取一共有几张   此处只用显示第一张
-				HttpRequest.post(httpurl+"/court2/todotasks/todotasks/TodoTasksController/initTodoTask.vot",{"tasksid":tasksid},function(data)
-				{
-					papersobj= JSON.parse(data);
-					papers = papersobj.length;
-					papersidshen.text = papersobj[0].sid;
-					var number3:ArrayCollection = new ArrayCollection(
-						[
-							
-						]);
-					for(var x:int=0;x<papers;x++)
-					{
-						number3.addItem((x+1)+"/"+papers);
-						arr.push(papersobj[x].sid);						
-					}					
-					
-					shallThisDropDownListLook.dataProvider = number3;
-					shallThisDropDownListLook.validateNow();
-					shallThisDropDownListLook.selectedIndex = 0;//可以设置默认
-					
-				});	
 				
+				dao.query("select * from COURT_TASKINFOITEM where sid = '"+tasksid+"'",function(date:*):void
+				{
+					evalobj = date[0].evalobjsid;
+					dao.query("select * from COURT2_EVALOBJPAPERINFO where evalobjsid = '"+date[0].evalobjsid+"' and zbsid = '"+ date[0].zbsid+"'" , function(data:*):void
+					{
+						papersobj= data;
+						papers = papersobj.length;
+						papersidshen.text = papersobj[0].sid;
+						var number3:ArrayCollection = new ArrayCollection(
+						[
+								
+						]);
+						for(var x:int=0;x<papers;x++)
+						{
+							number3.addItem((x+1)+"/"+papers);
+							arr.push(papersobj[x].sid);						
+						}					
+						
+						shallThisDropDownListLook.dataProvider = number3;
+						shallThisDropDownListLook.validateNow();
+						shallThisDropDownListLook.selectedIndex = 0;//可以设置默认
+					});
+				});
+					
 				//从数据库取出来的相应的题目	
 				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
 				{	
@@ -1265,15 +1113,37 @@
 							var arr:Array =new Array();
 							var list:Array = new Array();
 							var num:int = date.length;
+							var evalobjpapersid :String = papersidshen.text
 							var zzz:int = 0;
 							for(var q :int ; q<date.length ; q++)
-							{		
+							{
 								arr.push( date[q].sid );
 								list.push( date[q].name);
 							}
-							onequest.optiondata={zhang:0 , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+							
+							var sureanswer:String;
+							var aaa:int; //aaa代表使用哪个查看，court_answer 还是 本地提交
+							dao.query("select * from COURT_AUDITANSWER where evalobjsid = '"+evalobjpapersid+"' and questsid = '"+date[0].questsid+"'" , function(data:*):void
+							{
+								Alert.show(JSON.stringify(data));//因为数据库中没有evalobjsid
+								if(data != null)
+								{
+									sureanswer = data[0].answersid;
+									aaa = 1;
+								}
+								else
+								{
+									aaa = 0;
+								}
+							});
+							dao.query("select * from COURT_ANSWER where evalobjpapersid = '"+evalobjpapersid+"' and questsid = '"+date[0].questsid+"'" , function(data:*):void
+							{
+								//Alert.show(JSON.stringify(data));
+								onequest.choptiondata={aaa:aaa , sureanswer:sureanswer , answersid:data[0].answeroptionsid , zhang:0 , bool:zzz , ar:arr , num:num , list:list , qstid:data[0].questsid};
+								shlocalchacklist.addElement(onequest);
+							});
 						});
-						shlocalchacklist.addElement(onequest);
+						
 					}
 				});	
 			}
@@ -1297,26 +1167,31 @@
 				var papersobj:Object;
 				
 				//先用httprequest获取一共有几张   此处只用显示第一张
-				HttpRequest.post(httpurl+"/court2/todotasks/todotasks/TodoTasksController/initTodoTask.vot",{"tasksid":tasksid},function(data)
+				
+				dao.query("select * from COURT_TASKINFOITEM where sid = '"+tasksid+"'",function(date:*):void
 				{
-					papersobj= JSON.parse(data);
-					papers = papersobj.length;
-					papersid.text = papersobj[0].sid;
-					var number2:ArrayCollection = new ArrayCollection(
-						[
-							
-						]);
-					for(var x:int=0;x<papers;x++)
+					dao.query("select * from COURT2_EVALOBJPAPERINFO where evalobjsid = '"+date[0].evalobjsid+"' and zbsid = '"+ date[0].zbsid+"'" , function(data:*):void
 					{
-						number2.addItem((x+1)+"/"+papers);
-						arr.push(papersobj[x].sid);						
-					}					
-					
-					ThisDropDownList.dataProvider = number2;
-					ThisDropDownList.validateNow();
-					ThisDropDownList.selectedIndex = 0;//可以设置默认
-					
+						papersobj= data;
+						papers = papersobj.length;
+						papersid.text = papersobj[0].sid;
+						var number2:ArrayCollection = new ArrayCollection(
+							[
+								
+							]);
+						for(var x:int=0;x<papers;x++)
+						{
+							number2.addItem((x+1)+"/"+papers);
+							arr.push(papersobj[x].sid);						
+						}					
+						
+						ThisDropDownList.dataProvider = number2;
+						ThisDropDownList.validateNow();
+						ThisDropDownList.selectedIndex = 0;//可以设置默认
+					});
 				});
+					
+
 				
 				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
 				{	
@@ -1336,12 +1211,29 @@
 							var list:Array = new Array();
 							var num:int = date.length;
 							var zzz:int = 1;
+							var evalobjpapersid :String = papersid.text
 							for(var q :int ; q<date.length ; q++)
 							{		
 								arr.push( date[q].sid );
 								list.push( date[q].name);
-							}			
-							onequest.optiondata={zhang:0 , evalobjsid:evalobjsid , evalobjname:evalobjname , cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+							}
+							
+							var sureanswer:String ;
+							dao.query("select * from COURT_INPUTANSWER where evalobjsid = '"+evalobjpapersid+"' and questsid = '"+date[0].questsid+"' " , function(data:*):void
+							{
+								if(data != null)
+								{
+									sureanswer = data[0];
+								}
+								else
+								{
+									sureanswer = null;
+								}
+							});
+							dao.query("select * from COURT_ANSWER where evalobjpapersid = '"+evalobjpapersid+"' and questsid = '"+date[0].questsid+"'" , function(data:*):void
+							{
+								onequest.optiondata={sureanswer:sureanswer , answersid:data[0].answeroptionsid , zhang:0 , evalobjsid:evalobjsid , evalobjname:evalobjname , cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+							});
 						});
 						questcontainer.addElement(onequest);					
 					}
@@ -1349,7 +1241,99 @@
 				//从数据库取出来的相应的题目									
 			}
 			
-			
+			//本地列表的查看页面(录入任务)
+			public function chackout():void  
+			{
+				listpage.visible=false;
+				locallist.visible=false;
+				localchack.visible=true;
+				chacklocal.visible=true;
+				
+				var zbsidnum:String = local1.selectedItem.zbsid;
+				var evalobjname:String = local1.selectedItem.evalobjname;
+				var renwu:String = local1.selectedItem.nairename;
+				var wenjuan:String = local1.selectedItem.levelonezb;	
+				var tasksid:String = local1.selectedItem.sid;
+				var quest_sid:String;
+				var papersobj:Object;
+				var evalobj:String;
+				
+				//先用httprequest获取一共有几张   此处只用显示第一张
+				dao.query("select * from COURT_TASKINFOITEM where sid = '"+tasksid+"'",function(date:*):void
+				{
+					evalobj = date[0].evalobjsid;
+					dao.query("select * from COURT2_EVALOBJPAPERINFO where evalobjsid = '"+date[0].evalobjsid+"' and zbsid = '"+ date[0].zbsid+"'" , function(data:*):void
+					{
+						papersobj= data;
+						papers = papersobj.length;
+						papersid.text = papersobj[0].sid;
+						var number2:ArrayCollection = new ArrayCollection(
+							[
+								
+							]);
+						for(var x:int=0;x<papers;x++)
+						{
+							number2.addItem((x+1)+"/"+papers);
+							arr.push(papersobj[x].sid);						
+						}					
+						allThisDropDownListLook.dataProvider = number2;
+						allThisDropDownListLook.validateNow();
+						allThisDropDownListLook.selectedIndex = 0;//可以设置默认
+					});
+				});
+				
+				//从数据库取出来的相应的题目	
+				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
+				{
+					namenair.text = wenjuan;
+					shnamenair.text = wenjuan;
+					namecourt.text = evalobjname;
+					shnamecourt.text = evalobjname;
+					cname = evalobjname;
+					namenai.text = renwu;
+					shnamenai.text = renwu;
+					questall.text = data.length;
+					shquestall.text = data.length;
+					for (var d:int = 0; d < data.length; ++d) 
+					{
+						var onequest:OneQuestion = new OneQuestion();
+						onequest.questdata = {selet:1 , num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
+						quest_sid = data[d].sid;
+						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
+						{	
+							var arr:Array =new Array();
+							var list:Array = new Array();
+							var num:int = date.length;
+							var zzz:int = 0;
+							var evalobjpapersid :String = papersid.text
+							for(var q :int ; q<date.length ; q++)
+							{		
+								arr.push( date[q].sid );
+								list.push( date[q].name);
+							}	
+							var sureanswer:String ;
+							var aaa:int;		//这个aaa判断的是使用本地的提交 或者 是从court_answer 
+							dao.query("select * from COURT_INPUTANSWER where evalobjsid = '"+evalobj+"' and questsid = '"+date[0].questsid+"' " , function(data:*):void
+							{
+								if(data != null)
+								{
+									sureanswer = data[0].answersid;
+									aaa = 1;
+								}
+								else
+								{
+									aaa = 0;
+								}
+							});
+							dao.query("select * from COURT_ANSWER where evalobjpapersid = '"+evalobjpapersid+"' and questsid = '"+date[0].questsid+"'" , function(data:*):void
+							{
+								onequest.choptiondata={aaa:aaa , sureanswer:sureanswer , answersid:data[0].answeroptionsid , zhang:0 , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+								localchacklist.addElement(onequest);
+							});
+						});
+					}
+				});	
+			}
 			
 			//更新本地数据库
 			protected function updateSQLite(event:MouseEvent):void
@@ -1384,7 +1368,7 @@
 			protected function sureToSave(event:MouseEvent):void
 			{
 				thebz.text = textthebz.text;
-				Alert.show("保存成功！");
+				Alert.show("保存成功！","提示");
 				blackPage.visible = false;
 			}
 			
@@ -1403,7 +1387,7 @@
 			protected function enteringsureToSave(event:MouseEvent):void
 			{
 				enteringbz.text = enteringtybz.text;
-				Alert.show("保存成功！");
+				Alert.show("保存成功！","提示");
 				blackPage.visible = false;
 			}
 			
@@ -1494,7 +1478,6 @@
 						//每次点击完之后，再次把papersid.text的值换为arr[event.newIndex]
 						papersid.text = arr[event.newIndex];
 						//*******************************************************************************************************************			
-						Alert.show("dsaf");
 						onequest.questdata = {zbsid:foranswerzbsid , num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
 						quest_sid = data[d].sid;
 						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
@@ -1579,7 +1562,7 @@
 					{
 						var onequest:OneQuestion = new OneQuestion();
 						
-						//***************************************再次点开一张的同时判断是否已有选中****************************************************			
+//***************************************再次点开一张的同时判断是否已有选中****************************************************			
 						//保存后判断，从数据库中找出是否已经有这个papersid的答案了
 						var dataall:Object = new Object();
 						dao.query("select * from COURT_CURRENTANSWER" , function(data:*):void
@@ -1596,9 +1579,9 @@
 								sendevalobjname = dataall[shuzi].evalobjname ;
 							}
 						}
-						//每次点击完之后，再次把papersid.text的值换为arr[event.newIndex]
+//每次点击完之后，再次把papersid.text的值换为arr[event.newIndex]
 						papersidshen.text = arr[event.newIndex];
-						//*******************************************************************************************************************			
+//*******************************************************************************************************************			
 						
 						onequest.questdata = {zbsid:foranswerzbsid , num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
 						quest_sid = data[d].sid;
@@ -2029,8 +2012,8 @@
 												
 												protected function griditemrenderer2_dataChangeHandler(event:FlexEvent):void
 												{
-													rupianluru.visible = (data.input_status == "已完成");
-													luru.visible =  (data.input_status == "已完成")
+													rupianluru.visible = (!((data.input_status == "已完成") == (data.audit_status == "已完成")))
+													luru.visible =  (!((data.input_status == "已完成") == (data.audit_status == "已完成")))
 												}
 											]]>
 										</fx:Script>
@@ -2071,9 +2054,9 @@
 			<s:Label/>
 			<s:Label/>
 			<s:HGroup>
-				<s:Button label=" " skinClass="skins.makeSureUpdate" click="updatetask(event)"/>
+				<s:Button label=" " id="first" skinClass="skins.makeSureUpdate" click="updatetask(event)"/>
 				<s:Label/><s:Label/><s:Label/>
-				<s:Button label=" " skinClass="skins.turnBack" click="turnBack(event)"/>
+				<s:Button label=" " id="second" skinClass="skins.turnBack" click="turnBack(event)"/>
 			</s:HGroup>		
 		</s:VGroup>		
 	</s:SkinnableContainer>
@@ -2184,13 +2167,11 @@
 			</s:HGroup>
 			<s:Label text=" " id="papersidshen" visible="false"/>
 			<s:HGroup horizontalAlign="center" width="100%" top="120">
-				<s:FormItem label="第   "  top="120" left="850">					
-				</s:FormItem>
-				<s:FormItem  top="120" left="900">
-					<s:DropDownList dataProvider="{number2}" labelField="tnumber" prompt="1"  change="ShenThisDropDownList_changeHandler(event)" width="70%" id="ShenThisDropDownList"/>										
-				</s:FormItem>
-				<s:FormItem label="张"  top="120" left="1050">
-				</s:FormItem>
+				<s:HGroup gap="5" verticalAlign="middle">
+					<s:Label text="第"/>
+					<s:DropDownList skinClass="skins.MyDropDownListSkin" dataProvider="{number2}" labelField="tnumber" prompt="1" minWidth="20" change="ShenThisDropDownList_changeHandler(event)" id="ShenThisDropDownList"/>										
+					<s:Label text="张"/>
+				</s:HGroup>
 				<s:Label text=" " id="allquestshen" visible="false"/>
 			</s:HGroup>
 			<s:HGroup verticalAlign="bottom" top="135" horizontalAlign="center" width="100%" visible="false">
@@ -2282,13 +2263,11 @@
 			</s:HGroup>
 			<s:Label text=" " id="papersid" visible="false"/>
 			<s:HGroup horizontalAlign="center" width="100%" top="120">
-				<s:FormItem label="第   "  top="120" left="850">					
-				</s:FormItem>
-				<s:FormItem  top="120" left="900">
-					<s:DropDownList dataProvider="{number}" labelField="tnumber" prompt="1" change="dropdownlist1_changeHandler(event)" width="70%" id="ThisDropDownList"/>										
-				</s:FormItem>
-				<s:FormItem label="张"  top="120" left="1050">
-				</s:FormItem>
+				<s:HGroup gap="5" verticalAlign="middle">
+					<s:Label text="第"/>
+					<s:DropDownList skinClass="skins.MyDropDownListSkin" dataProvider="{number}" labelField="tnumber" prompt="1" minWidth="20" change="dropdownlist1_changeHandler(event)" id="ThisDropDownList"/>										
+					<s:Label text="张"/>
+				</s:HGroup>
 				<s:Label text=" " id="allquest" visible="false"/>
 			</s:HGroup>			
 			<s:HGroup horizontalCenter="0" top="160" width="85%">
@@ -2440,21 +2419,11 @@
 				<s:Label text=" "/>
 			</s:HGroup>
 			<s:HGroup horizontalAlign="center" width="100%" top="80">
-				<!--<s:HGroup gap="5" verticalAlign="middle">
+				<s:HGroup gap="5" verticalAlign="middle">
 					<s:Label text="第"/>
-					<s:DropDownList skinClass="skins.MyDropDownListSkin" dataProvider="{number2}" labelField="tnumber" prompt="1" minWidth="20" change="dropdownlist1_changeHandler(event)" id="allThisDropDownListLook"/>										
+					<s:DropDownList skinClass="skins.MyDropDownListSkin" dataProvider="{number2}" labelField="tnumber" prompt="1" minWidth="20" change="dropdownlist1_changeHandler(event)" id="shallThisDropDownListLook"/>										
 					<s:Label text="张"/>
 				</s:HGroup>
-				<s:Label text=" " id="allquestlook" visible="false"/>-->
-				
-				
-				<s:FormItem label="第   "  top="80" left="850">					
-				</s:FormItem>
-				<s:FormItem  top="120" left="900">
-					<s:DropDownList dataProvider="{number2}" labelField="tnumber" prompt="1" change="dropdownlist1_changeHandler(event)" width="70%" id="shallThisDropDownListLook"/>										
-				</s:FormItem>
-				<s:FormItem label="张"  top="120" left="1050">
-				</s:FormItem>
 				<s:Label text=" " id="shallquestlook" visible="false"/>
 			</s:HGroup>
 			<s:HGroup horizontalAlign="center" width="100%" top="60">

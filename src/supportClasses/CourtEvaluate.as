@@ -7,7 +7,6 @@ package supportClasses
 		public var papercode:String;
 		public var zbsid:String;
 		public var evalobjsid:String;
-		public var sortfield:String;
-		
+		public var sortfield:String;		
 	}
 }
