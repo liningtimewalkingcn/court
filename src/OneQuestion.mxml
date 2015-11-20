@@ -36,9 +36,9 @@
 				origindatafile.text = file.nativePath;
 				//var newFile:File = File.resolvePath("\xxx.xls");
 				
-				obj['ans_inputor_memo'] = origindatafile.text;
+				/*obj['ans_inputor_memo'] = origindatafile.text;
 				obj['ans_memo'] = lrysm.text;
-				answers.push(obj);
+				answers.push(obj);*/
 				
 				var filePath:File = new File();
 				filePath.nativePath = "D:\\court\\xxx.xls";
@@ -61,9 +61,19 @@
 				}
 			}
 			
+			public var opt:OneOption = new OneOption();
 			public function set foranswer(val:*):void
 			{
-				this.asdfasdf = answers;
+				opt.optall = "答案";			
+				var qaa:Object = new Object();
+				qaa = opt._answer;		//从oneoption获得的objs
+				qaa['ans_inputor_memo'] = origindatafile.text;
+				qaa['ans_memo'] = lrysm.text;
+				this.asdfasdf = qaa;
+			}
+			public function set clear(val:*):void
+			{
+				opt.clear = "清空";
 			}
 			
 			public function get foranswer():Object
@@ -115,8 +125,9 @@
 					{
 						option.foroption.selected = true;
 					}*/
+					
 					option.quest = quest;
-					option.optiondata = {papersid:papersid.text , zbsid:questzbsid , evalobjsid:val.evalobjsid , evalobjname:val.evalobjname , all:n , n:z , opid:opid , nameid:nameid , questid:questid}
+					option.optiondata = {papersid:val.papersid , zbsid:questzbsid , evalobjsid:val.evalobjsid , evalobjname:val.evalobjname , all:n , n:z , opid:opid , nameid:nameid , questid:questid}
 					options.addElement(option);
 				}
 			}
@@ -225,14 +236,13 @@
 			
 			public function asdf(event:MouseEvent):void
 			{
-				// TODO Auto-generated method stub
 				
 			}
 			
 		]]>
 	</fx:Script>
 	
-	<s:HGroup>
+	<s:HGroup id="theHGroup">
 		<s:Label text="   "/>
 		<s:Label text="   "/>
 		<s:Label text="   "/>
@@ -287,7 +297,7 @@
 		<s:Label text="   "/>
 		<s:Label text="录入员说明 ："/>
 		<s:Label text=" "/>
-		<s:TextArea id="lrysm" click="asdf(event)" width="900" height="30"/>
+		<s:TextInput id="lrysm" click="asdf(event)" name="thisInputName"  width="900" height="30"  />
 	</s:HGroup>
 	
 	<s:HGroup fontSize="8">
@@ -302,7 +312,7 @@
 		<s:Label text="   "/>
 		<s:Label text="录入员附件 ："/>
 		<s:Label text=" "/>	
-		<s:TextInput id="origindatafile" enabled="false" width="900"/>
+		<s:TextInput id="origindatafile" enabled="false" width="900" />
 		<s:Button label="附件" click="selectVideoclickHandler()"/>
 	</s:HGroup>
 	

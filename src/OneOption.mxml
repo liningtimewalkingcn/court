@@ -30,8 +30,8 @@
 				evalobjname = val.evalobjname;
 				evalobjsid = val.evalobjsid;
 				zbsid.text = val.zbsid ; 
-				papersid.text = val.papersid;
 				
+				papersid.text = val.papersid;
 				s = change(num);
 				if( num < all)
 				{
@@ -54,7 +54,7 @@
 				questId = bid.text;
 				if(foroption.selected = true)
 				{
-					obj['evalobjname'] = evalobjname;
+					obj['evalobjname'] = val.evalobjname;
 					obj['questid'] = questId;
 					obj['answersid'] = answerId;
 					obj['evalobjsid'] = val.evalobjsid;
@@ -96,7 +96,6 @@
 				obj['evalobjsid'] = evalobjsid;
 				obj['zbsid'] = zbsid.text;
 				obj['papersid'] = papersid.text;
-				
 
 				var len:int = objs.length;
 				if(len == 0)
@@ -115,13 +114,14 @@
 					}
 					objs.push(obj);
 				}
-				/*for(var a:int ; a<len ; a++)
+				/*var len:int = objs.length;
+				for(var a:int=0 ; a<len ; a++)
 				{
-					if(obj.answersid == objs[a].answersid)
+					//if(obj.answersid == objs[a].answersid)
 					{
-						//if(objs[a].questid == obj.questid)
+						if(objs[a].questid == bid.text)
 						{							
-							objs[a].answersid = obj.answersid;
+							objs[a].answersid = sid.text;
 							//return ;
 						}						
 					}

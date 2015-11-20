@@ -58,18 +58,6 @@
 				return asdfasdf;
 			}
 			
-			public function set enteringanswer(val:*):void
-			{
-				enteringallAnswer = val.qaa;
-				var aaa:int = 1;
-				this.ccc = aaa;
-			}
-			
-			public function get enteringanswer():int
-			{
-				return ccc;
-			}
-			
 			public function set answer(val:*):void
 			{
 				allAnswer = val.qaa;
@@ -113,20 +101,10 @@
 					{
 						option.foroption.selected = true;
 					}
-					
-					if( enteringallAnswer != null )
-					{
-						var len:int = enteringallAnswer.length;
-						for(var o:int = 0 ; o<len ; o++)
-						{
-							if( (opid == enteringallAnswer[o].answersid) && (questid == enteringallAnswer[o].questid) && (val.cname == enteringallAnswer[o].evalobjname)  )
-							{
-								option.foroption.selected = true;
-							}
-						}
-					}
+
 					option.quest = quest;
-					option.optiondata = {papersid:papersid.text , zbsid:questzbsid , evalobjsid:val.evalobjsid , evalobjname:val.evalobjname , all:n , n:z , opid:opid , nameid:nameid , questid:questid}
+					
+					option.optiondata = {papersid:val.papersid , zbsid:questzbsid , evalobjsid:val.evalobjsid , evalobjname:val.evalobjname , all:n , n:z , opid:opid , nameid:nameid , questid:questid}
 					options.addElement(option);
 
 					option.foroption.enabled = false;
@@ -162,6 +140,7 @@
 					}
 					
 					option.quest = quest;
+					option.foroption.enabled = false;
 					option.optiondata = {papersid:papersid.text , zbsid:questzbsid , evalobjsid:val.evalobjsid , evalobjname:val.evalobjname , all:n , n:z , opid:opid , nameid:nameid , questid:questid}
 					options.addElement(option);
 					
@@ -251,9 +230,53 @@
 					var opid:String = (val.ar[z]);
 					var nameid:String = (val.list[z]);
 					var questid:String = (val.qstid);
+					if( allAnswer != null )//暂存
+					{
+						var zlen:int = allAnswer.length;
+						for(var r:int = 0 ; r<zlen ; r++)
+						{						
+							if( (val.ppsid == allAnswer[r].papersid) && (opid == allAnswer[r].answersid) && (questid == allAnswer[r].questid) && (val.cname == allAnswer[r].evalobjname)  )
+							{
+								option.foroption.selected = true;
+							}
+						}
+					}
+					else if(val.sureanswer == opid)//本地提交的答案
+					{
+						option.foroption.selected = true;
+					}
+					else if(val.answersid == opid)//court_answer中找
+					{
+						option.foroption.selected = true;
+					}
+					
+					if( enteringallAnswer != null )
+					{
+						var len:int = enteringallAnswer.length;
+						for(var o:int = 0 ; o<len ; o++)
+						{
+							if( (opid == enteringallAnswer[o].answersid) && (questid == enteringallAnswer[o].questid) && (val.cname == enteringallAnswer[o].evalobjname)  )
+							{
+								option.foroption.selected = true;
+							}
+						}
+					}
+					option.quest = quest;
+					option.optiondata = {papersid:val.papersid , zbsid:questzbsid , evalobjsid:val.evalobjsid , evalobjname:val.evalobjname , all:n , n:z , opid:opid , nameid:nameid , questid:questid}
+					options.addElement(option);
+				
+				
+				/*var val:Object = answeragain;
+				var n:int = val.num;
+				for(var z:int = 0 ; z<n　; z++)
+				{
+					var option :OneOption = new OneOption();
+					var opid:String = (val.ar[z]);
+					var nameid:String = (val.list[z]);
+					var questid:String = (val.qstid);
 					option.quest = quest;
 					option.optiondata = {papersid:papersid.text , zbsid:questzbsid , evalobjsid:val.evalobjsid , evalobjname:val.evalobjname , all:n , n:z , opid:opid , nameid:nameid , questid:questid}
-					options.addElement(option);
+					options.addElement(option);*/
 				}
 				//是否出错    需要重新加载选项
 				if(isSubmit.selected == true)
@@ -284,9 +307,6 @@
 				// TODO Auto-generated method stub
 				
 			}
-			
-
-			
 		]]>
 	</fx:Script>
 	

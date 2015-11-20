@@ -50,8 +50,7 @@
 			import supportClasses.AnswerItem;
 			import supportClasses.Court2Zb;
 			import supportClasses.CourtEvaluate;
-			import supportClasses.Court_auditanswer;
-			import supportClasses.Court_inputanswer;
+			import supportClasses.Court_Localanswer;
 			import supportClasses.ListAuditItem;
 			import supportClasses.ListInfoTask;
 			import supportClasses.ListOption;
@@ -63,7 +62,7 @@
 			
 			private var useritems:Vector.<UserItem> = new Vector.<UserItem>();
 			private var newuser:UserItem = new UserItem();
-			private var _httpurl:String = "http://192.168.1.158:8289/court";
+			private var _httpurl:String = "http://192.168.1.237:8080/court";
 			private var n:int = 0;
 			private var answer:String; 		//选项的内容
 			private var qsid:String;		//问题的
@@ -145,7 +144,7 @@
 			
 			//点击进入创建页面
 			protected function makeUser(event:MouseEvent):void
-			{				
+			{
 				loginpage.visible = false;
 				makepage.visible = true;
 			}
@@ -699,14 +698,15 @@
 					var answerArr:Array = [];
 					for(var h:int = 0 ; h<qaa.length ; h++)
 					{
-						var listoption:Court_auditanswer = new Court_auditanswer();
+						var listoption:Court_Localanswer = new Court_Localanswer();
 						listoption.sid =   UIDUtil.createUID();
 						listoption.questsid = qaa[h].questid;
 						listoption.answersid = qaa[h].answersid;
 						listoption.evalobjsid = qaa[h].evalobjsid;
 						listoption.usersid = loginusernetusername.text;
-						/*listoption.aud_memo = aaq[h].aud_memo;
-						listoption.aud_input_memo = aaq[h].aud_input_memo;*/
+						listoption.papersid = qaa[h].papersid;
+						/*listoption.ans_memo = aaq[h].ans_memo;
+						listoption.ans_input_memo = aaq[h].ans_input_memo;*/
 						listoption.zbsid = zbsid;
 						answerArr.push(listoption);
 					}
@@ -741,22 +741,23 @@
 			
 			//答题页面的提交答案（录入任务）
 			protected function submitanswer(event:MouseEvent):void
-			{				
+			{
 				var alllen:int = int(allquest.text);
-				var opt:OneOption = new OneOption();
+				/*var opt:OneOption = new OneOption();
 				opt.optall = "答案";			
 				var qaa:Object = new Object();
-				qaa = opt._answer;		//从oneoption获得的objs
+				qaa = opt._answer;	*/	//从oneoption获得的objs
 				var evalobjname:String = local1.selectedItem.evalobjname;
 				var evalobjsid:String = local1.selectedItem.evalobjsid;
 				var zbsid:String = local1.selectedItem.zbsid;
+				
 				var questOne:OneQuestion = new OneQuestion;
 				var papersids:String = papersid.text;
 				questOne.foranswer = "答案";
 				var aaq:Object = new Object();
 				aaq = questOne.asdfasdf;
 				//把得到的数据存到数据库
-				if(alllen > qaa.length)
+				if(alllen > aaq.length)
 				{
 					Alert.show("请答完所有题目再交卷！","提示");
 				}
@@ -769,16 +770,17 @@
 					locallist.visible=true;
 					
 					var answerArr:Array = [];
-					for(var h:int = 0 ; h<qaa.length ; h++)
+					for(var h:int = 0 ; h<aaq.length ; h++)
 					{
-						var listoption:Court_inputanswer = new Court_inputanswer();
+						var listoption:Court_Localanswer = new Court_Localanswer();
 						listoption.sid =  UIDUtil.createUID();
-						listoption.questsid = qaa[h].questid;
-						listoption.answersid = qaa[h].answersid;
-						listoption.evalobjsid = qaa[h].evalobjsid;
+						listoption.questsid = aaq[h].questid;
+						listoption.answersid = aaq[h].answersid;
+						listoption.evalobjsid = aaq[h].evalobjsid;
+						listoption.papersid = aaq[h].papersid;
 						listoption.usersid = loginusernetusername.text;
-						/*listoption.ans_memo = aaq[h].ans_memo;
-						listoption.ans_input_memo = aaq[h].ans_inputor_memo;*/
+						listoption.ans_memo = aaq[h].ans_memo;
+						listoption.ans_input_memo = aaq[h].ans_inputor_memo;
 						listoption.zbsid = zbsid;
 						answerArr.push(listoption);
 					}
@@ -787,7 +789,7 @@
 						if(status.committed)
 						{
 							dao.updateBySQL("update COURT_LIST_TODO set input_status = '已完成' where evalobjname = '"+evalobjname+"' ");
-							opt.clear = "清空";
+							questOne.clear = "清空";
 							Alert.show("提交成功！","提示");
 							
 							//刷新页面
@@ -967,7 +969,8 @@
 				var zbsidnum:String = local2.selectedItem.zbsid;
 				var evalobjname:String = local2.selectedItem.evalobjname;
 				var renwu:String = local2.selectedItem.nairename;
-				var wenjuan:String = local2.selectedItem.levelonezb;			
+				var wenjuan:String = local2.selectedItem.levelonezb;		
+				var evalobjsid:String = local2.selectedItem.evalobjsid;
 				var quest_sid:String;		
 				var tasksid:String = local2.selectedItem.sid;
 				var papersobj:Object;
@@ -1024,7 +1027,7 @@
 							}
 							
 							var sureanswer:String;
-							dao.query("select * from COURT_AUDITANSWER where evalobjsid = '"+evalobjpapersid+"' and questsid = '"+date[0].questsid+"'" , function(data:*):void
+							dao.query("select * from COURT_LOCALANSWER where evalobjsid = '"+evalobjsid+"' and questsid = '"+date[0].questsid+"'" , function(data:*):void
 							{
 								if(data != null)
 								{
@@ -1038,7 +1041,7 @@
 							
 							dao.query("select * from COURT_ANSWER where evalobjpapersid = '"+evalobjpapersid+"' and questsid = '"+date[0].questsid+"'" , function(data:*):void
 							{
-								onequest.optiondata={sureanswer:sureanswer , answersid:data[0].answeroptionsid , zhang:0 , evalobjname : cname ,cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+								onequest.optiondata={papersid:papersidshen.text , evalobjsid:evalobjsid , sureanswer:sureanswer , answersid:data[0].answeroptionsid , zhang:0 , evalobjname : cname ,cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
 							});
 						});
 						enteringpagequestcontainer.addElement(onequest);
@@ -1123,9 +1126,8 @@
 							
 							var sureanswer:String;
 							var aaa:int; //aaa代表使用哪个查看，court_answer 还是 本地提交
-							dao.query("select * from COURT_AUDITANSWER where evalobjsid = '"+evalobjpapersid+"' and questsid = '"+date[0].questsid+"'" , function(data:*):void
+							dao.query("select * from COURT_LOCALANSWER where evalobjsid = '"+evalobj+"' and questsid = '"+date[0].questsid+"'" , function(data:*):void
 							{
-								Alert.show(JSON.stringify(data));//因为数据库中没有evalobjsid
 								if(data != null)
 								{
 									sureanswer = data[0].answersid;
@@ -1219,7 +1221,7 @@
 							}
 							
 							var sureanswer:String ;
-							dao.query("select * from COURT_INPUTANSWER where evalobjsid = '"+evalobjpapersid+"' and questsid = '"+date[0].questsid+"' " , function(data:*):void
+							dao.query("select * from COURT_LOCALANSWER where evalobjsid = '"+evalobjpapersid+"' and questsid = '"+date[0].questsid+"' " , function(data:*):void
 							{
 								if(data != null)
 								{
@@ -1232,7 +1234,7 @@
 							});
 							dao.query("select * from COURT_ANSWER where evalobjpapersid = '"+evalobjpapersid+"' and questsid = '"+date[0].questsid+"'" , function(data:*):void
 							{
-								onequest.optiondata={sureanswer:sureanswer , answersid:data[0].answeroptionsid , zhang:0 , evalobjsid:evalobjsid , evalobjname:evalobjname , cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+								onequest.optiondata={papersid:papersid.text , sureanswer:sureanswer , answersid:data[0].answeroptionsid , zhang:0 , evalobjsid:evalobjsid , evalobjname:evalobjname , cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
 							});
 						});
 						questcontainer.addElement(onequest);					
@@ -1313,7 +1315,7 @@
 							}	
 							var sureanswer:String ;
 							var aaa:int;		//这个aaa判断的是使用本地的提交 或者 是从court_answer 
-							dao.query("select * from COURT_INPUTANSWER where evalobjsid = '"+evalobj+"' and questsid = '"+date[0].questsid+"' " , function(data:*):void
+							dao.query("select * from COURT_LOCALANSWER where evalobjsid = '"+evalobj+"' and questsid = '"+date[0].questsid+"' " , function(data:*):void
 							{
 								if(data != null)
 								{
