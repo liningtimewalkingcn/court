@@ -105,18 +105,19 @@
 					var nameid:String = (val.list[z]);
 					var questid:String = (val.qstid);
 					
-					if( allAnswer != null )//暂存
+					if(allAnswer != null )//暂存
 					{
 						var zlen:int = allAnswer.length;
 						
 						for(var r:int = 0 ; r<zlen ; r++)
 						{						
-							if( (val.ppsid == allAnswer[r].papersid) && (opid == allAnswer[r].answersid) && (questid == allAnswer[r].questid) && (val.cname == allAnswer[r].evalobjname)  )
+							if( (val.papersid == allAnswer[r].papersid) && (opid == allAnswer[r].answersid) && (questid == allAnswer[r].questid) && (val.cname == allAnswer[r].evalobjname)  )
 							{
 								option.foroption.selected = true;
 							}
 						}
 					}
+					//只要有暂存，就不能有底下的这些，因为肯定会进第一个，所以不会进底下的这下
 					/*else if(val.sureanswer == opid)//本地的提交
 					{
 						option.foroption.selected = true;

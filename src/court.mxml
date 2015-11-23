@@ -649,7 +649,7 @@
 				locallist.visible=true;
 			}
 			
-			//本地录入页面的返回列表
+			//答题页面的返回列表（审核任务）
 			protected function enteringbacklist(event:MouseEvent):void
 			{
 				listpage.visible=true;
@@ -660,7 +660,7 @@
 				enteringbz.text = null;
 			}
 			
-			//本地答题页面的返回到列表
+			//答题页面的返回到列表（录入任务）
 			protected function backlist(event:MouseEvent):void
 			{
 				questcontainer.removeAllElements();
@@ -815,7 +815,7 @@
 				}												
 			}
 			
-			//录入页面的暂存
+			//本地答题页面的暂存 （审核任务）
 			protected function enteringtemporary(event:MouseEvent):void
 			{
 				var opt:OneOption = new OneOption();
@@ -836,7 +836,7 @@
 				
 			}
 			
-			//本地答题页面的暂存
+			//本地答题页面的暂存（录入任务）
 			protected function temporary(event:MouseEvent):void
 			{	
 				var opt:OneOption = new OneOption();
@@ -859,7 +859,14 @@
 			//答题页面的取消(审核任务)
 			protected function enteringreset(event:MouseEvent):void
 			{
+				listpage.visible=true;
+				locallist.visible=true;
 				enteringpagequestcontainer.removeAllElements();
+				entering.visible = false;
+				enteringpage.visible = false;
+				enteringbz.text = null;
+				
+				/*enteringpagequestcontainer.removeAllElements();
 				entering.visible = false;
 				enteringpage.visible = false;
 				listpage.visible=true;
@@ -904,13 +911,20 @@
 						});
 						enteringpagequestcontainer.addElement(onequest);
 					}
-				});
+				});*/
 			}
 			
-			//本地答题页面的取消
+			//答题页面的取消（录入任务）
 			public function reset(event:MouseEvent):void
 			{
 				questcontainer.removeAllElements();
+				questionpage.visible=false;
+				qpage.visible=false;
+				listpage.visible=true;
+				locallist.visible=true;
+				thebz.text = null;
+				
+				/*questcontainer.removeAllElements();
 				questionpage.visible=false;
 				qpage.visible=false;
 				listpage.visible=true;
@@ -923,7 +937,9 @@
 				var zbsidnum:String = local1.selectedItem.zbsid;
 				var evalobjname:String = local1.selectedItem.evalobjname;
 				var renwu:String = local1.selectedItem.nairename;
-				var wenjuan:String = local1.selectedItem.levelonezb;			
+				var wenjuan:String = local1.selectedItem.levelonezb;		
+				var evalobjsid:String = local1.selectedItem.evalobjsid;
+				var foranswerzbsid :String = local1.selectedItem.zbsid;
 				var quest_sid:String;
 				
 				//从数据库取出来的相应的题目				
@@ -937,7 +953,7 @@
 					for (var d:int = 0; d < data.length; ++d) 
 					{
 						var onequest:OneQuestion = new OneQuestion();
-						onequest.questdata = {num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
+						onequest.questdata = {selet:0 , zbsid:foranswerzbsid , num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
 						quest_sid = data[d].sid;
 						dao.query("select * from COURT_QUESTION_OPTION where questsid = '"+quest_sid+"'",function(date:*):void
 						{	
@@ -945,17 +961,33 @@
 							var list:Array = new Array();
 							var num:int = date.length;
 							var zzz:int = 1;
+							var evalobjpapersid :String = papersid.text
 							for(var q :int ; q<date.length ; q++)
 							{		
 								arr.push( date[q].sid );
 								list.push( date[q].name);
-							}	
-							onequest.removeall = "清空allanswer";
-							onequest.optiondata={ppsid:papersid.text , zhang:0 , evalobjname:evalobjname , cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+							}
+							
+							var sureanswer:String ;
+							dao.query("select * from COURT_LOCALANSWER where evalobjsid = '"+evalobjpapersid+"' and questsid = '"+date[0].questsid+"' " , function(data:*):void
+							{
+								if(data != null)
+								{
+									sureanswer = data[0];
+								}
+								else
+								{
+									sureanswer = null;
+								}
+							});
+							dao.query("select * from COURT_ANSWER where evalobjpapersid = '"+evalobjpapersid+"' and questsid = '"+date[0].questsid+"'" , function(data:*):void
+							{
+								onequest.optiondata={papersid:papersid.text , sureanswer:sureanswer , answersid:data[0].answeroptionsid , zhang:0 , evalobjsid:evalobjsid , evalobjname:evalobjname , cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
+							});
 						});
-						questcontainer.addElement(onequest);
+						questcontainer.addElement(onequest);					
 					}
-				});	
+				});	*/
 			}
 			
 			//本地列表的答题页面(审核任务)
@@ -1041,7 +1073,7 @@
 							
 							dao.query("select * from COURT_ANSWER where evalobjpapersid = '"+evalobjpapersid+"' and questsid = '"+date[0].questsid+"'" , function(data:*):void
 							{
-								Alert.show(JSON.stringify(data));
+								//Alert.show(JSON.stringify(data));
 								onequest.optiondata={papersid:papersidshen.text , evalobjsid:evalobjsid , sureanswer:sureanswer , answersid:data[0].answeroptionsid , zhang:0 , evalobjname : cname ,cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
 							});
 						});
@@ -1141,7 +1173,7 @@
 							});
 							dao.query("select * from COURT_ANSWER where evalobjpapersid = '"+evalobjpapersid+"' and questsid = '"+date[0].questsid+"'" , function(data:*):void
 							{
-								Alert.show(JSON.stringify(data));
+								//Alert.show(JSON.stringify(data));
 								onequest.choptiondata={aaa:aaa , sureanswer:sureanswer , answersid:data[0].answeroptionsid , zhang:0 , bool:zzz , ar:arr , num:num , list:list , qstid:data[0].questsid};
 								shlocalchacklist.addElement(onequest);
 							});
@@ -1348,7 +1380,7 @@
 			{
 				return papers;
 			}
-			//本地的查看的返回列表
+			//本地的查看的返回列表（录入任务）（审核任务）
 			protected function backagain(event:MouseEvent):void
 			{
 				localchacklist.removeAllElements();
@@ -2169,7 +2201,7 @@
 				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="统一修改备注" click="enteringxiugai(event)"/>
 			</s:HGroup>
 			<s:Label text=" " id="papersidshen" visible="false"/>
-			<s:HGroup horizontalAlign="center" width="100%" top="120">
+			<s:HGroup horizontalAlign="center" width="100%" top="130">
 				<s:HGroup gap="5" verticalAlign="middle">
 					<s:Label text="第"/>
 					<s:DropDownList skinClass="skins.MyDropDownListSkin" dataProvider="{number2}" labelField="tnumber" prompt="1" minWidth="20" change="ShenThisDropDownList_changeHandler(event)" id="ShenThisDropDownList"/>										
@@ -2270,7 +2302,7 @@
 				<s:Button skinClass="skins.UpdateOrSubmitButtonSkin" label="统一修改备注" click="blackpage(event)"/>
 			</s:HGroup>
 			<s:Label text=" " id="papersid" visible="false"/>
-			<s:HGroup horizontalAlign="center" width="100%" top="120">
+			<s:HGroup horizontalAlign="center" width="100%" top="130">
 				<s:HGroup gap="5" verticalAlign="middle">
 					<s:Label text="第"/>
 					<s:DropDownList skinClass="skins.MyDropDownListSkin" dataProvider="{number}" labelField="tnumber" prompt="1" minWidth="20" change="dropdownlist1_changeHandler(event)" id="ThisDropDownList"/>										
@@ -2354,7 +2386,7 @@
 			<s:HGroup>
 				<s:Label text=" "/>
 			</s:HGroup>
-			<s:HGroup horizontalAlign="center" width="100%" top="80">
+			<s:HGroup horizontalAlign="center" width="100%" top="95">
 				<s:HGroup gap="5" verticalAlign="middle">
 					<s:Label text="第"/>
 					<s:DropDownList skinClass="skins.MyDropDownListSkin" dataProvider="{number2}" labelField="tnumber" prompt="1" minWidth="20" change="dropdownlist1_changeHandler(event)" id="allThisDropDownListLook"/>										
@@ -2431,7 +2463,7 @@
 			<s:HGroup>
 				<s:Label text=" "/>
 			</s:HGroup>
-			<s:HGroup horizontalAlign="center" width="100%" top="80">
+			<s:HGroup horizontalAlign="center" width="100%" top="95">
 				<s:HGroup gap="5" verticalAlign="middle">
 					<s:Label text="第"/>
 					<s:DropDownList skinClass="skins.MyDropDownListSkin" dataProvider="{number2}" labelField="tnumber" prompt="1" minWidth="20" change="dropdownlist1_changeHandler(event)" id="shallThisDropDownListLook"/>										

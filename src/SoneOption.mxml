@@ -5,7 +5,7 @@
 		  >
 	
 	<!--<fx:Declarations>
-		<s:RadioButtonGroup id="g"/>		
+	<s:RadioButtonGroup id="g"/>		
 	</fx:Declarations>-->
 	
 	<fx:Script>
@@ -48,25 +48,19 @@
 					return res;
 				}
 				
-			}
-
-			
-			protected function clickradiobutton(event:MouseEvent):void
-			{		
 				var answerId:String;
 				var questId:String;
-				var cnam:String;
 				answerId = sid.text;
 				questId = bid.text;
-				
-				cnam = evalobjname;
-				obj['evalobjname'] = evalobjname;
-				obj['questid'] = questId;
-				obj['answersid'] = answerId;
-				obj['evalobjsid'] = evalobjsid;
-				obj['zbsid'] = zbsid.text;
-				obj['papersid'] = papersid.text;
-
+				if(foroption.selected == true)
+				{
+					obj['evalobjname'] = val.evalobjname;
+					obj['questid'] = questId;
+					obj['answersid'] = answerId;
+					obj['evalobjsid'] = val.evalobjsid;
+					obj['zbsid'] = val.zbsid ;
+					obj['papersid'] = val.papersid;
+				}
 				var len:int = objs.length;
 				if(len == 0)
 				{
@@ -84,7 +78,55 @@
 					}
 					objs.push(obj);
 				}
+			}
+			
+			
+			protected function clickradiobutton(event:MouseEvent):void
+			{		
+				var answerId:String;
+				var questId:String;
+				var cnam:String;
+				answerId = sid.text;
+				questId = bid.text;
 				
+				/*cnam = evalobjname;
+				obj['evalobjname'] = evalobjname;
+				obj['questid'] = questId;
+				obj['answersid'] = answerId;
+				obj['evalobjsid'] = evalobjsid;
+				obj['zbsid'] = zbsid.text;
+				obj['papersid'] = papersid.text;
+				
+				var len:int = objs.length;
+				if(len == 0)
+				{
+					objs.push(obj);
+				}
+				else
+				{
+					for(var a:int = 0 ; a<len ; a++)
+					{
+						if(objs[a].questid == obj.questid)
+						{							
+							objs[a] = obj;
+							return ;
+						}						
+					}
+					objs.push(obj);
+				}*/
+				var len:int = objs.length;
+				for(var a:int=0 ; a<len ; a++)
+				{
+					//if(obj.answersid == objs[a].answersid)
+					{
+						if(objs[a].questid == bid.text)
+						{							
+							objs[a].answersid = sid.text;
+							//return ;
+						}						
+					}
+					//objs.push(obj);
+				}
 			}
 			
 			public function set optall(val1:*):void
@@ -139,7 +181,7 @@
 		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
 		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
 		<s:Label text=" "/><s:Label text=" "/><s:Label text=" "/><s:Label text=" "/>
-
+		
 		<s:Label text=" " id="word" height="100%" verticalAlign="bottom" fontSize="23" fontWeight="normal"/>
 		<s:Label text=" "/>
 		<s:RadioButton id="foroption" click="clickradiobutton(event)"/>
