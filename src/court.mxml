@@ -675,10 +675,10 @@
 			protected function enteringsubmit(event:MouseEvent):void
 			{				
 				var alllen:int = int(enteringall.text);
-				var opt:OneOption = new OneOption();
+				var opt:SoneOption = new SoneOption();
 				opt.enteringoptall = "答案";			
 				var qaa:Object = new Object();
-				qaa = opt.entering_answer;		//从oneoption获得的objs
+				qaa = opt.entering_answer;		//从SoneOption获得的objs
 				var evalobjname:String = local2.selectedItem.evalobjname;
 				var zbsid:String = local2.selectedItem.zbsid;
 				
@@ -1041,6 +1041,7 @@
 							
 							dao.query("select * from COURT_ANSWER where evalobjpapersid = '"+evalobjpapersid+"' and questsid = '"+date[0].questsid+"'" , function(data:*):void
 							{
+								Alert.show(JSON.stringify(data));
 								onequest.optiondata={papersid:papersidshen.text , evalobjsid:evalobjsid , sureanswer:sureanswer , answersid:data[0].answeroptionsid , zhang:0 , evalobjname : cname ,cname:cname , bool:zzz , ar:arr , num:num , list:list , qstid:date[0].questsid};
 							});
 						});
@@ -1096,7 +1097,7 @@
 					
 				//从数据库取出来的相应的题目	
 				dao.query("select * from COURT_QUESTION where zbsid = '"+zbsidnum+"'", function (data:*):void 
-				{	
+				{
 					namenair.text = wenjuan;
 					shnamenair.text = wenjuan;
 					namecourt.text = evalobjname;
@@ -1106,7 +1107,7 @@
 					shnamenai.text = renwu;
 					questall.text = data.length;
 					shquestall.text = data.length;
-					for (var d:int = 0; d < data.length; ++d) 
+					for (var d:int = 0; d < data.length; ++d)
 					{
 						var onequest:SoneQuestion = new SoneQuestion();
 						onequest.questdata = {selet:1 , num:d , tmsms:data[d].memo , quests:data[d].name , sid1:data[d].sid};
@@ -1140,7 +1141,7 @@
 							});
 							dao.query("select * from COURT_ANSWER where evalobjpapersid = '"+evalobjpapersid+"' and questsid = '"+date[0].questsid+"'" , function(data:*):void
 							{
-								//Alert.show(JSON.stringify(data));
+								Alert.show(JSON.stringify(data));
 								onequest.choptiondata={aaa:aaa , sureanswer:sureanswer , answersid:data[0].answeroptionsid , zhang:0 , bool:zzz , ar:arr , num:num , list:list , qstid:data[0].questsid};
 								shlocalchacklist.addElement(onequest);
 							});
@@ -2108,7 +2109,7 @@
 		</s:VGroup>		
 	</s:SkinnableContainer>
 	
-	<!--本地录入页面答题首-->
+	<!--本地答题首--> <!--审核任务-->
 	<s:SkinnableContainer skinClass="skins.questList" id="entering" visible="false" horizontalCenter="1" width="100%">
 		<s:layout>
 			<s:VerticalLayout horizontalAlign="center"/>
@@ -2181,11 +2182,16 @@
 				<s:Label text=" " id="enteringall" fontWeight="bold" color="red"/>
 				<s:Label text="道题"/>
 			</s:HGroup>			
-			<s:HGroup horizontalCenter="0" top="160" width="85%">
+			<s:HGroup horizontalCenter="0" top="160" width="85%" fontFamily="宋体">
 				<s:Label text="   "/>
 				<s:Label text="   "/>
 				<s:Label text="   "/>
-				<s:Label text="问卷备注   ："/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="问卷备注 ："/>
 				<s:TextArea id="enteringbz"  width="900" height="30"/>
 			</s:HGroup>
 			<s:HGroup>
@@ -2206,7 +2212,7 @@
 		</supportClasses:MyScroller>
 	</s:Group>
 	
-	<!--本地答题首-->
+	<!--本地答题首--> <!--录入任务-->
 	<s:SkinnableContainer skinClass="skins.questList" id="questionpage" visible="false" horizontalCenter="1" width="100%">
 		<s:layout>
 			<s:VerticalLayout horizontalAlign="center"/>
@@ -2272,7 +2278,12 @@
 				</s:HGroup>
 				<s:Label text=" " id="allquest" visible="false"/>
 			</s:HGroup>			
-			<s:HGroup horizontalCenter="0" top="160" width="85%">
+			<s:HGroup horizontalCenter="0" top="160" width="85%" fontFamily="宋体">
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>
+				<s:Label text="   "/>
 				<s:Label text="问卷备注   ："/>
 				<s:TextArea id="thebz"  width="900" height="30"/>
 			</s:HGroup>

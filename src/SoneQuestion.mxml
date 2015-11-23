@@ -71,14 +71,14 @@
 			}
 			
 			//填写选项
-			public var option :OneOption = new OneOption();
+			public var option :SoneOption = new SoneOption();
 			public function set optiondata(val:*):void
 			{	
 				answeragain = val;
 				var n:int = val.num;
 				for(var z:int = 0 ; z<n　; z++)
 				{
-					var option :OneOption = new OneOption();
+					var option :SoneOption = new SoneOption();
 					var opid:String = (val.ar[z]);
 					var nameid:String = (val.list[z]);
 					var questid:String = (val.qstid);
@@ -97,9 +97,12 @@
 					{
 						option.foroption.selected = true;
 					}
-					else if(val.answersid == opid)//court_answer中找
+					else 
 					{
-						option.foroption.selected = true;
+						if(val.answersid == opid)//court_answer中找
+						{
+							option.foroption.selected = true;
+						}
 					}
 
 					option.quest = quest;
@@ -118,7 +121,7 @@
 				var n:int = val.num;
 				for(var z:int = 0 ; z<n　; z++)
 				{
-					var option :OneOption = new OneOption();
+					var option :SoneOption = new SoneOption();
 					var opid:String = val.ar[z];
 					var nameid:String = val.list[z];
 					var questid:String = val.qstid;
@@ -226,7 +229,7 @@
 				var n:int = val.num;
 				for(var z:int = 0 ; z<n　; z++)
 				{
-					var option :OneOption = new OneOption();
+					var option :SoneOption = new SoneOption();
 					var opid:String = (val.ar[z]);
 					var nameid:String = (val.list[z]);
 					var questid:String = (val.qstid);
@@ -270,7 +273,7 @@
 				var n:int = val.num;
 				for(var z:int = 0 ; z<n　; z++)
 				{
-					var option :OneOption = new OneOption();
+					var option :SoneOption = new SoneOption();
 					var opid:String = (val.ar[z]);
 					var nameid:String = (val.list[z]);
 					var questid:String = (val.qstid);
